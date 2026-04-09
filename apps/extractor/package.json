@@ -1,0 +1,20 @@
+{
+  "name": "@repo/extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "playwright": "^1.59.1",
+    "@applyai/db" : "workspace:*"
+  }
+}

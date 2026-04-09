@@ -1,0 +1,60 @@
+{
+  "name": "SavedJob",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "work_mode": {
+      "type": "string"
+    },
+    "stipend": {
+      "type": "string"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "internship",
+        "job",
+        "hackathon",
+        "competition"
+      ],
+      "default": "internship"
+    },
+    "source_site": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "saved",
+        "applied",
+        "ignored"
+      ],
+      "default": "saved"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "company"
+  ]
+}

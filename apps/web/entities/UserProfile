@@ -1,0 +1,159 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "resume_url": {
+      "type": "string"
+    },
+    "linkedin_url": {
+      "type": "string"
+    },
+    "github_url": {
+      "type": "string"
+    },
+    "portfolio_url": {
+      "type": "string"
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "institution": {
+            "type": "string"
+          },
+          "degree": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "gpa": {
+            "type": "string"
+          },
+          "start_year": {
+            "type": "string"
+          },
+          "end_year": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "work_mode": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferred_locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "min_stipend": {
+          "type": "number"
+        },
+        "opportunity_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferred_platforms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "industries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "roles_of_interest": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "auto_apply": {
+          "type": "boolean"
+        },
+        "daily_apply_limit": {
+          "type": "number"
+        },
+        "unstop_preferences": {
+          "type": "object",
+          "properties": {
+            "competition_types": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "team_size_preference": {
+              "type": "string"
+            },
+            "prize_minimum": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "onboarding_completed": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

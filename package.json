@@ -1,13 +1,13 @@
 {
   "name": "ApplyAi-turborepo",
   "private": true,
-  // "scripts": {
-  //   "build": "turbo run build",
-  //   "dev": "turbo run dev",
-  //   "lint": "turbo run lint",
-  //   "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-  //   "check-types": "turbo run check-types"
-  // },,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
+  },
   "devDependencies": {
     "prettier": "^3.7.4",
     "turbo": "^2.9.4",
@@ -16,5 +16,8 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1026.0"
   }
 }

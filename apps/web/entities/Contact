@@ -1,0 +1,76 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "linkedin_url": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "LinkedIn",
+        "Unstop",
+        "GitHub",
+        "Twitter",
+        "Email",
+        "Event",
+        "Other"
+      ],
+      "default": "LinkedIn"
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "recruiter",
+        "peer",
+        "mentor",
+        "alumni",
+        "referral",
+        "other"
+      ],
+      "default": "peer"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "pending",
+        "following",
+        "met"
+      ],
+      "default": "connected"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "last_interaction": {
+      "type": "string",
+      "format": "date"
+    },
+    "referral_potential": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

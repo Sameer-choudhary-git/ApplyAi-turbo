@@ -1,0 +1,46 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "related_application_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "interview_prep",
+        "document",
+        "follow_up",
+        "skill_building",
+        "other"
+      ],
+      "default": "other"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

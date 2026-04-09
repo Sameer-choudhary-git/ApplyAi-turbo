@@ -7,6 +7,8 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "@applyai/db": "workspace:*",
+    "@hono/node-server": "^1.19.13",
     "hono": "^4.12.12"
   },
   "devDependencies": {
