@@ -5,10 +5,12 @@ import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 
 import { authRoutes } from "./routes/auth.js";
-import { userRoutes } from "./routes/user.js";
+import  userRoutes  from "./routes/user.js";
 import { jobRoutes } from "./routes/jobs.js";
 import { healthRoutes } from "./routes/health.js";
 import { errorHandler } from "./middleware/error.js";
+import resume from './routes/resume';
+import {userFlagsRouter,unstopSessionRouter} from "./routes/unstopSession.js";
 
 export const app = new Hono();
 
@@ -29,8 +31,11 @@ app.use(
 // ── Routes ─────────────────────────────────────────────────
 app.route("/health", healthRoutes);
 app.route("/api/auth", authRoutes);
-app.route("/api/user", userRoutes);
+app.route("/api/users", userRoutes);
 app.route("/api/jobs", jobRoutes);
+app.route('/api/resume', resume);
+app.route('/api/sessions/unstop', unstopSessionRouter);
+app.route('/api/users/me/flags', userFlagsRouter);
 
 // ── 404 ────────────────────────────────────────────────────
 app.notFound((c) => {

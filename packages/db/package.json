@@ -2,9 +2,12 @@
   "name": "@applyai/db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "type": "module",
+  "main": "./index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": {
+      "default": "./index.ts"
+    }
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

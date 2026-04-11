@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@applyai/db": ["../../packages/db/index.ts"],
+      "@applyai/utils": ["../../packages/utils/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

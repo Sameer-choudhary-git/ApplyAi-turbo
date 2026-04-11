@@ -6,9 +6,22 @@ export async function runAllExtractors() {
     const currentPlatform = extractor.platform;
     const currentCategory = extractor.category;
     const dbTable = `${currentPlatform}_${currentCategory}`;
+
+
     const data = await extractor.run();
-    for (const item of data) {
-      await (prisma as any)[dbTable].create({ data: item });
+
+    if (data.length === 0) {
+      console.log(`⚠️  No data returned for [${dbTable}], skipping.`);
+      continue;
     }
+
+    const result = await (prisma as any)[dbTable].createMany({
+      data: data,
+      skipDuplicates: true,
+    });
+
+    console.log(
+      `✅ [${dbTable}] ${result.count} new records inserted, ${data.length - result.count} duplicates skipped.`
+    );
   }
 }

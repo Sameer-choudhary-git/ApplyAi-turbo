@@ -11,10 +11,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@repo/extractor": "workspace:*",
-    "node-cron": "^4.2.1",
     "@applyai/db": "workspace:*",
-    "@applyai/queue": "workspace:*"
+    "@applyai/queue": "workspace:*",
+    "@repo/extractor": "workspace:*",
+    "fs": "0.0.1-security",
+    "node-cron": "^4.2.1",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "tsx": "^4.21.0"

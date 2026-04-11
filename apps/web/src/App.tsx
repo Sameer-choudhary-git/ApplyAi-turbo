@@ -14,31 +14,30 @@ import Analytics from './pages/Analytics';
 import Preferences from './pages/Preferences';
 import Networking from './pages/Networking';
 import SavedJobs from './pages/SavedJobs';
+import Login from './pages/Login';
+
+import { Navigate } from 'react-router-dom'; // Make sure Navigate is imported!
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
- 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  const { isLoadingAuth, authError, user } = useAuth(); // Removed navigateToLogin
+  
+  if (isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+  // Gracefully route to login using React Router, preventing token destruction
+  if (authError?.type === 'auth_required' || !user) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Render the main app
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
+  }
+
   return (
     <Routes>
       <Route element={<AppShell />}>
@@ -57,12 +56,14 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
       </QueryClientProvider>
@@ -70,4 +71,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

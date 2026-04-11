@@ -1,247 +1,138 @@
-import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
-import { prisma } from "@applyai/db";
-import { authMiddleware } from "../middleware/auth.js";
+// apps/api/src/routes/user.ts  (add this route or merge into existing)
+import { Hono } from 'hono';
+import { prisma } from '@applyai/db'; // adjust import to your db package export
 
-export const userRoutes = new Hono();
+const user = new Hono();
 
-// All user routes require auth
-userRoutes.use("*", authMiddleware);
+// POST /api/users/onboard
+// Creates user + all nested relations in one transaction
+user.post('/onboard', async (c) => {
+  try {
+    const body = await c.req.json() as {
+      fullName:    string;
+      email:       string;
+      phone?:      string;
+      location?:   string;
+      bio?:        string;
+      resumeUrl?:  string;
+      linkedinUrl?: string;
+      githubUrl?:  string;
+      education: {
+        institution:  string;
+        degree?:      string;
+        fieldOfStudy?: string;
+        gpa?:         string;
+        startYear?:   number;
+        endYear?:     number;
+      }[];
+      experience: {
+        company:      string;
+        role?:        string;
+        duration?:    string;
+        description?: string;
+      }[];
+      skills: string[];
+      preferences: {
+        workModes:        string[];
+        opportunityTypes: string[];
+        platforms:        string[];
+      };
+    };
 
-// ── Get full profile ───────────────────────────────────────
-userRoutes.get("/profile", async (c) => {
-  const userId = c.get("userId") as string;
+    if (!body.fullName || !body.email) {
+      return c.json({ error: 'fullName and email are required' }, 400);
+    }
 
-  const user = await prisma.users.findUnique({
-    where: { id: userId },
-    include: {
-      education: true,
-      experience: true,
-      skills: true,
-      preferences: true,
-      platformSessions: {
-        select: {
-          platform: true,
-          isActive: true,
-          lastVerifiedAt: true,
-          expiresAt: true,
-          // Never return encryptedCookie to frontend
+    // Upsert so re-submitting onboarding doesn't explode
+    const createdUser = await prisma.$transaction(async (tx) => {
+      // 1. Upsert the user row
+      const u = await tx.users.upsert({
+        where: { email: body.email },
+        create: {
+          fullName:    body.fullName,
+          email:       body.email,
+          phone:       body.phone,
+          location:    body.location,
+          bio:         body.bio,
+          resumeUrl:   body.resumeUrl,
+          linkedinUrl: body.linkedinUrl,
+          githubUrl:   body.githubUrl,
+          isOnboarded: true,
+          onboardedAt: new Date(),
         },
-      },
-    },
-  });
-
-  if (!user) return c.json({ success: false, error: "User not found" }, 404);
-
-  return c.json({ success: true, user });
-});
-
-// ── Update basic profile ───────────────────────────────────
-const updateProfileSchema = z.object({
-  fullName: z.string().min(1).optional(),
-  phone: z.string().optional(),
-  location: z.string().optional(),
-  bio: z.string().optional(),
-  resumeUrl: z.string().url().optional(),
-  linkedinUrl: z.string().url().optional(),
-  githubUrl: z.string().url().optional(),
-});
-
-userRoutes.patch(
-  "/profile",
-  zValidator("json", updateProfileSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const data = c.req.valid("json");
-
-    const user = await prisma.users.update({
-      where: { id: userId },
-      data,
-    });
-
-    return c.json({ success: true, user });
-  }
-);
-
-// ── Onboarding ─────────────────────────────────────────────
-const onboardingSchema = z.object({
-  fullName: z.string().min(1),
-  phone: z.string().optional(),
-  location: z.string().optional(),
-  bio: z.string().optional(),
-  education: z
-    .array(
-      z.object({
-        institution: z.string(),
-        degree: z.string().optional(),
-        fieldOfStudy: z.string().optional(),
-        gpa: z.string().optional(),
-        startYear: z.number().optional(),
-        endYear: z.number().optional(),
-      })
-    )
-    .optional(),
-  experience: z
-    .array(
-      z.object({
-        company: z.string(),
-        role: z.string().optional(),
-        duration: z.string().optional(),
-        description: z.string().optional(),
-      })
-    )
-    .optional(),
-  skills: z.array(z.string()).optional(),
-  preferences: z
-    .object({
-      workModes: z.array(z.string()).optional(),
-      opportunityTypes: z.array(z.string()).optional(),
-      platforms: z.array(z.string()).optional(),
-    })
-    .optional(),
-});
-
-userRoutes.post(
-  "/onboarding",
-  zValidator("json", onboardingSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const data = c.req.valid("json");
-
-    // Run everything in a transaction
-    const user = await prisma.$transaction(async (tx) => {
-      // Update base profile
-      await tx.users.update({
-        where: { id: userId },
-        data: {
-          fullName: data.fullName,
-          phone: data.phone,
-          location: data.location,
-          bio: data.bio,
+        update: {
+          fullName:    body.fullName,
+          phone:       body.phone,
+          location:    body.location,
+          bio:         body.bio,
+          resumeUrl:   body.resumeUrl     ?? undefined,
+          linkedinUrl: body.linkedinUrl   ?? undefined,
+          githubUrl:   body.githubUrl     ?? undefined,
           isOnboarded: true,
           onboardedAt: new Date(),
         },
       });
 
-      // Replace education
-      if (data.education?.length) {
-        await tx.user_education.deleteMany({ where: { userId } });
+      // 2. Delete old relations then recreate (clean upsert for arrays)
+      await tx.user_education.deleteMany({ where: { userId: u.id } });
+      if (body.education?.length) {
         await tx.user_education.createMany({
-          data: data.education.map((e) => ({ ...e, userId })),
+          data: body.education.map(e => ({
+            userId:       u.id,
+            institution:  e.institution,
+            degree:       e.degree,
+            fieldOfStudy: e.fieldOfStudy,
+            gpa:          e.gpa,
+            startYear:    e.startYear,
+            endYear:      e.endYear,
+          })),
         });
       }
 
-      // Replace experience
-      if (data.experience?.length) {
-        await tx.user_experience.deleteMany({ where: { userId } });
+      await tx.user_experience.deleteMany({ where: { userId: u.id } });
+      if (body.experience?.length) {
         await tx.user_experience.createMany({
-          data: data.experience.map((e) => ({ ...e, userId })),
+          data: body.experience.map(e => ({
+            userId:      u.id,
+            company:     e.company,
+            role:        e.role,
+            duration:    e.duration,
+            description: e.description,
+          })),
         });
       }
 
-      // Replace skills
-      if (data.skills?.length) {
-        await tx.user_skills.deleteMany({ where: { userId } });
+      await tx.user_skills.deleteMany({ where: { userId: u.id } });
+      if (body.skills?.length) {
         await tx.user_skills.createMany({
-          data: data.skills.map((skill) => ({ userId, skill })),
+          data: body.skills.map(skill => ({ userId: u.id, skill })),
           skipDuplicates: true,
         });
       }
 
-      // Upsert preferences
-      if (data.preferences) {
-        await tx.user_preferences.upsert({
-          where: { userId },
-          update: data.preferences,
-          create: { userId, ...data.preferences },
-        });
-      }
-
-      return tx.users.findUnique({
-        where: { id: userId },
-        include: {
-          education: true,
-          experience: true,
-          skills: true,
-          preferences: true,
+      await tx.user_preferences.upsert({
+        where:  { userId: u.id },
+        create: {
+          userId:          u.id,
+          workModes:       body.preferences.workModes,
+          opportunityTypes: body.preferences.opportunityTypes,
+          platforms:       body.preferences.platforms,
+        },
+        update: {
+          workModes:        body.preferences.workModes,
+          opportunityTypes: body.preferences.opportunityTypes,
+          platforms:        body.preferences.platforms,
         },
       });
+
+      return u;
     });
 
-    return c.json({ success: true, user });
+    return c.json({ success: true, userId: createdUser.id });
+  } catch (err) {
+    console.error('Onboarding error:', err);
+    return c.json({ error: 'Failed to save onboarding data' }, 500);
   }
-);
-
-// ── Toggle platform auto-apply ─────────────────────────────
-const togglePlatformSchema = z.object({
-  platform: z.enum(["unstop", "commudle"]),
-  enabled: z.boolean(),
 });
 
-userRoutes.patch(
-  "/platforms/toggle",
-  zValidator("json", togglePlatformSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const { platform, enabled } = c.req.valid("json");
-
-    const updateData =
-      platform === "unstop"
-        ? { isUnstopInternshipEnabled: enabled }
-        : { isCommudleEventEnabled: enabled };
-
-    const user = await prisma.users.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        isUnstopInternshipEnabled: true,
-        isCommudleEventEnabled: true,
-      },
-    });
-
-    return c.json({ success: true, ...user });
-  }
-);
-
-// ── Save platform session (cookie) ────────────────────────
-// NOTE: encrypt the cookie before storing — never store raw cookies
-const platformSessionSchema = z.object({
-  platform: z.string(),
-  encryptedCookie: z.string(),
-  expiresAt: z.string().datetime().optional(),
-});
-
-userRoutes.post(
-  "/platforms/session",
-  zValidator("json", platformSessionSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const data = c.req.valid("json");
-
-    const session = await prisma.user_platform_sessions.upsert({
-      where: { userId_platform: { userId, platform: data.platform } },
-      update: {
-        encryptedCookie: data.encryptedCookie,
-        isActive: true,
-        lastVerifiedAt: new Date(),
-        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
-      },
-      create: {
-        userId,
-        platform: data.platform,
-        encryptedCookie: data.encryptedCookie,
-        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
-      },
-    });
-
-    return c.json({
-      success: true,
-      session: {
-        platform: session.platform,
-        isActive: session.isActive,
-        lastVerifiedAt: session.lastVerifiedAt,
-      },
-    });
-  }
-);
+export default user;

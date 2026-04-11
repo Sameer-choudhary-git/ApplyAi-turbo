@@ -4,6 +4,8 @@ import { queueEligibleUsers } from "./queueUsers";
 
 console.log("⏰ Scheduler started...");
 
+runAllExtractors();
+queueEligibleUsers();
 // Extractors (every 1 hour)
 cron.schedule("0 * * * *", async () => {
   console.log("🚀 Running extractors...");

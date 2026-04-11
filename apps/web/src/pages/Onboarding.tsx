@@ -1,374 +1,1074 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Bot,
+  User,
+  BookOpen,
+  BrainCircuit,
+  Workflow,
+  ThumbsUp,
+  ChevronRight,
+  ChevronLeft,
+  UploadCloud,
+  Plus,
+  X,
+  Trash2,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { useMutation } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Bot, ChevronRight, ChevronLeft, Upload, Sparkles, X, Plus } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
-import OnboardingStep from '../components/onboarding/OnboardingStep';
-import { localStore } from '@/utils/localStorage';
+// ─── Constants ───────────────────────────────────────────────────────────────
+const steps = [
+  { id: "profile", title: "Profile", icon: User },
+  { id: "education", title: "Education", icon: BookOpen },
+  { id: "experience", title: "Experience", icon: BrainCircuit },
+  { id: "preferences", title: "Preferences", icon: Workflow },
+  { id: "review", title: "Review", icon: ThumbsUp },
+];
 
-const STEPS = ['Profile', 'Education', 'Skills & Experience', 'Preferences', 'Review'];
+const WORK_MODES = ["Remote", "Hybrid", "On-site"];
+const OPP_TYPES = [
+  "Internship",
+  "Full-time Job",
+  "Part-time Job",
+  "Hackathon",
+  "Competition",
+];
+const PLATFORMS = [
+  "LinkedIn",
+  "Unstop",
+  "Internshala",
+  "AngelList",
+  "Indeed",
+  "Glassdoor",
+  "Wellfound",
+  "Devfolio",
+];
+const SKILL_SUGGESTIONS = [
+  "JavaScript",
+  "Python",
+  "React",
+  "Node.js",
+  "SQL",
+  "Machine Learning",
+  "Data Analysis",
+  "UI/UX Design",
+  "Java",
+  "C++",
+  "TypeScript",
+  "AWS",
+  "Docker",
+  "Git",
+];
 
-const WORK_MODES = ['Remote', 'Hybrid', 'On-site'];
-const OPP_TYPES = ['Internship', 'Full-time Job', 'Part-time Job', 'Hackathon', 'Competition'];
-const PLATFORMS = ['LinkedIn', 'Unstop', 'Internshala', 'AngelList', 'Indeed', 'Glassdoor', 'Wellfound', 'Devfolio'];
-const SKILL_SUGGESTIONS = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Machine Learning', 'Data Analysis', 'UI/UX Design', 'Java', 'C++', 'TypeScript', 'AWS', 'Docker', 'Git'];
+// ─── Sub-components ───────────────────────────────────────────────────────────
+const OnboardingInput = ({
+  label,
+  ...props
+}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
+  <div className="w-full">
+    <label className="block text-xs md:text-sm font-medium text-foreground mb-1">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full bg-input text-foreground border border-border rounded-lg p-2.5 md:p-3 text-sm focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all placeholder:text-muted-foreground/50"
+    />
+  </div>
+);
 
-export default function Onboarding({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [data, setData] = useState({
-    full_name: '', email: '', phone: '', location: '', bio: '',
-    resume_url: '', resume_filename: '',
-    linkedin_url: '', github_url: '', portfolio_url: '',
-    education: [{ institution: '', degree: '', field: '', gpa: '', start_year: '', end_year: '' }],
-    skills: [], experience: [{ company: '', role: '', duration: '', description: '' }],
-    preferences: {
-      work_mode: [], preferred_locations: [], min_stipend: 0,
-      opportunity_types: [], preferred_platforms: [],
-      industries: [], roles_of_interest: [], auto_apply: true, daily_apply_limit: 10,
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface EducationEntry {
+  institution: string;
+  degree: string;
+  fieldOfStudy: string;
+  gpa: string;
+  startYear: string;
+  endYear: string;
+}
+
+interface ExperienceEntry {
+  company: string;
+  role: string;
+  duration: string;
+  description: string;
+}
+
+type UploadStatus = "idle" | "uploading" | "done" | "error";
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function Onboarding() {
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const currentStep = steps[currentStepIndex];
+  const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Add this line
+  // Profile
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [bio, setBio] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+
+  // Resume upload
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeUrl, setResumeUrl] = useState("");
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  // Education
+  const [education, setEducation] = useState<EducationEntry[]>([
+    {
+      institution: "",
+      degree: "",
+      fieldOfStudy: "",
+      gpa: "",
+      startYear: "",
+      endYear: "",
     },
-  });
-  const [newSkill, setNewSkill] = useState('');
+  ]);
 
-  // ✅ replaced: db.entities.UserProfile.create(...)
-  const saveMutation = useMutation({
-    mutationFn: (profileData) => {
-      return Promise.resolve(localStore.saveProfile(profileData));
-    },
-    onSuccess: () => onComplete(),
-  });
+  // Experience
+  const [experience, setExperience] = useState<ExperienceEntry[]>([
+    { company: "", role: "", duration: "", description: "" },
+  ]);
 
-  // ✅ replaced: db.integrations.Core.UploadFile(...)
-  // Instead of uploading to a server we just store the filename and a
-  // base64 data-URL in state so the rest of the UI keeps working.
-  const uploadMutation = useMutation({
-    mutationFn: (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ file_url: reader.result, filename: file.name });
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
-      });
-    },
-    onSuccess: ({ file_url, filename }) =>
-      setData(d => ({ ...d, resume_url: file_url, resume_filename: filename })),
+  // Skills
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
+
+  // Preferences
+  const [preferences, setPreferences] = useState({
+    workModes: [] as string[],
+    opportunityTypes: [] as string[],
+    platforms: [] as string[],
   });
 
-  const update = (key, value) => setData(d => ({ ...d, [key]: value }));
-  const updatePref = (key, value) => setData(d => ({ ...d, preferences: { ...d.preferences, [key]: value } }));
-  const togglePref = (key, item) => {
-    const arr = data.preferences[key] || [];
-    updatePref(key, arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item]);
+  // Saving state
+  const [isSaving, setIsSaving] = useState(false);
+
+  // ─── Handlers ──────────────────────────────────────────────────────────────
+  const nextStep = () => {
+    if (currentStepIndex < steps.length - 1) setCurrentStepIndex((s) => s + 1);
+    else handleComplete();
   };
 
-  const handleResumeUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) uploadMutation.mutate(file);
+  const prevStep = () => {
+    if (currentStepIndex > 0) setCurrentStepIndex((s) => s - 1);
   };
 
-  const addSkill = (skill) => {
-    if (skill && !data.skills.includes(skill)) {
-      update('skills', [...data.skills, skill]);
+  const addSkill = (skill: string) => {
+    const trimmed = skill.trim();
+    if (trimmed && !skills.includes(trimmed))
+      setSkills((prev) => [...prev, trimmed]);
+    setNewSkill("");
+  };
+
+  const removeSkill = (s: string) =>
+    setSkills((prev) => prev.filter((x) => x !== s));
+
+  const togglePref = (category: keyof typeof preferences, item: string) => {
+    setPreferences((prev) => {
+      const arr = prev[category];
+      return {
+        ...prev,
+        [category]: arr.includes(item)
+          ? arr.filter((x) => x !== item)
+          : [...arr, item],
+      };
+    });
+  };
+
+  // Resume upload — calls your Hono API
+  const handleResumeUpload = async (file: File) => {
+    setUploadError("");
+
+    if (file.type !== "application/pdf") {
+      setUploadError("Only PDF files are allowed.");
+      setUploadStatus("error");
+      return;
     }
-    setNewSkill('');
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File must be under 5 MB.");
+      setUploadStatus("error");
+      return;
+    }
+
+    setResumeFile(file);
+    setUploadStatus("uploading");
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const res = await fetch("http://localhost:3000/api/resume/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as any).error || "Upload failed");
+      }
+
+      const { url } = (await res.json()) as { url: string };
+      setResumeUrl(url);
+      setUploadStatus("done");
+    } catch (err: any) {
+      setUploadError(err.message ?? "Upload failed. Please try again.");
+      setUploadStatus("error");
+    }
   };
 
-  const progress = ((step + 1) / STEPS.length) * 100;
+  // Final submit — POST to your Hono /api/users/onboard route
+  const handleComplete = async () => {
+    setIsSaving(true);
+    try {
+      const payload = {
+        // ... (keep your existing payload exactly as is)
+      };
 
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 font-body">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Bot className="w-7 h-7 text-primary" />
-          </div>
-          <h1 className="font-heading font-bold text-2xl">Welcome to ApplyAI</h1>
-          <p className="text-muted-foreground text-sm mt-1">Let's set up your profile so your AI agent can apply on your behalf.</p>
-        </div>
+      const res = await fetch('http://localhost:3000/api/users/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            {STEPS.map((s, i) => (
-              <span key={s} className={`text-xs font-medium ${i <= step ? 'text-primary' : 'text-muted-foreground'}`}>{s}</span>
-            ))}
-          </div>
-          <Progress value={progress} className="h-1.5" />
-        </div>
+      if (!res.ok) throw new Error('Failed to save profile');
 
-        <Card className="border-border/50">
-          <CardContent className="p-6">
-            <AnimatePresence mode="wait">
-              {step === 0 && (
-                <OnboardingStep key="profile" title="Basic Information" subtitle="Tell us about yourself">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>Full Name *</Label>
-                      <Input value={data.full_name} onChange={(e) => update('full_name', e.target.value)} placeholder="John Doe" className="mt-1" />
+      // Add this line to force AppShell to fetch the fresh 'isOnboarded: true' data
+      await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+
+      // Navigate to your root dashboard route
+      navigate('/'); 
+    } catch (err) {
+      console.error('Onboarding error:', err);
+      alert('There was a problem saving your profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // ─── Step Rendering ─────────────────────────────────────────────────────────
+  const renderStepContent = () => {
+    switch (currentStep.id) {
+      // ── PROFILE ──────────────────────────────────────────────────────────────
+      case "profile":
+        return (
+          <motion.div
+            key="profile"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold font-heading text-gradient">
+                Basic Information
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
+                Tell us about yourself to help the agents personalize their
+                strategy.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <OnboardingInput
+                  label="Full Name *"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+                <OnboardingInput
+                  label="Email *"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <OnboardingInput
+                  label="Phone"
+                  type="tel"
+                  placeholder="+91 98765 43210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <OnboardingInput
+                  label="Location"
+                  type="text"
+                  placeholder="Mumbai, India"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Bio
+                </label>
+                <textarea
+                  className="w-full bg-input text-foreground border border-border rounded-lg p-3 h-28 text-sm focus:ring-2 focus:ring-ring outline-none transition-all placeholder:text-muted-foreground/50"
+                  placeholder="A brief description about yourself, your skills, and your career goals."
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                />
+              </div>
+
+              {/* ── Resume Upload ── */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Resume{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (PDF · max 5 MB)
+                  </span>
+                </label>
+
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file) handleResumeUpload(file);
+                  }}
+                  onClick={() => {
+                    if (uploadStatus !== "uploading")
+                      document.getElementById("resume-file-input")?.click();
+                  }}
+                  className={cn(
+                    "border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer select-none",
+                    isDragging
+                      ? "border-primary bg-primary/5 scale-[1.01]"
+                      : uploadStatus === "done"
+                        ? "border-green-500/40 bg-green-500/5"
+                        : uploadStatus === "error"
+                          ? "border-destructive/40 bg-destructive/5"
+                          : "border-border bg-input/50 hover:border-primary/50 hover:bg-input",
+                  )}
+                >
+                  <input
+                    id="resume-file-input"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleResumeUpload(f);
+                      e.target.value = "";
+                    }}
+                  />
+
+                  {uploadStatus === "uploading" && (
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                      <p className="text-sm text-muted-foreground">
+                        Uploading{" "}
+                        <span className="text-foreground font-medium">
+                          {resumeFile?.name}
+                        </span>
+                        …
+                      </p>
                     </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>Email *</Label>
-                      <Input value={data.email} onChange={(e) => update('email', e.target.value)} placeholder="john@example.com" className="mt-1" />
+                  )}
+
+                  {uploadStatus === "done" && (
+                    <div className="flex flex-col items-center gap-2">
+                      <CheckCircle2 className="w-10 h-10 text-green-400" />
+                      <p className="font-semibold text-green-400 text-sm">
+                        {resumeFile?.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Uploaded successfully ·{" "}
+                        <span
+                          className="text-primary cursor-pointer hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUploadStatus("idle");
+                            setResumeFile(null);
+                            setResumeUrl("");
+                          }}
+                        >
+                          Replace
+                        </span>
+                      </p>
                     </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>Phone</Label>
-                      <Input value={data.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+91 98765 43210" className="mt-1" />
+                  )}
+
+                  {uploadStatus === "error" && (
+                    <div className="flex flex-col items-center gap-2">
+                      <AlertCircle className="w-10 h-10 text-destructive" />
+                      <p className="text-sm text-destructive font-medium">
+                        {uploadError || "Upload failed"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Click to try again
+                      </p>
                     </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>Location</Label>
-                      <Input value={data.location} onChange={(e) => update('location', e.target.value)} placeholder="Mumbai, India" className="mt-1" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label>Bio</Label>
-                      <Textarea value={data.bio} onChange={(e) => update('bio', e.target.value)} placeholder="Brief description about yourself..." className="mt-1 h-20" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label>Resume</Label>
-                      <div className="mt-1 border-2 border-dashed border-border rounded-xl p-6 text-center">
-                        {data.resume_url ? (
-                          <div>
-                            <p className="text-sm text-accent font-medium">✓ Resume loaded</p>
-                            {/* ✅ show filename instead of a server URL */}
-                            <p className="text-xs text-muted-foreground mt-1">{data.resume_filename}</p>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground mb-2">Upload your resume (PDF)</p>
-                            <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" id="resume-upload" />
-                            <Button variant="outline" size="sm" onClick={() => document.getElementById('resume-upload').click()} disabled={uploadMutation.isPending}>
-                              {uploadMutation.isPending ? 'Reading...' : 'Choose File'}
-                            </Button>
-                          </>
+                  )}
+
+                  {uploadStatus === "idle" && (
+                    <>
+                      <UploadCloud
+                        className={cn(
+                          "w-10 h-10 mx-auto mb-4 transition-colors",
+                          isDragging ? "text-primary" : "text-muted-foreground",
                         )}
-                      </div>
+                      />
+                      <p className="font-semibold text-foreground text-sm">
+                        Upload your resume
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 mb-4">
+                        Drag & drop or click to browse
+                      </p>
+                      <button
+                        type="button"
+                        className="px-5 py-2 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+                      >
+                        Choose File
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <OnboardingInput
+                  label="LinkedIn URL"
+                  type="url"
+                  placeholder="linkedin.com/in/…"
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                />
+                <OnboardingInput
+                  label="GitHub URL"
+                  type="url"
+                  placeholder="github.com/…"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                />
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      // ── EDUCATION ─────────────────────────────────────────────────────────────
+      case "education":
+        return (
+          <motion.div
+            key="education"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold font-heading text-gradient">
+                Education History
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
+                Add your educational background.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {education.map((edu, i) => (
+                <div
+                  key={i}
+                  className="relative p-5 rounded-xl border border-border bg-input/30 space-y-4"
+                >
+                  {education.length > 1 && (
+                    <button
+                      onClick={() =>
+                        setEducation(education.filter((_, idx) => idx !== i))
+                      }
+                      className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <OnboardingInput
+                        label="Institution"
+                        placeholder="University / College Name"
+                        value={edu.institution}
+                        onChange={(e) => {
+                          const ed = [...education];
+                          ed[i].institution = e.target.value;
+                          setEducation(ed);
+                        }}
+                      />
                     </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>LinkedIn URL</Label>
-                      <Input value={data.linkedin_url} onChange={(e) => update('linkedin_url', e.target.value)} placeholder="linkedin.com/in/..." className="mt-1" />
-                    </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <Label>GitHub URL</Label>
-                      <Input value={data.github_url} onChange={(e) => update('github_url', e.target.value)} placeholder="github.com/..." className="mt-1" />
+                    <OnboardingInput
+                      label="Degree"
+                      placeholder="B.Tech / B.Sc / MBA"
+                      value={edu.degree}
+                      onChange={(e) => {
+                        const ed = [...education];
+                        ed[i].degree = e.target.value;
+                        setEducation(ed);
+                      }}
+                    />
+                    <OnboardingInput
+                      label="Field of Study"
+                      placeholder="Computer Science"
+                      value={edu.fieldOfStudy}
+                      onChange={(e) => {
+                        const ed = [...education];
+                        ed[i].fieldOfStudy = e.target.value;
+                        setEducation(ed);
+                      }}
+                    />
+                    <OnboardingInput
+                      label="GPA / Marks"
+                      placeholder="8.5 / 90%"
+                      value={edu.gpa}
+                      onChange={(e) => {
+                        const ed = [...education];
+                        ed[i].gpa = e.target.value;
+                        setEducation(ed);
+                      }}
+                    />
+                    <div className="flex gap-4">
+                      <OnboardingInput
+                        label="Start Year"
+                        placeholder="2021"
+                        type="number"
+                        min="1990"
+                        max="2099"
+                        value={edu.startYear}
+                        onChange={(e) => {
+                          const ed = [...education];
+                          ed[i].startYear = e.target.value;
+                          setEducation(ed);
+                        }}
+                      />
+                      <OnboardingInput
+                        label="End Year"
+                        placeholder="2025"
+                        type="number"
+                        min="1990"
+                        max="2099"
+                        value={edu.endYear}
+                        onChange={(e) => {
+                          const ed = [...education];
+                          ed[i].endYear = e.target.value;
+                          setEducation(ed);
+                        }}
+                      />
                     </div>
                   </div>
-                </OnboardingStep>
-              )}
+                </div>
+              ))}
 
-              {step === 1 && (
-                <OnboardingStep key="edu" title="Education" subtitle="Add your educational background">
-                  {data.education.map((edu, i) => (
-                    <div key={i} className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border/50">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="col-span-2">
-                          <Label className="text-xs">Institution</Label>
-                          <Input value={edu.institution} onChange={(e) => {
-                            const ed = [...data.education]; ed[i].institution = e.target.value; update('education', ed);
-                          }} placeholder="University name" className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Degree</Label>
-                          <Input value={edu.degree} onChange={(e) => {
-                            const ed = [...data.education]; ed[i].degree = e.target.value; update('education', ed);
-                          }} placeholder="B.Tech" className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Field of Study</Label>
-                          <Input value={edu.field} onChange={(e) => {
-                            const ed = [...data.education]; ed[i].field = e.target.value; update('education', ed);
-                          }} placeholder="Computer Science" className="mt-1" />
-                        </div>
-                        <div>
-                          <Label className="text-xs">GPA</Label>
-                          <Input value={edu.gpa} onChange={(e) => {
-                            const ed = [...data.education]; ed[i].gpa = e.target.value; update('education', ed);
-                          }} placeholder="8.5" className="mt-1" />
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <Label className="text-xs">Start Year</Label>
-                            <Input value={edu.start_year} onChange={(e) => {
-                              const ed = [...data.education]; ed[i].start_year = e.target.value; update('education', ed);
-                            }} placeholder="2021" className="mt-1" />
-                          </div>
-                          <div className="flex-1">
-                            <Label className="text-xs">End Year</Label>
-                            <Input value={edu.end_year} onChange={(e) => {
-                              const ed = [...data.education]; ed[i].end_year = e.target.value; update('education', ed);
-                            }} placeholder="2025" className="mt-1" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              <button
+                onClick={() =>
+                  setEducation([
+                    ...education,
+                    {
+                      institution: "",
+                      degree: "",
+                      fieldOfStudy: "",
+                      gpa: "",
+                      startYear: "",
+                      endYear: "",
+                    },
+                  ])
+                }
+                className="w-full py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground font-medium flex items-center justify-center gap-2 hover:bg-input hover:text-foreground hover:border-primary/50 transition-all text-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Another Institution
+              </button>
+            </div>
+          </motion.div>
+        );
+
+      // ── EXPERIENCE ────────────────────────────────────────────────────────────
+      case "experience":
+        return (
+          <motion.div
+            key="experience"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold font-heading text-gradient">
+                Skills & Experience
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
+                What can you do? Tell us about your professional background.
+              </p>
+            </div>
+
+            {/* Skills */}
+            <div className="mb-10">
+              <label className="block text-sm font-medium text-foreground mb-3">
+                Core Skills
+              </label>
+              <div className="flex gap-2 mb-4">
+                <input
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addSkill(newSkill);
+                    }
+                  }}
+                  placeholder="e.g. Next.js, Solidity…"
+                  className="flex-1 bg-input text-foreground border border-border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-ring outline-none"
+                />
+                <button
+                  onClick={() => addSkill(newSkill)}
+                  className="px-4 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg transition-colors flex items-center justify-center"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              {skills.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {skills.map((s) => (
+                    <span
+                      key={s}
+                      className="px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-medium flex items-center gap-1.5 border border-primary/20"
+                    >
+                      {s}
+                      <X
+                        className="w-3 h-3 cursor-pointer hover:text-white"
+                        onClick={() => removeSkill(s)}
+                      />
+                    </span>
                   ))}
-                  <Button variant="outline" size="sm" onClick={() => update('education', [...data.education, { institution: '', degree: '', field: '', gpa: '', start_year: '', end_year: '' }])}>
-                    <Plus className="w-4 h-4 mr-1" /> Add Another
-                  </Button>
-                </OnboardingStep>
+                </div>
               )}
 
-              {step === 2 && (
-                <OnboardingStep key="skills" title="Skills & Experience" subtitle="What can you do?">
-                  <div>
-                    <Label className="font-medium mb-2 block">Skills</Label>
-                    <div className="flex gap-2 mb-3">
-                      <Input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} placeholder="Add a skill..."
-                        onKeyDown={(e) => e.key === 'Enter' && addSkill(newSkill)} />
-                      <Button variant="outline" size="icon" onClick={() => addSkill(newSkill)}><Plus className="w-4 h-4" /></Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {data.skills.map(s => (
-                        <Badge key={s} variant="secondary" className="text-xs gap-1">
-                          {s} <X className="w-3 h-3 cursor-pointer" onClick={() => update('skills', data.skills.filter(x => x !== s))} />
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">Suggestions:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {SKILL_SUGGESTIONS.filter(s => !data.skills.includes(s)).map(s => (
-                        <Badge key={s} variant="outline" className="text-[10px] cursor-pointer hover:bg-primary/10" onClick={() => addSkill(s)}>
-                          + {s}
-                        </Badge>
-                      ))}
+              <p className="text-xs text-muted-foreground mb-2">Suggestions:</p>
+              <div className="flex flex-wrap gap-2">
+                {SKILL_SUGGESTIONS.filter((s) => !skills.includes(s)).map(
+                  (s) => (
+                    <button
+                      key={s}
+                      onClick={() => addSkill(s)}
+                      className="px-3 py-1.5 rounded-full border border-border text-muted-foreground text-xs hover:border-primary/50 hover:text-foreground transition-colors"
+                    >
+                      + {s}
+                    </button>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <hr className="border-border mb-8" />
+
+            {/* Work Experience */}
+            <div className="space-y-6">
+              <label className="block text-sm font-medium text-foreground">
+                Work Experience
+              </label>
+              {experience.map((exp, i) => (
+                <div
+                  key={i}
+                  className="relative p-5 rounded-xl border border-border bg-input/30 space-y-4"
+                >
+                  {experience.length > 1 && (
+                    <button
+                      onClick={() =>
+                        setExperience(experience.filter((_, idx) => idx !== i))
+                      }
+                      className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <OnboardingInput
+                      label="Company"
+                      placeholder="Google"
+                      value={exp.company}
+                      onChange={(e) => {
+                        const ex = [...experience];
+                        ex[i].company = e.target.value;
+                        setExperience(ex);
+                      }}
+                    />
+                    <OnboardingInput
+                      label="Role"
+                      placeholder="Software Engineer Intern"
+                      value={exp.role}
+                      onChange={(e) => {
+                        const ex = [...experience];
+                        ex[i].role = e.target.value;
+                        setExperience(ex);
+                      }}
+                    />
+                    <OnboardingInput
+                      label="Duration"
+                      placeholder="May 2024 – Aug 2024"
+                      value={exp.duration}
+                      onChange={(e) => {
+                        const ex = [...experience];
+                        ex[i].duration = e.target.value;
+                        setExperience(ex);
+                      }}
+                    />
+                    <div className="md:col-span-2">
+                      <label className="block text-xs md:text-sm font-medium text-foreground mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        className="w-full bg-input text-foreground border border-border rounded-lg p-3 h-20 text-sm focus:ring-2 focus:ring-ring outline-none transition-all placeholder:text-muted-foreground/50"
+                        placeholder="Briefly describe your responsibilities…"
+                        value={exp.description}
+                        onChange={(e) => {
+                          const ex = [...experience];
+                          ex[i].description = e.target.value;
+                          setExperience(ex);
+                        }}
+                      />
                     </div>
                   </div>
-                  <div className="mt-6">
-                    <Label className="font-medium mb-3 block">Experience</Label>
-                    {data.experience.map((exp, i) => (
-                      <div key={i} className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border/50 mb-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label className="text-xs">Company</Label>
-                            <Input value={exp.company} onChange={(e) => {
-                              const ex = [...data.experience]; ex[i].company = e.target.value; update('experience', ex);
-                            }} placeholder="Company name" className="mt-1" />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Role</Label>
-                            <Input value={exp.role} onChange={(e) => {
-                              const ex = [...data.experience]; ex[i].role = e.target.value; update('experience', ex);
-                            }} placeholder="Software Intern" className="mt-1" />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Duration</Label>
-                            <Input value={exp.duration} onChange={(e) => {
-                              const ex = [...data.experience]; ex[i].duration = e.target.value; update('experience', ex);
-                            }} placeholder="3 months" className="mt-1" />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Description</Label>
-                            <Input value={exp.description} onChange={(e) => {
-                              const ex = [...data.experience]; ex[i].description = e.target.value; update('experience', ex);
-                            }} placeholder="Brief description" className="mt-1" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <Button variant="outline" size="sm" onClick={() => update('experience', [...data.experience, { company: '', role: '', duration: '', description: '' }])}>
-                      <Plus className="w-4 h-4 mr-1" /> Add Experience
-                    </Button>
-                  </div>
-                </OnboardingStep>
+                </div>
+              ))}
+
+              <button
+                onClick={() =>
+                  setExperience([
+                    ...experience,
+                    { company: "", role: "", duration: "", description: "" },
+                  ])
+                }
+                className="w-full py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground font-medium flex items-center justify-center gap-2 hover:bg-input hover:text-foreground hover:border-primary/50 transition-all text-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Experience
+              </button>
+            </div>
+          </motion.div>
+        );
+
+      // ── PREFERENCES ───────────────────────────────────────────────────────────
+      case "preferences":
+        return (
+          <motion.div
+            key="preferences"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold font-heading text-gradient">
+                Agent Preferences
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
+                Configure what opportunities your AI agents should hunt for.
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-3">
+                  Work Mode
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {WORK_MODES.map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => togglePref("workModes", m)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
+                        preferences.workModes.includes(m)
+                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          : "bg-input border-border text-muted-foreground hover:border-primary/50",
+                      )}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-3">
+                  Opportunity Types
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {OPP_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => togglePref("opportunityTypes", t)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
+                        preferences.opportunityTypes.includes(t)
+                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          : "bg-input border-border text-muted-foreground hover:border-primary/50",
+                      )}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-3">
+                  Target Platforms
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {PLATFORMS.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => togglePref("platforms", p)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
+                        preferences.platforms.includes(p)
+                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          : "bg-input border-border text-muted-foreground hover:border-primary/50",
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      // ── REVIEW ────────────────────────────────────────────────────────────────
+      case "review":
+        return (
+          <motion.div
+            key="review"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="py-4"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold font-heading text-foreground">
+                Ready to Deploy
+              </h2>
+              <p className="text-muted-foreground mt-2 max-w-md mx-auto text-sm">
+                Your profile is complete. EngiBuddy agents will use this data to
+                automatically apply to jobs on your behalf.
+              </p>
+            </div>
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {[
+                {
+                  value: education.filter((e) => e.institution.trim()).length,
+                  label: "Degrees",
+                  color: "text-foreground",
+                },
+                {
+                  value: experience.filter((e) => e.company.trim()).length,
+                  label: "Roles",
+                  color: "text-foreground",
+                },
+                {
+                  value: skills.length,
+                  label: "Skills",
+                  color: "text-primary",
+                },
+                {
+                  value: preferences.platforms.length,
+                  label: "Platforms",
+                  color: "text-accent",
+                },
+              ].map(({ value, label, color }) => (
+                <div
+                  key={label}
+                  className="p-4 rounded-xl border border-border bg-input/30 text-center"
+                >
+                  <p className={cn("text-2xl font-bold mb-1", color)}>
+                    {value}
+                  </p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Profile summary */}
+            <div className="rounded-xl border border-border bg-input/30 p-5 space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">
+                    {fullName || "—"}
+                  </p>
+                  <p className="text-muted-foreground text-xs">{email}</p>
+                </div>
+                {resumeUrl && (
+                  <span className="ml-auto px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Resume
+                  </span>
+                )}
+              </div>
+
+              {skills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {skills.slice(0, 8).map((s) => (
+                    <span
+                      key={s}
+                      className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs border border-primary/10"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                  {skills.length > 8 && (
+                    <span className="px-2 py-0.5 rounded-full bg-input text-muted-foreground text-xs border border-border">
+                      +{skills.length - 8} more
+                    </span>
+                  )}
+                </div>
               )}
 
-              {step === 3 && (
-                <OnboardingStep key="prefs" title="Application Preferences" subtitle="Tell your AI agent what to look for">
-                  <div className="space-y-5">
-                    <div>
-                      <Label className="font-medium mb-2 block">Work Mode</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {WORK_MODES.map(m => (
-                          <Badge key={m} variant={data.preferences.work_mode.includes(m) ? 'default' : 'outline'}
-                            className="cursor-pointer text-xs px-3 py-1.5" onClick={() => togglePref('work_mode', m)}>
-                            {m}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="font-medium mb-2 block">Opportunity Types</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {OPP_TYPES.map(t => (
-                          <Badge key={t} variant={data.preferences.opportunity_types.includes(t) ? 'default' : 'outline'}
-                            className="cursor-pointer text-xs px-3 py-1.5" onClick={() => togglePref('opportunity_types', t)}>
-                            {t}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="font-medium mb-2 block">Platforms</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {PLATFORMS.map(p => (
-                          <Badge key={p} variant={data.preferences.preferred_platforms.includes(p) ? 'default' : 'outline'}
-                            className="cursor-pointer text-xs px-3 py-1.5" onClick={() => togglePref('preferred_platforms', p)}>
-                            {p}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </OnboardingStep>
+              {preferences.workModes.length > 0 && (
+                <p className="text-muted-foreground text-xs">
+                  Work mode:{" "}
+                  <span className="text-foreground">
+                    {preferences.workModes.join(", ")}
+                  </span>
+                </p>
               )}
-
-              {step === 4 && (
-                <OnboardingStep key="review" title="All Set!" subtitle="Review your profile and let the AI agent take over">
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                      <div className="flex items-start gap-3">
-                        <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-                        <div>
-                          <p className="font-medium text-sm">Your AI agent is ready</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            It will start searching and applying to {data.preferences.opportunity_types.join(', ') || 'opportunities'} on {data.preferences.preferred_platforms.join(', ') || 'various platforms'} for you daily.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-xs text-muted-foreground">Name</p>
-                        <p className="font-medium mt-0.5">{data.full_name || '—'}</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-xs text-muted-foreground">Location</p>
-                        <p className="font-medium mt-0.5">{data.location || '—'}</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-xs text-muted-foreground">Skills</p>
-                        <p className="font-medium mt-0.5">{data.skills.length} added</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-xs text-muted-foreground">Platforms</p>
-                        <p className="font-medium mt-0.5">{data.preferences.preferred_platforms.length} selected</p>
-                      </div>
-                    </div>
-                  </div>
-                </OnboardingStep>
+              {preferences.opportunityTypes.length > 0 && (
+                <p className="text-muted-foreground text-xs">
+                  Looking for:{" "}
+                  <span className="text-foreground">
+                    {preferences.opportunityTypes.join(", ")}
+                  </span>
+                </p>
               )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
+            </div>
+          </motion.div>
+        );
 
-        <div className="flex items-center justify-between mt-6">
-          <Button variant="ghost" onClick={() => setStep(s => s - 1)} disabled={step === 0}>
-            <ChevronLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
-          {step < STEPS.length - 1 ? (
-            <Button onClick={() => setStep(s => s + 1)}>
-              Next <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          ) : (
-            <Button onClick={() => saveMutation.mutate(data)} disabled={saveMutation.isPending}>
-              <Sparkles className="w-4 h-4 mr-2" />
-              {saveMutation.isPending ? 'Setting up...' : 'Launch Agent'}
-            </Button>
-          )}
+      default:
+        return null;
+    }
+  };
+
+  // ─── Layout ─────────────────────────────────────────────────────────────────
+  return (
+    <div
+      className="min-h-screen flex flex-col bg-background relative font-body pb-32"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsla(258,92%,68%,0.08) 0%, transparent 60%)",
+      }}
+    >
+      {/* Header */}
+      <div className="text-center pt-8 md:pt-12 pb-6 md:pb-8">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 glow-primary shadow-lg">
+            <Bot className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-xl md:text-2xl font-bold font-heading text-white">
+            Welcome to EngiBuddy
+          </h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-3xl w-full mx-auto flex flex-col gap-4 md:gap-6 px-4 relative z-10">
+        {/* Step tabs */}
+        <div className="glass rounded-xl p-1.5 flex gap-1 border border-white/5 overflow-x-auto no-scrollbar">
+          {steps.map((step, index) => {
+            const isActive = index === currentStepIndex;
+            const isCompleted = index < currentStepIndex;
+            return (
+              <button
+                key={step.id}
+                onClick={() => setCurrentStepIndex(index)}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : isCompleted
+                      ? "text-primary/70 hover:bg-sidebar-accent/50 hover:text-white"
+                      : "text-muted-foreground/70 hover:bg-sidebar-accent/50 hover:text-white",
+                )}
+              >
+                {isCompleted ? (
+                  <CheckCircle2 className="w-4 h-4 hidden sm:block text-primary/70" />
+                ) : (
+                  <step.icon
+                    className={cn(
+                      "w-4 h-4 hidden sm:block",
+                      isActive && "drop-shadow-sm",
+                    )}
+                  />
+                )}
+                <span>{step.title}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Main card */}
+        <div className="glass border-shimmer rounded-2xl shadow-xl relative p-5 md:p-8">
+          <AnimatePresence mode="wait">{renderStepContent()}</AnimatePresence>
+        </div>
+      </div>
+
+      {/* Fixed footer nav */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-background/95 backdrop-blur-md border-t border-sidebar-border z-50">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+          <button
+            onClick={prevStep}
+            disabled={currentStepIndex === 0}
+            className={cn(
+              "px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-muted-foreground font-medium flex items-center gap-2 hover:bg-input transition-all text-sm md:text-base border border-transparent hover:border-border",
+              currentStepIndex === 0 && "opacity-40 pointer-events-none",
+            )}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </button>
+
+          <button
+            onClick={nextStep}
+            disabled={isSaving}
+            className="px-6 md:px-8 py-2.5 md:py-3 rounded-lg gradient-primary glow-sm text-primary-foreground font-semibold flex items-center gap-2.5 hover:opacity-90 transition-all shadow-lg text-sm md:text-base disabled:opacity-60 disabled:pointer-events-none"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+              </>
+            ) : currentStepIndex < steps.length - 1 ? (
+              <>
+                Next Step <ChevronRight className="w-4 h-4" />
+              </>
+            ) : (
+              <>
+                Complete Setup <Sparkles className="w-4 h-4" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

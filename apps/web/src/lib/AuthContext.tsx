@@ -1,11 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-
-export interface User {
-  id: string;
-  email: string;
-  role: string;
-  name?: string;
-}
+import { supabase } from '../supabaseClient';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface AuthError {
   type: string;
@@ -13,86 +8,67 @@ export interface AuthError {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: SupabaseUser | null;
   isAuthenticated: boolean;
   isLoadingAuth: boolean;
-  isLoadingPublicSettings: boolean;
   authError: AuthError | null;
-  logout: (shouldRedirect?: boolean) => void;
+  logout: (shouldRedirect?: boolean) => Promise<void>;
   navigateToLogin: () => void;
-  checkUserAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>({ id: '1', email: 'user@example.com', role: 'user' });
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(false);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState<boolean>(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // Must start as true so we don't flash the login screen or redirect prematurely
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true); 
   const [authError, setAuthError] = useState<AuthError | null>(null);
 
   useEffect(() => {
-    checkUserAuth();
+    // 1. Check if the URL has an OAuth token or code
+    const isOAuthCallback = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+
+    // 2. Set up the listener FIRST so we catch the login event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+        setIsAuthenticated(!!session?.user);
+        setIsLoadingAuth(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoadingAuth(false);
+      }
+    });
+
+    // 3. Only manually get the session if we are NOT waiting for an OAuth callback to process
+    if (!isOAuthCallback) {
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error) setAuthError({ type: 'auth_required', message: error.message });
+        setUser(session?.user ?? null);
+        setIsAuthenticated(!!session?.user);
+        setIsLoadingAuth(false);
+      });
+    }
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const checkUserAuth = async () => {
-    try {
-      setIsLoadingAuth(true);
-      setAuthError(null);
-      
-      // Mock authentication - replace with your backend API call when ready
-      // Example backend call:
-      // const token = localStorage.getItem('token');
-      // if (!token) throw new Error('No token found');
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-      // if (!response.ok) throw new Error('Authentication failed');
-      // const currentUser: User = await response.json();
-      
-      setUser({ id: '1', email: 'user@example.com', role: 'user' });
-      setIsAuthenticated(true);
-    } catch (error: any) {
-      console.error('User auth check failed:', error);
-      setIsAuthenticated(false);
-      setUser(null);
-      
-      if (error.message !== 'No token found') {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required or session expired'
-        });
-      }
-    } finally {
-      setIsLoadingAuth(false);
-    }
+  const logout = async (shouldRedirect = true) => {
+    await supabase.auth.signOut();
+    if (shouldRedirect) window.location.href = '/login';
   };
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('token');
-    
-    if (shouldRedirect) {
+  const navigateToLogin = () => {
+    if (window.location.pathname !== '/login') {
       window.location.href = '/login';
     }
   };
 
-  const navigateToLogin = () => {
-    window.location.href = '/login';
-  };
-
   return (
     <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      isLoadingAuth,
-      isLoadingPublicSettings,
-      authError,
-      logout,
-      navigateToLogin,
-      checkUserAuth
+      user, isAuthenticated, isLoadingAuth, authError, logout, navigateToLogin
     }}>
       {children}
     </AuthContext.Provider>
@@ -101,8 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };

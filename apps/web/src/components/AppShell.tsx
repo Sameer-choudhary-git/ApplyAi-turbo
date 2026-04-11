@@ -1,27 +1,43 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { Navigate } from 'react-router-dom';
 import AppLayout from './layout/AppLayout';
 import Onboarding from '../pages/Onboarding';
-// ✅ replaced: db.entities.UserProfile — now using localStorage
-import { localStore } from '@/utils/localStorage';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/supabaseClient';
 
 export default function AppShell() {
-  const queryClient = useQueryClient();
+  const { user, isLoadingAuth } = useAuth();
 
-  // ✅ replaced: db.entities.UserProfile.list('-created_date', 1)
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['userProfile'],
-    queryFn: () => Promise.resolve(localStore.getProfile()),
-    // no network call — resolves instantly, but we still get the
-    // loading / success / error states that the rest of the component expects
+    // Use email as the key dependency since we query by it
+    queryKey: ['userProfile', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      
+      const { data, error } = await supabase
+        .from('users') // Changed from 'profiles' to match Prisma
+        .select('*')
+        .eq('email', user.email) // Linking via email based on your Hono backend
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error; 
+      return data;
+    },
+    enabled: !!user?.email,
   });
 
-  const needsOnboarding = !isLoading && !profile?.onboarding_completed;
+  if (!isLoadingAuth && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
-  if (isLoading) {
+  // Changed from profile.onboarding_completed to profile.isOnboarded
+  const needsOnboarding = !isLoading && (!profile || !profile.isOnboarded);
+
+  if (isLoading || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground mt-3">Loading your dashboard...</p>
         </div>
       </div>
@@ -29,11 +45,7 @@ export default function AppShell() {
   }
 
   if (needsOnboarding) {
-    return (
-      <Onboarding
-        onComplete={() => queryClient.invalidateQueries({ queryKey: ['userProfile'] })}
-      />
-    );
+    return <Onboarding />;
   }
 
   return <AppLayout />;

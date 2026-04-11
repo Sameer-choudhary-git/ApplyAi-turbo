@@ -1,22 +1,30 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Briefcase, Settings, CalendarDays,
-  ListTodo, BarChart3, Bot, ChevronLeft, ChevronRight,
-  Users, Bookmark
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+  LayoutDashboard,
+  Briefcase,
+  Settings,
+  CalendarDays,
+  ListTodo,
+  BarChart3,
+  Bot,
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  Bookmark,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/applications', icon: Briefcase, label: 'Applications' },
-  { path: '/saved-jobs', icon: Bookmark, label: 'Saved Jobs' },
-  { path: '/networking', icon: Users, label: 'Networking' },
-  { path: '/schedule', icon: CalendarDays, label: 'Schedule' },
-  { path: '/tasks', icon: ListTodo, label: 'Tasks' },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics' },
-  { path: '/preferences', icon: Settings, label: 'Preferences' },
+  { path: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { path: "/applications", icon: Briefcase, label: "Applications" },
+  { path: "/saved-jobs", icon: Bookmark, label: "Saved Jobs" },
+  { path: "/networking", icon: Users, label: "Networking" },
+  { path: "/schedule", icon: CalendarDays, label: "Schedule" },
+  { path: "/tasks", icon: ListTodo, label: "Tasks" },
+  { path: "/analytics", icon: BarChart3, label: "Analytics" },
+  { path: "/preferences", icon: Settings, label: "Preferences" },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
@@ -42,8 +50,12 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <h1 className="font-heading font-bold text-white text-lg whitespace-nowrap leading-tight">ApplyAI</h1>
-              <p className="text-[10px] text-sidebar-foreground/40 font-semibold tracking-widest uppercase">Agent Platform</p>
+              <h1 className="font-heading font-bold text-white text-lg whitespace-nowrap leading-tight">
+                EngiBuddy
+              </h1>
+              <p className="text-[10px] text-sidebar-foreground/40 font-semibold tracking-widest uppercase">
+                Agent Platform
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -59,21 +71,30 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               to={item.path}
               title={collapsed ? item.label : undefined}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
                 isActive
-                  ? 'bg-sidebar-primary text-white shadow-lg'
-                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? "bg-sidebar-primary text-white shadow-lg"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
-              style={isActive ? { boxShadow: '0 4px 14px 0 rgba(124,58,237,0.35)' } : {}}
+              style={
+                isActive
+                  ? { boxShadow: "0 4px 14px 0 rgba(124,58,237,0.35)" }
+                  : {}
+              }
             >
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
                   className="absolute inset-0 rounded-xl gradient-primary"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                 />
               )}
-              <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0 relative z-10', isActive && 'drop-shadow-sm')} />
+              <item.icon
+                className={cn(
+                  "w-[18px] h-[18px] flex-shrink-0 relative z-10",
+                  isActive && "drop-shadow-sm",
+                )}
+              />
               <AnimatePresence>
                 {!collapsed && (
                   <motion.span
@@ -98,7 +119,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center py-2.5 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200"
         >
-          <motion.div animate={{ rotate: collapsed ? 0 : 180 }} transition={{ duration: 0.3 }}>
+          <motion.div
+            animate={{ rotate: collapsed ? 0 : 180 }}
+            transition={{ duration: 0.3 }}
+          >
             <ChevronRight className="w-4 h-4" />
           </motion.div>
         </button>
