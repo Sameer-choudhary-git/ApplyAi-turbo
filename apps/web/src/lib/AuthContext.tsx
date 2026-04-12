@@ -21,15 +21,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  // Must start as true so we don't flash the login screen or redirect prematurely
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true); 
   const [authError, setAuthError] = useState<AuthError | null>(null);
 
   useEffect(() => {
-    // 1. Check if the URL has an OAuth token or code
     const isOAuthCallback = window.location.hash.includes('access_token') || window.location.search.includes('code=');
 
-    // 2. Set up the listener FIRST so we catch the login event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
@@ -42,7 +39,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // 3. Only manually get the session if we are NOT waiting for an OAuth callback to process
     if (!isOAuthCallback) {
       supabase.auth.getSession().then(({ data: { session }, error }) => {
         if (error) setAuthError({ type: 'auth_required', message: error.message });

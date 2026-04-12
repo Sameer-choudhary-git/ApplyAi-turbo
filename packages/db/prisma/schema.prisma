@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,144 +7,177 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Scraped data ──────────────────────────────────────────────────────────────
+
 model unstop_internships {
-  id           String    @id @default(cuid())
-  title        String
-  company      String
-  link         String    @unique
-  stipend      String?
-  experience   String?
-  type         String?   // "Full Time" | "Part Time"
-  location     String?
-  skills       Json      @default("[]")
-  tags         Json      @default("[]")
-  postedDate   String?
-  daysLeft     String?
+  id         String  @id @default(cuid())
+  title      String
+  company    String
+  link       String  @unique
+  stipend    String?
+  experience String?
+  type       String? // "Full Time" | "Part Time"
+  location   String?
+  skills     Json    @default("[]")
+  tags       Json    @default("[]")
+  postedDate String?
+  daysLeft   String?
 
-  // lifecycle fields
-  isActive     Boolean   @default(true)
-  expiresAt    DateTime?
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
 
-  // audit fields
-  scrapedAt    DateTime  @default(now())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  scrapedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // escape hatch for future/unknown fields
-  metadata     Json?
+  metadata Json?
 }
+
+// ─── Users ────────────────────────────────────────────────────────────────────
 
 model users {
-  id            String   @id @default(cuid())
-  
-  // basic info
-  fullName      String
-  email         String   @unique
-  phone         String?
-  location      String?
-  bio           String?
-  resumeUrl     String?  // s3/cloudflare link
-  linkedinUrl   String?
-  githubUrl     String?
+  id String @id
 
-  // onboarding state
-  isOnboarded   Boolean  @default(false)
-  onboardedAt   DateTime?
+  fullName    String
+  email       String  @unique
+  phone       String?
+  location    String?
+  bio         String?
+  resumeUrl   String?
+  linkedinUrl String?
+  githubUrl   String?
 
-  // relations
-  education     user_education[]
-  experience    user_experience[]
-  skills        user_skills[]
-  preferences   user_preferences?
+  isOnboarded Boolean   @default(false)
+  onboardedAt DateTime?
+
+  // Relations
+  education        user_education[]
+  experience       user_experience[]
+  skills           user_skills[]
+  preferences      user_preferences?
   platformSessions user_platform_sessions[]
 
+  // ── Job-enable flags ──────────────────────────────────────────────────────
+  // One boolean per flag in enableJobsConfig.
+  // Add a new flag here whenever you add one to the config.
   isUnstopInternshipEnabled Boolean @default(false)
+  isUnstopJobEnabled        Boolean @default(false) // was missing — now added
   isCommudleEventEnabled    Boolean @default(false)
 
-  // scheduling fields
-  lastQueuedAt DateTime?
-  queueCountToday Int @default(0)
-  lastQueueReset DateTime?
+  // Scheduling
+  lastQueuedAt    DateTime?
+  queueCountToday Int       @default(0)
+  lastQueueReset  DateTime?
 
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// ─── Profile sub-tables ───────────────────────────────────────────────────────
+
 model user_education {
-  id          String   @id @default(cuid())
-  userId      String
-  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  institution String
-  degree      String?
+  institution  String
+  degree       String?
   fieldOfStudy String?
-  gpa         String?
-  startYear   Int?
-  endYear     Int?
+  gpa          String?
+  startYear    Int?
+  endYear      Int?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model user_experience {
-  id          String   @id @default(cuid())
-  userId      String
-  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   company     String
   role        String?
   duration    String?
   description String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model user_skills {
-  id        String  @id @default(cuid())
-  userId    String
-  user      users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  skill     String
+  skill String
 
   @@unique([userId, skill])
 }
 
+// ─── Preferences ─────────────────────────────────────────────────────────────
+
 model user_preferences {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // work mode — multiple allowed so Json array
-  workModes       Json     @default("[]")  // ["Remote", "Hybrid", "On-site"]
+  // ── Platform targeting ────────────────────────────────────────────────────
+  workModes        Json @default("[]") // ["Remote", "Hybrid", "On-site"]
+  opportunityTypes Json @default("[]") // ["Internship", "Full-time Job", ...]
+  platforms        Json @default("[]") // ["LinkedIn", "Unstop", ...]
 
-  // opportunity types
-  opportunityTypes Json    @default("[]")  // ["Internship", "Full-time Job", ...]
+  // ── Location & compensation ───────────────────────────────────────────────
+  preferredLocations Json    @default("[]") // ["Bangalore", "Remote", ...]
+  minStipend         Int     @default(0)    // monthly in INR
 
-  // platforms user wants to apply on
-  platforms       Json     @default("[]")  // ["LinkedIn", "Unstop", ...]
+  // ── Role keywords ─────────────────────────────────────────────────────────
+  rolesOfInterest Json @default("[]") // ["Frontend Developer", ...]
+  industries      Json @default("[]") // ["Technology", "Fintech", ...]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  // ── Automation ────────────────────────────────────────────────────────────
+  autoApply       Boolean @default(false)
+  dailyApplyLimit Int     @default(10)
+
+  // ── Platform-specific settings (stored as JSONB blobs) ───────────────────
+  // Shape for unstopPreferences:
+  //   { competition_types: string[], prize_minimum: number }
+  unstopPreferences   Json?
+  commudlePreferences Json?   // ✅ ADD THIS
+
+
+  // Add more platform-specific blobs as needed:
+  // commudlePreferences Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// this is where you store cookies/session data per platform
+// ─── Platform sessions (cookies) ─────────────────────────────────────────────
+
 model user_platform_sessions {
-  id             String   @id @default(cuid())
-  userId         String
-  user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  platform       String   // "unstop", "linkedin", etc
+  platform        String    // "unstop", "commudle", etc.
+  encryptedCookie String    @db.Text
 
-  // 🔐 actual cookie stored here (encrypted)
-  encryptedCookie String  @db.Text
-
-  // optional metadata
-  isActive       Boolean  @default(true)
+  isActive       Boolean   @default(true)
   lastVerifiedAt DateTime?
   expiresAt      DateTime?
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, platform])
+}
+
+// ─── Setup tokens ────────────────────────────────────────────────────────────
+
+model unstop_setup_tokens {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  token     String   @unique
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }

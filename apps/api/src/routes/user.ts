@@ -1,12 +1,12 @@
-// apps/api/src/routes/user.ts  (add this route or merge into existing)
 import { Hono } from 'hono';
-import { prisma } from '@applyai/db'; // adjust import to your db package export
+import { prisma } from '@applyai/db';
+import { authMiddleware } from '../middleware/auth';
 
 const user = new Hono();
 
 // POST /api/users/onboard
 // Creates user + all nested relations in one transaction
-user.post('/onboard', async (c) => {
+user.post('/onboard', authMiddleware, async (c) => {
   try {
     const body = await c.req.json() as {
       fullName:    string;
@@ -39,18 +39,20 @@ user.post('/onboard', async (c) => {
       };
     };
 
-    if (!body.fullName || !body.email) {
-      return c.json({ error: 'fullName and email are required' }, 400);
+    const authUser = c.get("supabaseUser");
+    const userId = c.get("userId");
+
+    if (!body.fullName) {
+      return c.json({ error: 'fullName is required' }, 400);
     }
 
-    // Upsert so re-submitting onboarding doesn't explode
     const createdUser = await prisma.$transaction(async (tx) => {
-      // 1. Upsert the user row
       const u = await tx.users.upsert({
-        where: { email: body.email },
+        where: { id: userId },
         create: {
+          id:          userId,
           fullName:    body.fullName,
-          email:       body.email,
+          email:       authUser.email!,
           phone:       body.phone,
           location:    body.location,
           bio:         body.bio,
@@ -135,4 +137,106 @@ user.post('/onboard', async (c) => {
   }
 });
 
+user.get("/me", authMiddleware, async (c) => {
+  const userId = c.get("userId") as string;
+
+  try {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      include: {
+        preferences: true,
+        education: true,
+        experience: true,
+        skills: true,
+        platformSessions: {
+          where: { isActive: true },
+          select: {
+            platform: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return c.json({ success: false, error: "User not found" }, 404);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Flags (from users table)
+    // ─────────────────────────────────────────────────────────────
+
+    const flags = {
+      isUnstopInternshipEnabled: user.isUnstopInternshipEnabled,
+      isUnstopJobEnabled: user.isUnstopJobEnabled,
+      isCommudleEventEnabled: user.isCommudleEventEnabled,
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // Sessions → { unstop: true }
+    // ─────────────────────────────────────────────────────────────
+
+    const sessions = user.platformSessions.reduce<Record<string, boolean>>(
+      (acc, s) => {
+        acc[s.platform] = true;
+        return acc;
+      },
+      {}
+    );
+
+    // ─────────────────────────────────────────────────────────────
+    // Preferences (safe defaults)
+    // ─────────────────────────────────────────────────────────────
+
+    const preferences = user.preferences ?? {
+      workModes: [],
+      opportunityTypes: [],
+      platforms: [],
+      preferredLocations: [],
+      minStipend: 0,
+      rolesOfInterest: [],
+      industries: [],
+      autoApply: false,
+      dailyApplyLimit: 10,
+      unstopPreferences: {},
+      commudlePreferences: {},
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // Final response
+    // ─────────────────────────────────────────────────────────────
+
+    return c.json({
+      success: true,
+
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        location: user.location,
+        bio: user.bio,
+        resumeUrl: user.resumeUrl,
+        linkedinUrl: user.linkedinUrl,
+        githubUrl: user.githubUrl,
+        isOnboarded: user.isOnboarded,
+      },
+
+      preferences,
+      flags,
+      sessions,
+
+      profile: {
+        education: user.education,
+        experience: user.experience,
+        skills: user.skills.map((s) => s.skill),
+      },
+    });
+  } catch (err) {
+    console.error("GET /me error:", err);
+    return c.json(
+      { success: false, error: "Failed to fetch user data" },
+      500
+    );
+  }
+});
 export default user;

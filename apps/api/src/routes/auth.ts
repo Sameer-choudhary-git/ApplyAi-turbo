@@ -29,18 +29,13 @@ authRoutes.post("/sync", authMiddleware, async (c) => {
   return c.json({ success: true, user });
 });
 
-// Get current auth user
+
 authRoutes.get("/me", authMiddleware, async (c) => {
   const userId = c.get("userId") as string;
 
   const user = await prisma.users.findUnique({
     where: { id: userId },
-    include: {
-      education: true,
-      experience: true,
-      skills: true,
-      preferences: true,
-    },
+
   });
 
   if (!user) {

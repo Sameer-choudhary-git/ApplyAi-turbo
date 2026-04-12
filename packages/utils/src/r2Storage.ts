@@ -1,18 +1,19 @@
 import 'dotenv/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { storageConfig } from '@applyai/config';
 
 const r2Client = new S3Client({
   region: 'auto',
-  endpoint: process.env.R2_ENDPOINT_URL,
+  endpoint: storageConfig.endpoint,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    accessKeyId: storageConfig.accessKeyId,
+    secretAccessKey: storageConfig.secretAccessKey,
   },
 });
 
 export const uploadFileToR2 = async (fileBuffer: Buffer, fileName: string, contentType: string) => {
   const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
+    Bucket: storageConfig.bucketName,
     Key: fileName,
     Body: fileBuffer,
     ContentType: contentType,
@@ -20,5 +21,5 @@ export const uploadFileToR2 = async (fileBuffer: Buffer, fileName: string, conte
 
   await r2Client.send(command);
   
-    return `${process.env.R2_PUBLIC_URL}/${fileName}`;
+  return `${storageConfig.publicUrl}/${fileName}`;
 };

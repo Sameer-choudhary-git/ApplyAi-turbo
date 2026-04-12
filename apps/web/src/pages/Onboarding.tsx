@@ -21,6 +21,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { apiConfig } from "@applyai/config";
+import { supabase } from "@/supabaseClient";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const steps = [
@@ -109,7 +111,6 @@ export default function Onboarding() {
   const queryClient = useQueryClient(); // Add this line
   // Profile
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [bio, setBio] = useState("");
@@ -209,10 +210,25 @@ export default function Onboarding() {
       const formData = new FormData();
       formData.append("resume", file);
 
-      const res = await fetch("http://localhost:3000/api/resume/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+
+      if (!token) {
+        setUploadError("You are not authenticated");
+        setUploadStatus("error");
+        return;
+      }
+
+      const res = await fetch(
+        `${apiConfig.baseUrl}${apiConfig.endpoints.resume.upload}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
 
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
@@ -228,34 +244,81 @@ export default function Onboarding() {
     }
   };
 
-  // Final submit — POST to your Hono /api/users/onboard route
   const handleComplete = async () => {
-    setIsSaving(true);
-    try {
-      const payload = {
-        // ... (keep your existing payload exactly as is)
-      };
+  if (!fullName.trim()) {
+    alert("Full name is required");
+    return;
+  }
 
-      const res = await fetch('http://localhost:3000/api/users/onboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+  setIsSaving(true);
 
-      if (!res.ok) throw new Error('Failed to save profile');
+  try {
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
 
-      // Add this line to force AppShell to fetch the fresh 'isOnboarded: true' data
-      await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-
-      // Navigate to your root dashboard route
-      navigate('/'); 
-    } catch (err) {
-      console.error('Onboarding error:', err);
-      alert('There was a problem saving your profile. Please try again.');
-    } finally {
-      setIsSaving(false);
+    if (!token) {
+      alert("You are not authenticated");
+      return;
     }
-  };
+
+    const payload = {
+      fullName,
+      phone: phone || undefined,
+      location: location || undefined,
+      bio: bio || undefined,
+      resumeUrl,
+      linkedinUrl,
+      githubUrl,
+
+      education: education
+        .filter((e) => e.institution.trim())
+        .map((e) => ({
+          institution: e.institution,
+          degree: e.degree,
+          fieldOfStudy: e.fieldOfStudy,
+          gpa: e.gpa,
+          startYear: e.startYear ? Number(e.startYear) : undefined,
+          endYear: e.endYear ? Number(e.endYear) : undefined,
+        })),
+
+      experience: experience
+        .filter((e) => e.company.trim())
+        .map((e) => ({
+          company: e.company,
+          role: e.role,
+          duration: e.duration,
+          description: e.description,
+        })),
+
+      skills,
+      preferences,
+    };
+
+    const res = await fetch(
+      `${apiConfig.baseUrl}${apiConfig.endpoints.auth.onboard}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to save profile");
+
+    // 🔥 ensure fresh fetch
+    await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+
+    navigate("/");
+  } catch (err) {
+    console.error("Onboarding error:", err);
+    alert("There was a problem saving your profile.");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   // ─── Step Rendering ─────────────────────────────────────────────────────────
   const renderStepContent = () => {
@@ -287,14 +350,6 @@ export default function Onboarding() {
                   placeholder="John Doe"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  required
-                />
-                <OnboardingInput
-                  label="Email *"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
                 <OnboardingInput
@@ -920,7 +975,6 @@ export default function Onboarding() {
                   <p className="font-semibold text-foreground">
                     {fullName || "—"}
                   </p>
-                  <p className="text-muted-foreground text-xs">{email}</p>
                 </div>
                 {resumeUrl && (
                   <span className="ml-auto px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1">

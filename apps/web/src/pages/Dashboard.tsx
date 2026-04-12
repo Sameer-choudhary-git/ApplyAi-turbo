@@ -10,7 +10,7 @@ import RecentApplications from "../components/dashboard/RecentApplications";
 import UpcomingInterviews from "../components/dashboard/UpcomingInterviews";
 import AgentStatus from "../components/dashboard/AgentStatus";
 
-export default function Dashboard() {
+export default  function Dashboard() {
   const { user } = useAuth();
 
   // Fetch real profile from the cache initialized in AppShell
@@ -28,7 +28,7 @@ export default function Dashboard() {
     },
     enabled: !!user?.email,
   });
-
+    
   // TODO: Replace with real applications fetch once your backend supports it
   const applications = [];
   const summaries = {

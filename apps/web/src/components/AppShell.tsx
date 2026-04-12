@@ -9,28 +9,25 @@ export default function AppShell() {
   const { user, isLoadingAuth } = useAuth();
 
   const { data: profile, isLoading } = useQuery({
-    // Use email as the key dependency since we query by it
-    queryKey: ['userProfile', user?.email],
+    queryKey: ['userProfile', user?.id],
     queryFn: async () => {
-      if (!user?.email) return null;
-      
+      if (!user?.id) return null;
       const { data, error } = await supabase
-        .from('users') // Changed from 'profiles' to match Prisma
+        .from('users')
         .select('*')
-        .eq('email', user.email) // Linking via email based on your Hono backend
+        .eq('id', user.id)
         .single();
         
       if (error && error.code !== 'PGRST116') throw error; 
       return data;
     },
-    enabled: !!user?.email,
+    enabled: !!user?.id,
   });
 
   if (!isLoadingAuth && !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Changed from profile.onboarding_completed to profile.isOnboarded
   const needsOnboarding = !isLoading && (!profile || !profile.isOnboarded);
 
   if (isLoading || isLoadingAuth) {

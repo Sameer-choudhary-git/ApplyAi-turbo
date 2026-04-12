@@ -5,12 +5,13 @@
     "moduleResolution": "bundler",
     "strict": true,
     "outDir": "dist",
-    "rootDir": "src",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "paths": {
+      "@applyai/config": ["../../packages/config/index.ts"],
       "@applyai/db": ["../../packages/db/index.ts"],
-      "@applyai/utils": ["../../packages/utils/index.ts"]
+      "@applyai/utils": ["../../packages/utils/index.ts"],
+      "@applyai/types": ["../../packages/types/index.ts"]
     }
   },
   "include": ["src"]

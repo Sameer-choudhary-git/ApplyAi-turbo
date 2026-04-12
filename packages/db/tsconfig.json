@@ -5,7 +5,11 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@applyai/config": ["../config/index.ts"],
+      "@applyai/types": ["../types/index.ts"]
+    }
   },
   "include": ["."]
 }

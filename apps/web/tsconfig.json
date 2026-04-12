@@ -15,9 +15,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@config": ["../../packages/config/index.ts"]
     }
   },
   "include": ["src", "entities"],
