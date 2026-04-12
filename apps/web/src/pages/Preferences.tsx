@@ -24,7 +24,7 @@ type PreferencesState = {
   industries: string[];
   auto_apply: boolean;
   daily_apply_limit: number;
-  preferred_platforms: string[]; // now platform IDs (unstop, commudle)
+  preferred_platforms: string[];
 };
 
 type FlagState = Record<string, boolean>;
@@ -78,11 +78,8 @@ export default function Preferences() {
   });
 
   const [flagState, setFlagState] = useState<FlagState>({});
-  const [sessionState, setSessionState] =
-    useState<SessionState>(buildInitialSessionState());
-
-  const [platformPrefs, setPlatformPrefs] =
-    useState<PlatformPrefs>(buildInitialPlatformPrefs());
+  const [sessionState, setSessionState] = useState<SessionState>(buildInitialSessionState());
+  const [platformPrefs, setPlatformPrefs] = useState<PlatformPrefs>(buildInitialPlatformPrefs());
 
   // ─────────────────────────────────────────────────────────────
   // LOAD USER DATA
@@ -95,16 +92,14 @@ export default function Preferences() {
         const token = (await session).data.session?.access_token;
         const res = await fetch(
           `${apiConfig.baseUrl}/api/users/me`,
-          { credentials: "include", headers: { "Content-Type": "application/json" , Authorization : `Bearer ${token}` } },
+          { credentials: "include", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
         );
 
         const data = await res.json();
-
         if (!data.success) throw new Error("Failed to load user");
 
         const { user, preferences, sessions } = data;
 
-        // ── Preferences
         setPrefs({
           work_mode: preferences.workModes ?? [],
           opportunity_types: preferences.opportunityTypes ?? [],
@@ -117,47 +112,26 @@ export default function Preferences() {
           preferred_platforms: preferences.platforms ?? [],
         });
 
-        // ── Flags (CONFIG DRIVEN)
-setFlagState(data.flags || {});
-        // ── Sessions
-        setSessionState((prev) => ({
-          ...prev,
-          ...sessions,
-        }));
-
-        // ── Platform Prefs
+        setFlagState(data.flags || {});
+        setSessionState((prev) => ({ ...prev, ...sessions }));
         setPlatformPrefs((prev) => {
-  const updated = { ...prev };
-
-  Object.keys(prev).forEach((platformId) => {
-    updated[platformId] =
-      preferences[`${platformId}Preferences`] ?? {};
-  });
-
-  return updated;
-});
-       } catch (err) {
-         toast.error("Failed to load preferences");
-       } finally {
+          const updated = { ...prev };
+          Object.keys(prev).forEach((platformId) => {
+            updated[platformId] = preferences[`${platformId}Preferences`] ?? {};
+          });
+          return updated;
+        });
+      } catch (err) {
+        toast.error("Failed to load preferences");
+      } finally {
         setLoading(false);
       }
     };
-
     load();
   }, []);
 
-  // ─────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────
-
   const toggleArray = (arr: string[], item: string) =>
-    arr.includes(item)
-      ? arr.filter((x) => x !== item)
-      : [...arr, item];
-
-  // ─────────────────────────────────────────────────────────────
-  // Save Preferences
-  // ─────────────────────────────────────────────────────────────
+    arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
   const handleSave = async () => {
     try {
@@ -166,7 +140,7 @@ setFlagState(data.flags || {});
         {
           method: "PUT",
           credentials: "include",
-          headers: { "Content-Type": "application/json" , Authorization : `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
           body: JSON.stringify({
             workModes: prefs.work_mode,
             opportunityTypes: prefs.opportunity_types,
@@ -177,28 +151,19 @@ setFlagState(data.flags || {});
             rolesOfInterest: prefs.roles_of_interest,
             autoApply: prefs.auto_apply,
             dailyApplyLimit: prefs.daily_apply_limit,
-
             ...Object.fromEntries(
-              Object.entries(platformPrefs).map(([k, v]) => [
-                `${k}Preferences`,
-                v,
-              ])
+              Object.entries(platformPrefs).map(([k, v]) => [`${k}Preferences`, v])
             ),
           }),
         }
       );
 
-       if (!res.ok) throw new Error();
-
-       toast.success("Preferences updated!");
-     } catch {
-       toast.error("Failed to save preferences.");
-     }
+      if (!res.ok) throw new Error();
+      toast.success("Preferences updated!");
+    } catch {
+      toast.error("Failed to save preferences.");
+    }
   };
-
-  // ─────────────────────────────────────────────────────────────
-  // Flag Toggle
-  // ─────────────────────────────────────────────────────────────
 
   const handleFlagToggle = async (flagId: string, value: boolean) => {
     const owningPlatform = Object.values(enableJobsConfig).find((p) =>
@@ -218,13 +183,12 @@ setFlagState(data.flags || {});
         {
           method: "PATCH",
           credentials: "include",
-          headers: { "Content-Type": "application/json" , Authorization : `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
           body: JSON.stringify({ [flagId]: value }),
         }
       );
 
       if (!res.ok) throw new Error();
-
       toast.success(value ? "Enabled" : "Disabled");
     } catch {
       setFlagState((prev) => ({ ...prev, [flagId]: !value }));
@@ -232,33 +196,19 @@ setFlagState(data.flags || {});
     }
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // Session success
-  // ─────────────────────────────────────────────────────────────
-
   const handleSessionSuccess = (platformId: string) => {
     setSessionState((prev) => ({ ...prev, [platformId]: true }));
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // Platform Prefs
-  // ─────────────────────────────────────────────────────────────
-
-  const handlePlatformPrefsChange = (
-    platformId: string,
-    prefs: Record<string, unknown>
-  ) => {
-    setPlatformPrefs((prev) => ({ ...prev, [platformId]: prefs }));
+  const handlePlatformPrefsChange = (platformId: string, preferences: Record<string, unknown>) => {
+    setPlatformPrefs((prev) => ({ ...prev, [platformId]: preferences }));
   };
 
-  // ─────────────────────────────────────────────────────────────
 
-  if (loading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading...</div>;
-  }
 
   return (
-    <div className="space-y-6 max-w-4xl pb-20">
+    // FIX: Added 'mx-auto', 'w-full', and 'px-4 sm:px-6' right here to center everything nicely.
+    <div className="space-y-6 max-w-4xl mx-auto w-full px-4 sm:px-6 pb-20 pt-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
@@ -279,97 +229,40 @@ setFlagState(data.flags || {});
         </Button>
       </div>
 
-      {/* Automation */}
       <AutomationControlCard
         autoApply={prefs.auto_apply}
         dailyApplyLimit={prefs.daily_apply_limit}
-        onAutoApplyChange={(v) =>
-          setPrefs((p) => ({ ...p, auto_apply: v }))
-        }
-        onDailyLimitChange={(v) =>
-          setPrefs((p) => ({ ...p, daily_apply_limit: v }))
-        }
+        onAutoApplyChange={(v) => setPrefs((p) => ({ ...p, auto_apply: v }))}
+        onDailyLimitChange={(v) => setPrefs((p) => ({ ...p, daily_apply_limit: v }))}
       />
 
-      {/* Role + Keywords */}
       <div className="grid md:grid-cols-2 gap-6">
         <RoleSpecificationsCard
           workMode={prefs.work_mode}
           opportunityTypes={prefs.opportunity_types}
           minStipend={prefs.min_stipend}
           preferredLocations={prefs.preferred_locations}
-          onWorkModeToggle={(mode) =>
-            setPrefs((p) => ({
-              ...p,
-              work_mode: toggleArray(p.work_mode, mode),
-            }))
-          }
-          onOpportunityTypeToggle={(type) =>
-            setPrefs((p) => ({
-              ...p,
-              opportunity_types: toggleArray(p.opportunity_types, type),
-            }))
-          }
-          onMinStipendChange={(v) =>
-            setPrefs((p) => ({ ...p, min_stipend: v }))
-          }
-          onAddLocation={(loc) =>
-            setPrefs((p) => ({
-              ...p,
-              preferred_locations: [...p.preferred_locations, loc],
-            }))
-          }
-          onRemoveLocation={(loc) =>
-            setPrefs((p) => ({
-              ...p,
-              preferred_locations: p.preferred_locations.filter(
-                (l) => l !== loc
-              ),
-            }))
-          }
+          onWorkModeToggle={(mode) => setPrefs((p) => ({ ...p, work_mode: toggleArray(p.work_mode, mode) }))}
+          onOpportunityTypeToggle={(type) => setPrefs((p) => ({ ...p, opportunity_types: toggleArray(p.opportunity_types, type) }))}
+          onMinStipendChange={(v) => setPrefs((p) => ({ ...p, min_stipend: v }))}
+          onAddLocation={(loc) => setPrefs((p) => ({ ...p, preferred_locations: [...p.preferred_locations, loc] }))}
+          onRemoveLocation={(loc) => setPrefs((p) => ({ ...p, preferred_locations: p.preferred_locations.filter((l) => l !== loc) }))}
         />
 
         <KeywordsTargetsCard
           rolesOfInterest={prefs.roles_of_interest}
           industries={prefs.industries}
-          onAddRole={(role) =>
-            setPrefs((p) => ({
-              ...p,
-              roles_of_interest: [...p.roles_of_interest, role],
-            }))
-          }
-          onRemoveRole={(role) =>
-            setPrefs((p) => ({
-              ...p,
-              roles_of_interest: p.roles_of_interest.filter(
-                (r) => r !== role
-              ),
-            }))
-          }
-          onAddIndustry={(ind) =>
-            setPrefs((p) => ({
-              ...p,
-              industries: [...p.industries, ind],
-            }))
-          }
-          onRemoveIndustry={(ind) =>
-            setPrefs((p) => ({
-              ...p,
-              industries: p.industries.filter((i) => i !== ind),
-            }))
-          }
+          onAddRole={(role) => setPrefs((p) => ({ ...p, roles_of_interest: [...p.roles_of_interest, role] }))}
+          onRemoveRole={(role) => setPrefs((p) => ({ ...p, roles_of_interest: p.roles_of_interest.filter((r) => r !== role) }))}
+          onAddIndustry={(ind) => setPrefs((p) => ({ ...p, industries: [...p.industries, ind] }))}
+          onRemoveIndustry={(ind) => setPrefs((p) => ({ ...p, industries: p.industries.filter((i) => i !== ind) }))}
         />
       </div>
 
       {/* Platforms */}
       <PlatformIntegrationsCard
         preferredPlatforms={prefs.preferred_platforms}
-        onPlatformToggle={(platformId) =>
-          setPrefs((p) => ({
-            ...p,
-            preferred_platforms: toggleArray(p.preferred_platforms, platformId),
-          }))
-        }
+        onPlatformToggle={(platformId) => setPrefs((p) => ({ ...p, preferred_platforms: toggleArray(p.preferred_platforms, platformId) }))}
         sessionState={sessionState}
         onSessionSuccess={handleSessionSuccess}
         flagState={flagState}
