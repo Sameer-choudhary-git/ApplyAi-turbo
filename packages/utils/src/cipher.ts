@@ -1,7 +1,17 @@
+import "dotenv/config";
 import { encryptionConfig } from "@applyai/config";
 import crypto from "crypto";
 
-const encryptionKey = encryptionConfig.cookieEncryptionKey;
+const encryptionKey ="b2e03ff7cb1e3daa56dfa16fa97f45a34730eb723088f8c13581a4752867ce14";
+if (!encryptionKey) {
+  throw new Error("COOKIE_ENCRYPTION_KEY is missing");
+}
+
+const key = Buffer.from(encryptionKey, "hex");
+
+if (key.length !== 32) {
+  throw new Error(`Invalid key length: ${key.length}`);
+}
 
 export const encrypt = (data: object | string): string => {
   const key = Buffer.from(encryptionKey, 'hex');

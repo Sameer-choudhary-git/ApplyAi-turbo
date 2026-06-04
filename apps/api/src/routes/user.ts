@@ -137,6 +137,7 @@ user.post('/onboard', authMiddleware, async (c) => {
   }
 });
 
+// GET /api/users/me
 user.get("/me", authMiddleware, async (c) => {
   const userId = c.get("userId") as string;
 

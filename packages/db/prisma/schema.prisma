@@ -56,6 +56,7 @@ model users {
   skills           user_skills[]
   preferences      user_preferences?
   platformSessions user_platform_sessions[]
+  jobApplications  user_job_applications[]
 
   // ── Job-enable flags ──────────────────────────────────────────────────────
   // One boolean per flag in enableJobsConfig.
@@ -113,7 +114,6 @@ model user_skills {
   @@unique([userId, skill])
 }
 
-// ─── Preferences ─────────────────────────────────────────────────────────────
 
 model user_preferences {
   id     String @id @default(cuid())
@@ -180,4 +180,28 @@ model unstop_setup_tokens {
   used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model user_job_applications {
+  id String @id @default(cuid())
+
+  userId String
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  platform String
+
+  jobTitle String
+  company String
+  jobLink String
+
+  status String
+  notes String?
+
+  type              String?   // "job" | "internship" | "hackathon" | "event"
+  success_probability Int ?    // 0–100, agent-assigned
+  location          String?
+
+  appliedAt DateTime @default(now())
+
+  metadata Json?
 }

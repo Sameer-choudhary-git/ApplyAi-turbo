@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Settings2, Save } from "lucide-react";
+import { Settings2, Save, FileText, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { apiConfig, enableJobsConfig } from "@applyai/config";
@@ -204,13 +204,77 @@ export default function Preferences() {
     setPlatformPrefs((prev) => ({ ...prev, [platformId]: preferences }));
   };
 
+  const handleViewResume = async () => {
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await fetch(`${apiConfig.baseUrl}/api/resume`, {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        toast.error("No resume found. Please upload one first.");
+        return;
+      }
+
+      window.open(data.url, "_blank");
+      toast.success("Opening resume...");
+    } catch (err) {
+      toast.error("Failed to fetch resume");
+    }
+  };
+
+  const handleUpdateResume = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf";
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (file.type !== "application/pdf") {
+        toast.error("Only PDF files are allowed");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File must be under 5 MB");
+        return;
+      }
+
+      try {
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        const formData = new FormData();
+        formData.append("resume", file);
+
+        const res = await fetch(`${apiConfig.baseUrl}/api/resume/update`, {
+          method: "POST",
+          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          toast.error(data.error || "Upload failed");
+          return;
+        }
+
+        toast.success("Resume updated successfully!");
+      } catch (err) {
+        toast.error("Failed to update resume");
+      }
+    };
+    input.click();
+  };
 
   return (
-    // FIX: Added 'mx-auto', 'w-full', and 'px-4 sm:px-6' right here to center everything nicely.
     <div className="space-y-6 max-w-4xl mx-auto w-full px-4 sm:px-6 pb-20 pt-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
             <Settings2 className="w-6 h-6 text-white" />
@@ -223,10 +287,20 @@ export default function Preferences() {
           </div>
         </div>
 
-        <Button onClick={handleSave}>
-          <Save className="w-4 h-4 mr-2" />
-          Save
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleViewResume}>
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">View Resume</span>
+          </Button>
+          <Button variant="outline" onClick={handleUpdateResume}>
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Update Resume</span>
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4" />
+            <span className="hidden sm:inline">Save</span>
+          </Button>
+        </div>
       </div>
 
       <AutomationControlCard

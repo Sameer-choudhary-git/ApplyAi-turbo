@@ -1,11 +1,14 @@
 import cron from "node-cron";
 import { runAllExtractors } from "@repo/extractor";
 import { queueEligibleUsers } from "./queueUsers";
+import { validateJobs } from "./validator";
 
 console.log("⏰ Scheduler started...");
 
+// validateJobs();
 // runAllExtractors();
 queueEligibleUsers();
+
 // Extractors (every 1 hour)
 cron.schedule("0 * * * *", async () => {
   console.log("🚀 Running extractors...");
@@ -25,5 +28,17 @@ cron.schedule("5 * * * *", async () => {
     console.log("✅ Users queued");
   } catch (err) {
     console.error("❌ Queue failed:", err);
+  }
+});
+
+
+// run after every 5 hours to validate old job applications
+cron.schedule("0 */5 * * *", async () => {
+  console.log("🧹 Cleaning up old job applications...");
+  try {
+    await validateJobs();
+    console.log("✅ Cleanup completed");
+  } catch (err) {
+    console.error("❌ Cleanup failed:", err);
   }
 });

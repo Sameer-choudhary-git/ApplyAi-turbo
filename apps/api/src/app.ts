@@ -14,6 +14,8 @@ import resume from './routes/resume';
 import { unstopSessionRouter } from './routes/unstop-session';
 import { userFlagsRouter } from './routes/user-flags';
 import { preferencesRouter } from './routes/preferences';
+import { applicationsRouter } from './routes/applications';
+
 export const app = new Hono();
 
 // ── Global middleware ──────────────────────────────────────
@@ -46,6 +48,7 @@ app.route('/api/users/me/flags', userFlagsRouter);
 app.route('/api/sessions/unstop', unstopSessionRouter);
 app.route('/api/auth/flags', userFlagsRouter); 
 app.route('/api/users/me/preferences', preferencesRouter);
+app.route('/api/applications', applicationsRouter);
 // ── 404 ────────────────────────────────────────────────────
 app.notFound((c) => {
   return c.json({ success: false, error: "Route not found" }, 404);
