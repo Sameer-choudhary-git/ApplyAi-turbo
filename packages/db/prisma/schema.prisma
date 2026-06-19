@@ -64,20 +64,21 @@ model users {
   isUnstopInternshipEnabled Boolean @default(false)
   isUnstopJobEnabled        Boolean @default(false) // was missing — now added
   isCommudleEventEnabled    Boolean @default(false)
+  isLinkedinEnabled         Boolean @default(false)
 
   // Scheduling
   lastQueuedAt    DateTime?
-  queueCountToday Int       @default(0)
+  queueCountToday Int               @default(0)
   lastQueueReset  DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
 }
 
 // ─── Profile sub-tables ───────────────────────────────────────────────────────
 
 model user_education {
-  id     String @id @default(cuid())
+  id     String       @id @default(cuid())
   userId String
   user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -158,7 +159,7 @@ model user_platform_sessions {
   userId String
   user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  platform        String    // "unstop", "commudle", etc.
+  platform        String    // "unstop", "commudle", "linkedin", etc.
   encryptedCookie String    @db.Text
 
   isActive       Boolean   @default(true)
@@ -204,4 +205,17 @@ model user_job_applications {
   appliedAt DateTime @default(now())
 
   metadata Json?
+}
+
+model linkedin_scrape_queue {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // "FEED_POST" | "JOB" | "CONNECTION" | "NOTIFICATION"
+  rawData     Json      // structured scraped data
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  scrapedAt   DateTime  @default(now())
+
+  @@index([userId, processed])
+  @@index([userId, type])
 }

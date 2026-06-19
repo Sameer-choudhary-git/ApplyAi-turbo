@@ -57,6 +57,7 @@ export const worker = new Worker(
                 jobTitle: app.title,
                 company: app.company,
                 jobLink: app.link,
+                type:app.type,
 
                 status: app.status,
                 notes: app.notes,
