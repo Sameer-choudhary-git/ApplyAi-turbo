@@ -105,36 +105,17 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  apps/extractor:
-    dependencies:
-      '@applyai/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      fs:
-        specifier: 0.0.1-security
-        version: 0.0.1-security
-      path:
-        specifier: ^0.12.7
-        version: 0.12.7
-      playwright:
-        specifier: ^1.59.1
-        version: 1.59.1
-    devDependencies:
-      '@types/node':
-        specifier: ^25.6.0
-        version: 25.6.0
-
   apps/scheduler:
     dependencies:
       '@applyai/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@applyai/extractor':
+        specifier: workspace:*
+        version: link:../../packages/extractor
       '@applyai/queue':
         specifier: workspace:*
         version: link:../../packages/queue
-      '@repo/extractor':
-        specifier: workspace:*
-        version: link:../extractor
       fs:
         specifier: 0.0.1-security
         version: 0.0.1-security
@@ -144,6 +125,9 @@ importers:
       path:
         specifier: ^0.12.7
         version: 0.12.7
+      playwright:
+        specifier: ^1.59.1
+        version: 1.59.1
     devDependencies:
       tsx:
         specifier: ^4.21.0
@@ -503,6 +487,25 @@ importers:
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/extractor:
+    dependencies:
+      '@applyai/db':
+        specifier: workspace:*
+        version: link:../db
+      fs:
+        specifier: 0.0.1-security
+        version: 0.0.1-security
+      path:
+        specifier: ^0.12.7
+        version: 0.12.7
+      playwright:
+        specifier: ^1.59.1
+        version: 1.59.1
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/queue:
     dependencies:

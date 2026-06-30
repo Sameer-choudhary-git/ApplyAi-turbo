@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import { connection } from "../connection";
+import { connection } from "../src/connection";
 
 export const applyQueue = new Queue("apply", {
   connection,

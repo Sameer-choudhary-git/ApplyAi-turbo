@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { runAllExtractors } from "@repo/extractor";
+import { runAllExtractors } from "@applyai/extractor";
 import { queueEligibleUsers } from "./queueUsers";
 import { validateJobs } from "./validator";
 
@@ -7,7 +7,7 @@ console.log("⏰ Scheduler started...");
 
 // validateJobs();
 // runAllExtractors();
-queueEligibleUsers();
+// queueEligibleUsers();
 
 // Extractors (every 1 hour)
 cron.schedule("0 * * * *", async () => {
@@ -42,3 +42,11 @@ cron.schedule("0 */5 * * *", async () => {
     console.error("❌ Cleanup failed:", err);
   }
 });
+
+
+
+import "./schedules/hourly";
+import "./schedules/every5Minutes";
+import "./schedules/daily";
+
+console.log("Scheduler Started");

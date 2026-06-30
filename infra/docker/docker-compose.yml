@@ -1,0 +1,144 @@
+services:
+  # Redis - Message Queue Backend
+  redis:
+    image: redis:7-alpine
+    container_name: applyai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - applyai-network
+    environment:
+      - REDIS_REPLICATION_DISKLESS_SYNC=yes
+
+  # Extractor Service - Data Scraping (Runs hourly)
+  extractor:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.extractor
+    container_name: applyai-extractor
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Database (Supabase)
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV:-development}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Encryption
+      COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
+    networks:
+      - applyai-network
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Scheduler Service - Job Queue Orchestration (Cron-based)
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.scheduler
+    container_name: applyai-scheduler
+    depends_on:
+      redis:
+        condition: service_healthy
+      extractor:
+        condition: service_started
+    environment:
+      # Database (Supabase)
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV:-development}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Encryption
+      COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
+    networks:
+      - applyai-network
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker Service - Job Processing (BullMQ Workers)
+  worker:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: applyai-worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      scheduler:
+        condition: service_started
+    environment:
+      # Database (Supabase)
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV:-development}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Encryption
+      COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
+
+      # Supabase (for browser automation if needed)
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+
+      # R2 Storage
+      R2_ENDPOINT_URL: ${R2_ENDPOINT_URL}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+    networks:
+      - applyai-network
+    restart: on-failure
+    # Scale this service: docker-compose up --scale worker=3
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis UI (Optional - for monitoring)
+  redis-ui:
+    image: rediscommander/redis-commander:latest
+    container_name: applyai-redis-ui
+    depends_on:
+      - redis
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    networks:
+      - applyai-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  applyai-network:
+    driver: bridge

@@ -1,0 +1,106 @@
+                 Scheduler
+                     │
+         ┌───────────┴────────────┐
+         ▼                        ▼
+ Extract Queue              Apply Queue
+         │                        │
+         ▼                        ▼
+ Extract Worker           Apply Worker
+         │                        │
+         ▼                        ▼
+     PostgreSQL          Playwright Apply
+
+
+packages/
+    db
+    utils
+    queue
+    config
+    extractor   <-- library
+    types
+
+
+apps/
+    worker/
+        src/
+            index.ts
+            workers/
+                apply.worker.ts
+                extract.worker.ts
+                cleanup.worker.ts
+
+
+
+
+apps/
+
+    api/
+
+    scheduler/
+
+    worker/
+        src/
+
+            index.ts
+
+            workers/
+                apply.worker.ts
+                extract.worker.ts
+                cleanup.worker.ts
+                notification.worker.ts
+
+            agents/
+                registry.ts
+
+                unstop/
+                    apply.ts
+                    parser.ts
+                    selectors.ts
+
+                linkedin/
+                    apply.ts
+
+                commudle/
+                    apply.ts
+
+            extractors/
+                registry.ts
+
+                unstop.ts
+                linkedin.ts
+                commudle.ts
+
+
+Redis
+
+│
+
+├── apply
+
+├── extract
+
+├── cleanup
+
+├── notification
+
+
+# Data Flow
+
+             Scheduler
+                  │
+      ┌───────────┴────────────┐
+      ▼                        ▼
+ Extract Queue             Apply Queue
+      │                        │
+      ▼                        ▼
+Extract Worker           Apply Worker
+      │                        │
+      ▼                        ▼
+ Registry                 Registry
+      │                        │
+      ▼                        ▼
+ Unstop                  Unstop Apply
+
+ LinkedIn                LinkedIn Apply
+
+ Commudle                Commudle Apply
