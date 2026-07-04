@@ -1,6 +1,2 @@
-export interface QueuePayload {
-
-}
-export interface QueueOptions {
-
-}
+export interface QueuePayload {}
+export interface QueueOptions {}

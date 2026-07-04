@@ -15,7 +15,7 @@ export function errorHandler(err: Error, c: Context) {
           message: e.message,
         })),
       },
-      400
+      400,
     );
   }
 
@@ -28,6 +28,6 @@ export function errorHandler(err: Error, c: Context) {
           ? "Internal server error"
           : err.message,
     },
-    500
+    500,
   );
 }

@@ -6,4 +6,4 @@ export const isNewDay = (last: Date) => {
     last.getMonth() !== now.getMonth() ||
     last.getFullYear() !== now.getFullYear()
   );
-}
+};

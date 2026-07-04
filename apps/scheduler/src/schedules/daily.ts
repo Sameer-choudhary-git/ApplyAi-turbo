@@ -1,11 +1,25 @@
 import cron from "node-cron";
-import { extractUnstopInternship, extractCommudleEvents } from "../jobs/extract.job";
 
-cron.schedule("0 0 * * *", async () => {
+import {
+  ExtractUnstopInternshipsJob,
+  ExtractCommudleJob,
+  UnstopValidationJob,
+} from "@applyai/jobs";
+
+export function startDailyScheduler() {
+  cron.schedule("0 2 * * *", async () => {
+    console.log("Starting daily extraction...");
+
     try {
-        await extractUnstopInternship.enqueue();
-        await extractCommudleEvents.enqueue();
+      await Promise.all([
+        new ExtractUnstopInternshipsJob().enqueue(),
+        new ExtractCommudleJob().enqueue(),
+        new UnstopValidationJob().enqueue(),
+      ]);
+
+      console.log("Daily extraction jobs queued.");
     } catch (error) {
-        console.error(error);
+      console.error("Failed to queue daily extraction jobs:", error);
     }
-});
+  });
+}

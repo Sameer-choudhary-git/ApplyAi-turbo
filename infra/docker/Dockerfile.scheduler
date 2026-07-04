@@ -7,7 +7,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Copy apps and packages
 COPY apps/scheduler ./apps/scheduler
-COPY packages/extractor ./packages/extractor
+COPY packages/core/extractor ./packages/core/extractor
+COPY packages/core/validation ./packages/core/validation
+COPY packages/core/apply ./packages/core/apply
 COPY packages/db ./packages/db
 COPY packages/utils ./packages/utils
 COPY packages/types ./packages/types
@@ -16,6 +18,7 @@ COPY packages/queue ./packages/queue
 COPY packages/typescript-config ./packages/typescript-config
 COPY packages/eslint-config ./packages/eslint-config
 
+
 # Install pnpm
 RUN npm install -g pnpm@9.0.0
 
@@ -23,8 +26,8 @@ RUN npm install -g pnpm@9.0.0
 RUN pnpm install --frozen-lockfile
 
 # Build packages
-RUN pnpm --filter @applyai/db run build 2>/dev/null || true
-RUN pnpm --filter @applyai/utils run build 2>/dev/null || true
+RUN pnpm --filter @applyai/db build
+RUN pnpm --filter @applyai/utils build
 
 # Start scheduler
 CMD ["pnpm", "--filter", "scheduler", "run", "dev"]

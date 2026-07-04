@@ -3,7 +3,7 @@
  * Centralized API client configuration with error handling
  */
 
-import { apiConfig } from '@config';
+import { apiConfig } from "@config";
 
 /**
  * API Response wrapper type
@@ -34,7 +34,7 @@ const DEFAULT_RETRIES = 2;
  */
 function getHeaders(): HeadersInit {
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 }
 
@@ -43,9 +43,13 @@ function getHeaders(): HeadersInit {
  */
 async function fetchWithRetry(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<Response> {
-  const { timeout = DEFAULT_TIMEOUT, retries = DEFAULT_RETRIES, ...fetchOptions } = options;
+  const {
+    timeout = DEFAULT_TIMEOUT,
+    retries = DEFAULT_RETRIES,
+    ...fetchOptions
+  } = options;
 
   let lastError: Error | null = null;
 
@@ -65,7 +69,7 @@ async function fetchWithRetry(
       lastError = error instanceof Error ? error : new Error(String(error));
 
       // Don't retry on AbortError (timeout)
-      if (lastError.name === 'AbortError' && attempt === retries) {
+      if (lastError.name === "AbortError" && attempt === retries) {
         throw new Error(`Request timeout after ${timeout}ms`);
       }
 
@@ -76,11 +80,11 @@ async function fetchWithRetry(
 
       // Exponential backoff
       const delay = Math.pow(2, attempt) * 100;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
-  throw lastError || new Error('Unknown error');
+  throw lastError || new Error("Unknown error");
 }
 
 /**
@@ -88,7 +92,7 @@ async function fetchWithRetry(
  */
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const url = `${apiConfig.baseUrl}${endpoint}`;
 
@@ -113,7 +117,7 @@ export async function apiRequest<T>(
 
     return data;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     return {
       success: false,
       error: message,
@@ -125,16 +129,20 @@ export async function apiRequest<T>(
  * GET request helper
  */
 export function apiGet<T>(endpoint: string, options?: RequestOptions) {
-  return apiRequest<T>(endpoint, { ...options, method: 'GET' });
+  return apiRequest<T>(endpoint, { ...options, method: "GET" });
 }
 
 /**
  * POST request helper
  */
-export function apiPost<T>(endpoint: string, body?: unknown, options?: RequestOptions) {
+export function apiPost<T>(
+  endpoint: string,
+  body?: unknown,
+  options?: RequestOptions,
+) {
   return apiRequest<T>(endpoint, {
     ...options,
-    method: 'POST',
+    method: "POST",
     body: body ? JSON.stringify(body) : undefined,
   });
 }
@@ -142,10 +150,14 @@ export function apiPost<T>(endpoint: string, body?: unknown, options?: RequestOp
 /**
  * PATCH request helper
  */
-export function apiPatch<T>(endpoint: string, body?: unknown, options?: RequestOptions) {
+export function apiPatch<T>(
+  endpoint: string,
+  body?: unknown,
+  options?: RequestOptions,
+) {
   return apiRequest<T>(endpoint, {
     ...options,
-    method: 'PATCH',
+    method: "PATCH",
     body: body ? JSON.stringify(body) : undefined,
   });
 }
@@ -154,7 +166,7 @@ export function apiPatch<T>(endpoint: string, body?: unknown, options?: RequestO
  * DELETE request helper
  */
 export function apiDelete<T>(endpoint: string, options?: RequestOptions) {
-  return apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
+  return apiRequest<T>(endpoint, { ...options, method: "DELETE" });
 }
 
 /**
@@ -163,16 +175,16 @@ export function apiDelete<T>(endpoint: string, options?: RequestOptions) {
 export async function apiUploadFile<T>(
   endpoint: string,
   file: File,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<ApiResponse<T>> {
   const url = `${apiConfig.baseUrl}${endpoint}`;
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
 
   try {
     const response = await fetchWithRetry(url, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: formData,
       headers: options?.headers,
     });
@@ -188,7 +200,7 @@ export async function apiUploadFile<T>(
 
     return data;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     return {
       success: false,
       error: message,

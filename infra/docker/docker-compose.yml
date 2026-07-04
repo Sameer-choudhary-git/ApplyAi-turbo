@@ -18,35 +18,6 @@ services:
     environment:
       - REDIS_REPLICATION_DISKLESS_SYNC=yes
 
-  # Extractor Service - Data Scraping (Runs hourly)
-  extractor:
-    build:
-      context: ../..
-      dockerfile: infra/docker/Dockerfile.extractor
-    container_name: applyai-extractor
-    depends_on:
-      redis:
-        condition: service_healthy
-    environment:
-      # Database (Supabase)
-      DATABASE_URL: ${DATABASE_URL}
-      NODE_ENV: ${NODE_ENV:-development}
-
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-
-      # Encryption
-      COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
-    networks:
-      - applyai-network
-    restart: on-failure
-    healthcheck:
-      test: ["CMD", "node", "-e", "console.log('ok')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   # Scheduler Service - Job Queue Orchestration (Cron-based)
   scheduler:
     build:

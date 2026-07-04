@@ -16,7 +16,7 @@ export const apiConfig = {
   baseUrl:
     env("VITE_API_URL") || env("REACT_APP_API_URL") || "http://localhost:3000",
   endpoints: {
-    user : {
+    user: {
       me: "/api/users/me",
       onboard: "/api/users/onboard",
     },
@@ -78,7 +78,7 @@ export const enableJobsConfig = {
     displayName: "Unstop",
 
     session: {
-      type: "cookie", 
+      type: "cookie",
     },
 
     jobs: {
@@ -94,8 +94,7 @@ export const enableJobsConfig = {
       },
     },
 
-    extras: {
-    },
+    extras: {},
   },
 
   commudle: {

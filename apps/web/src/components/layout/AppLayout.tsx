@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import MobileNav from './MobileNav';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import MobileNav from "./MobileNav";
+import { motion } from "framer-motion";
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background font-body" style={{ backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -20%, hsla(258,92%,68%,0.08) 0%, transparent 60%)' }}>
+    <div
+      className="min-h-screen bg-background font-body"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsla(258,92%,68%,0.08) 0%, transparent 60%)",
+      }}
+    >
       <div className="hidden md:block">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       </div>

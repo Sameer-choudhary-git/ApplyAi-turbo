@@ -78,8 +78,12 @@ export default function Preferences() {
   });
 
   const [flagState, setFlagState] = useState<FlagState>({});
-  const [sessionState, setSessionState] = useState<SessionState>(buildInitialSessionState());
-  const [platformPrefs, setPlatformPrefs] = useState<PlatformPrefs>(buildInitialPlatformPrefs());
+  const [sessionState, setSessionState] = useState<SessionState>(
+    buildInitialSessionState(),
+  );
+  const [platformPrefs, setPlatformPrefs] = useState<PlatformPrefs>(
+    buildInitialPlatformPrefs(),
+  );
 
   // ─────────────────────────────────────────────────────────────
   // LOAD USER DATA
@@ -90,10 +94,13 @@ export default function Preferences() {
       try {
         const session = supabase.auth.getSession();
         const token = (await session).data.session?.access_token;
-        const res = await fetch(
-          `${apiConfig.baseUrl}/api/users/me`,
-          { credentials: "include", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
-        );
+        const res = await fetch(`${apiConfig.baseUrl}/api/users/me`, {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const data = await res.json();
         if (!data.success) throw new Error("Failed to load user");
@@ -135,28 +142,31 @@ export default function Preferences() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(
-        `${apiConfig.baseUrl}/api/users/me/preferences`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
-          body: JSON.stringify({
-            workModes: prefs.work_mode,
-            opportunityTypes: prefs.opportunity_types,
-            platforms: prefs.preferred_platforms,
-            preferredLocations: prefs.preferred_locations,
-            minStipend: prefs.min_stipend,
-            industries: prefs.industries,
-            rolesOfInterest: prefs.roles_of_interest,
-            autoApply: prefs.auto_apply,
-            dailyApplyLimit: prefs.daily_apply_limit,
-            ...Object.fromEntries(
-              Object.entries(platformPrefs).map(([k, v]) => [`${k}Preferences`, v])
-            ),
-          }),
-        }
-      );
+      const res = await fetch(`${apiConfig.baseUrl}/api/users/me/preferences`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: JSON.stringify({
+          workModes: prefs.work_mode,
+          opportunityTypes: prefs.opportunity_types,
+          platforms: prefs.preferred_platforms,
+          preferredLocations: prefs.preferred_locations,
+          minStipend: prefs.min_stipend,
+          industries: prefs.industries,
+          rolesOfInterest: prefs.roles_of_interest,
+          autoApply: prefs.auto_apply,
+          dailyApplyLimit: prefs.daily_apply_limit,
+          ...Object.fromEntries(
+            Object.entries(platformPrefs).map(([k, v]) => [
+              `${k}Preferences`,
+              v,
+            ]),
+          ),
+        }),
+      });
 
       if (!res.ok) throw new Error();
       toast.success("Preferences updated!");
@@ -167,7 +177,7 @@ export default function Preferences() {
 
   const handleFlagToggle = async (flagId: string, value: boolean) => {
     const owningPlatform = Object.values(enableJobsConfig).find((p) =>
-      Object.values(p.jobs).some((j) => j.flag === flagId)
+      Object.values(p.jobs).some((j) => j.flag === flagId),
     );
 
     if (value && !sessionState[owningPlatform?.id ?? ""]) {
@@ -183,9 +193,12 @@ export default function Preferences() {
         {
           method: "PATCH",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
           body: JSON.stringify({ [flagId]: value }),
-        }
+        },
       );
 
       if (!res.ok) throw new Error();
@@ -200,7 +213,10 @@ export default function Preferences() {
     setSessionState((prev) => ({ ...prev, [platformId]: true }));
   };
 
-  const handlePlatformPrefsChange = (platformId: string, preferences: Record<string, unknown>) => {
+  const handlePlatformPrefsChange = (
+    platformId: string,
+    preferences: Record<string, unknown>,
+  ) => {
     setPlatformPrefs((prev) => ({ ...prev, [platformId]: preferences }));
   };
 
@@ -307,7 +323,9 @@ export default function Preferences() {
         autoApply={prefs.auto_apply}
         dailyApplyLimit={prefs.daily_apply_limit}
         onAutoApplyChange={(v) => setPrefs((p) => ({ ...p, auto_apply: v }))}
-        onDailyLimitChange={(v) => setPrefs((p) => ({ ...p, daily_apply_limit: v }))}
+        onDailyLimitChange={(v) =>
+          setPrefs((p) => ({ ...p, daily_apply_limit: v }))
+        }
       />
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -316,27 +334,73 @@ export default function Preferences() {
           opportunityTypes={prefs.opportunity_types}
           minStipend={prefs.min_stipend}
           preferredLocations={prefs.preferred_locations}
-          onWorkModeToggle={(mode) => setPrefs((p) => ({ ...p, work_mode: toggleArray(p.work_mode, mode) }))}
-          onOpportunityTypeToggle={(type) => setPrefs((p) => ({ ...p, opportunity_types: toggleArray(p.opportunity_types, type) }))}
-          onMinStipendChange={(v) => setPrefs((p) => ({ ...p, min_stipend: v }))}
-          onAddLocation={(loc) => setPrefs((p) => ({ ...p, preferred_locations: [...p.preferred_locations, loc] }))}
-          onRemoveLocation={(loc) => setPrefs((p) => ({ ...p, preferred_locations: p.preferred_locations.filter((l) => l !== loc) }))}
+          onWorkModeToggle={(mode) =>
+            setPrefs((p) => ({
+              ...p,
+              work_mode: toggleArray(p.work_mode, mode),
+            }))
+          }
+          onOpportunityTypeToggle={(type) =>
+            setPrefs((p) => ({
+              ...p,
+              opportunity_types: toggleArray(p.opportunity_types, type),
+            }))
+          }
+          onMinStipendChange={(v) =>
+            setPrefs((p) => ({ ...p, min_stipend: v }))
+          }
+          onAddLocation={(loc) =>
+            setPrefs((p) => ({
+              ...p,
+              preferred_locations: [...p.preferred_locations, loc],
+            }))
+          }
+          onRemoveLocation={(loc) =>
+            setPrefs((p) => ({
+              ...p,
+              preferred_locations: p.preferred_locations.filter(
+                (l) => l !== loc,
+              ),
+            }))
+          }
         />
 
         <KeywordsTargetsCard
           rolesOfInterest={prefs.roles_of_interest}
           industries={prefs.industries}
-          onAddRole={(role) => setPrefs((p) => ({ ...p, roles_of_interest: [...p.roles_of_interest, role] }))}
-          onRemoveRole={(role) => setPrefs((p) => ({ ...p, roles_of_interest: p.roles_of_interest.filter((r) => r !== role) }))}
-          onAddIndustry={(ind) => setPrefs((p) => ({ ...p, industries: [...p.industries, ind] }))}
-          onRemoveIndustry={(ind) => setPrefs((p) => ({ ...p, industries: p.industries.filter((i) => i !== ind) }))}
+          onAddRole={(role) =>
+            setPrefs((p) => ({
+              ...p,
+              roles_of_interest: [...p.roles_of_interest, role],
+            }))
+          }
+          onRemoveRole={(role) =>
+            setPrefs((p) => ({
+              ...p,
+              roles_of_interest: p.roles_of_interest.filter((r) => r !== role),
+            }))
+          }
+          onAddIndustry={(ind) =>
+            setPrefs((p) => ({ ...p, industries: [...p.industries, ind] }))
+          }
+          onRemoveIndustry={(ind) =>
+            setPrefs((p) => ({
+              ...p,
+              industries: p.industries.filter((i) => i !== ind),
+            }))
+          }
         />
       </div>
 
       {/* Platforms */}
       <PlatformIntegrationsCard
         preferredPlatforms={prefs.preferred_platforms}
-        onPlatformToggle={(platformId) => setPrefs((p) => ({ ...p, preferred_platforms: toggleArray(p.preferred_platforms, platformId) }))}
+        onPlatformToggle={(platformId) =>
+          setPrefs((p) => ({
+            ...p,
+            preferred_platforms: toggleArray(p.preferred_platforms, platformId),
+          }))
+        }
         sessionState={sessionState}
         onSessionSuccess={handleSessionSuccess}
         flagState={flagState}

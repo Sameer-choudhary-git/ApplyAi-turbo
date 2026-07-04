@@ -57,14 +57,13 @@ export const worker = new Worker(
                 jobTitle: app.title,
                 company: app.company,
                 jobLink: app.link,
-                type:app.type,
+                type: app.type,
 
                 status: app.status,
                 notes: app.notes,
               },
             });
           }
-
         } catch (err) {
           console.error(`Error processing platform:`, err);
           throw err;
@@ -81,7 +80,7 @@ export const worker = new Worker(
   {
     connection,
     concurrency: 5,
-  }
+  },
 );
 
 worker.on("completed", (job) => {

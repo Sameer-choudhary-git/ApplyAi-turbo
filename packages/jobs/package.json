@@ -1,0 +1,24 @@
+{
+  "name": "@applyai/jobs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+
+  "dependencies": {
+    "@applyai/queue": "workspace:*",
+    "@applyai/utils": "workspace:*",
+    "@applyai/db": "workspace:*",
+    "@applyai/apply": "workspace:*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

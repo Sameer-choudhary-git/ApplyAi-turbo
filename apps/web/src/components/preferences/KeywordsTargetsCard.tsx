@@ -72,11 +72,7 @@ export function KeywordsTargetsCard({
                 className="bg-background/50 border-border/50"
                 onKeyDown={(e) => e.key === "Enter" && handleAddRole()}
               />
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={handleAddRole}
-              >
+              <Button variant="secondary" size="icon" onClick={handleAddRole}>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>

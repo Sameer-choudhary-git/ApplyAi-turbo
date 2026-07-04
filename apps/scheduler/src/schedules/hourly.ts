@@ -1,14 +1,16 @@
 import cron from "node-cron";
+import { QueueEligibleUsersJob } from "@applyai/jobs";
 
-import { scheduleExtraction } from "../jobs/extract.job";
-import { scheduleQueueUsers } from "../jobs/queueUsers.job";
+export function startHourlyScheduler() {
+  cron.schedule("0 * * * *", async () => {
+    console.log("Starting hourly extraction...");
 
-cron.schedule("0 * * * *", async () => {
     try {
-        await scheduleExtraction();
-        await scheduleQueueUsers();
-        
+      await Promise.all([await new QueueEligibleUsersJob().enqueue()]);
+
+      console.log("Hourly extraction jobs queued.");
     } catch (error) {
-        console.error(error);
+      console.error("Failed to queue hourly extraction jobs:", error);
     }
-});
+  });
+}

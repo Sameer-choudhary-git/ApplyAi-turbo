@@ -32,10 +32,10 @@ resume.post("/upload", authMiddleware, async (c) => {
     const userId = c.get("userId");
     const fileName = `resumes/${userId}/${timestamp}_${safeName}`;
     const url = await uploadFileToR2(buffer, fileName, file.type);
-      await prisma.users.update({
-        where: { id: userId },
-        data: { resumeUrl: url },
-      });
+    await prisma.users.update({
+      where: { id: userId },
+      data: { resumeUrl: url },
+    });
 
     return c.json({ url, fileName });
   } catch (err) {

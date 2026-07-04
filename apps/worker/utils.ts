@@ -9,4 +9,3 @@ export async function makeInActive(internshipId: string) {
     },
   });
 }
-

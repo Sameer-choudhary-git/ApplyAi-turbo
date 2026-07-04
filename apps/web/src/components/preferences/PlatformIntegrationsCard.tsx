@@ -80,7 +80,7 @@ export function PlatformIntegrationsCard({
 }: any) {
   const platforms = Object.values(enableJobsConfig);
   const activePlatforms = platforms.filter((p) =>
-    preferredPlatforms.includes(p.id)
+    preferredPlatforms.includes(p.id),
   );
 
   return (
@@ -141,16 +141,22 @@ export function PlatformIntegrationsCard({
                   exit={{ opacity: 0, y: -15 }}
                   transition={{ delay: 0.05 * index }}
                 >
-                  <div className={`p-6 rounded-2xl border ${accent.border} ${accent.gradient}`}>
+                  <div
+                    className={`p-6 rounded-2xl border ${accent.border} ${accent.gradient}`}
+                  >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                      <h4 className={`text-lg font-bold tracking-wide ${accent.text}`}>
+                      <h4
+                        className={`text-lg font-bold tracking-wide ${accent.text}`}
+                      >
                         {platform.displayName} Configuration
                       </h4>
                       <Badge
                         variant="outline"
                         className={`text-xs px-2.5 py-1 ${
-                          sessionActive ? accent.badgeActive : accent.badgeInactive
+                          sessionActive
+                            ? accent.badgeActive
+                            : accent.badgeInactive
                         }`}
                       >
                         {sessionActive ? "Session Active" : "No Session"}
@@ -182,7 +188,9 @@ export function PlatformIntegrationsCard({
                           >
                             {/* LEFT SIDE */}
                             <div className="flex items-start gap-3">
-                              <div className={`mt-0.5 w-8 h-8 rounded-lg ${accent.iconBg} flex items-center justify-center flex-shrink-0`}>
+                              <div
+                                className={`mt-0.5 w-8 h-8 rounded-lg ${accent.iconBg} flex items-center justify-center flex-shrink-0`}
+                              >
                                 <Zap className={`w-4 h-4 ${accent.text}`} />
                               </div>
                               <div>
@@ -190,7 +198,9 @@ export function PlatformIntegrationsCard({
                                   {jobConfig.label} Auto-{jobConfig.action}
                                 </Label>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                  Automatically handle {jobConfig.label.toLowerCase()} tasks on {platform.displayName}.
+                                  Automatically handle{" "}
+                                  {jobConfig.label.toLowerCase()} tasks on{" "}
+                                  {platform.displayName}.
                                   {!sessionActive && (
                                     <span className="block mt-1 text-amber-400/80">
                                       ⚠ Requires an active session.
@@ -204,7 +214,9 @@ export function PlatformIntegrationsCard({
                             <Switch
                               checked={enabled}
                               disabled={!sessionActive}
-                              onCheckedChange={(v) => onFlagToggle(jobConfig.flag, v)}
+                              onCheckedChange={(v) =>
+                                onFlagToggle(jobConfig.flag, v)
+                              }
                               className={`${accent.switchOn} flex-shrink-0`}
                             />
                           </div>

@@ -245,80 +245,80 @@ export default function Onboarding() {
   };
 
   const handleComplete = async () => {
-  if (!fullName.trim()) {
-    alert("Full name is required");
-    return;
-  }
-
-  setIsSaving(true);
-
-  try {
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.access_token;
-
-    if (!token) {
-      alert("You are not authenticated");
+    if (!fullName.trim()) {
+      alert("Full name is required");
       return;
     }
 
-    const payload = {
-      fullName,
-      phone: phone || undefined,
-      location: location || undefined,
-      bio: bio || undefined,
-      resumeUrl,
-      linkedinUrl,
-      githubUrl,
+    setIsSaving(true);
 
-      education: education
-        .filter((e) => e.institution.trim())
-        .map((e) => ({
-          institution: e.institution,
-          degree: e.degree,
-          fieldOfStudy: e.fieldOfStudy,
-          gpa: e.gpa,
-          startYear: e.startYear ? Number(e.startYear) : undefined,
-          endYear: e.endYear ? Number(e.endYear) : undefined,
-        })),
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
 
-      experience: experience
-        .filter((e) => e.company.trim())
-        .map((e) => ({
-          company: e.company,
-          role: e.role,
-          duration: e.duration,
-          description: e.description,
-        })),
-
-      skills,
-      preferences,
-    };
-
-    const res = await fetch(
-      `${apiConfig.baseUrl}${apiConfig.endpoints.auth.onboard}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+      if (!token) {
+        alert("You are not authenticated");
+        return;
       }
-    );
 
-    if (!res.ok) throw new Error("Failed to save profile");
+      const payload = {
+        fullName,
+        phone: phone || undefined,
+        location: location || undefined,
+        bio: bio || undefined,
+        resumeUrl,
+        linkedinUrl,
+        githubUrl,
 
-    // 🔥 ensure fresh fetch
-    await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        education: education
+          .filter((e) => e.institution.trim())
+          .map((e) => ({
+            institution: e.institution,
+            degree: e.degree,
+            fieldOfStudy: e.fieldOfStudy,
+            gpa: e.gpa,
+            startYear: e.startYear ? Number(e.startYear) : undefined,
+            endYear: e.endYear ? Number(e.endYear) : undefined,
+          })),
 
-    navigate("/");
-  } catch (err) {
-    console.error("Onboarding error:", err);
-    alert("There was a problem saving your profile.");
-  } finally {
-    setIsSaving(false);
-  }
-};
+        experience: experience
+          .filter((e) => e.company.trim())
+          .map((e) => ({
+            company: e.company,
+            role: e.role,
+            duration: e.duration,
+            description: e.description,
+          })),
+
+        skills,
+        preferences,
+      };
+
+      const res = await fetch(
+        `${apiConfig.baseUrl}${apiConfig.endpoints.auth.onboard}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!res.ok) throw new Error("Failed to save profile");
+
+      // 🔥 ensure fresh fetch
+      await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+
+      navigate("/");
+    } catch (err) {
+      console.error("Onboarding error:", err);
+      alert("There was a problem saving your profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // ─── Step Rendering ─────────────────────────────────────────────────────────
   const renderStepContent = () => {

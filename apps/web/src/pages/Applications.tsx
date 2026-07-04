@@ -22,11 +22,22 @@ export default function Applications() {
   const { data, isLoading } = useQuery({
     queryKey: ["applications", user?.id],
     queryFn: () =>
-      fetch('http://localhost:3000/api/applications', { credentials: 'include', headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
-        .then(r => r.json())
-        .then(res => res.data),
+      fetch("http://localhost:3000/api/applications", {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((r) => r.json())
+        .then((res) => res.data),
     enabled: !!user?.id && !isSessionLoading,
   });
 
-  return <ApplicationsView applications={data ?? []} isLoading={isLoading || isSessionLoading} />;
+  return (
+    <ApplicationsView
+      applications={data ?? []}
+      isLoading={isLoading || isSessionLoading}
+    />
+  );
 }

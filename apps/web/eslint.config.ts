@@ -53,5 +53,5 @@ export default tseslint.config(
       ],
       "react-hooks/rules-of-hooks": "error",
     },
-  }
+  },
 );

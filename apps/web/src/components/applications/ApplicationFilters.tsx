@@ -1,9 +1,22 @@
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
 
-export default function ApplicationFilters({ search, setSearch, statusFilter, setStatusFilter, typeFilter, setTypeFilter }) {
+export default function ApplicationFilters({
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  typeFilter,
+  setTypeFilter,
+}) {
   return (
     <div className="flex flex-col sm:flex-row gap-3">
       <div className="relative flex-1">
@@ -15,7 +28,7 @@ export default function ApplicationFilters({ search, setSearch, statusFilter, se
           className="pl-10 bg-background/50 border-border/50 focus-visible:ring-primary/30 transition-all h-10"
         />
       </div>
-      
+
       <Select value={statusFilter} onValueChange={setStatusFilter}>
         <SelectTrigger className="w-full sm:w-[180px] bg-background/50 border-border/50 h-10">
           <SelectValue placeholder="Status" />
@@ -25,7 +38,9 @@ export default function ApplicationFilters({ search, setSearch, statusFilter, se
           <SelectItem value="applied">Applied</SelectItem>
           <SelectItem value="under_review">Under Review</SelectItem>
           <SelectItem value="shortlisted">Shortlisted</SelectItem>
-          <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+          <SelectItem value="interview_scheduled">
+            Interview Scheduled
+          </SelectItem>
           <SelectItem value="accepted">Accepted</SelectItem>
           <SelectItem value="rejected">Rejected</SelectItem>
         </SelectContent>

@@ -18,7 +18,7 @@ export class QueueService {
     queue: QueueName,
     jobName: string,
     payload: T,
-    options?: Parameters<Queue["add"]>[2]
+    options?: Parameters<Queue["add"]>[2],
   ): Promise<Job> {
     return this.getQueue(queue).add(jobName, payload, options);
   }

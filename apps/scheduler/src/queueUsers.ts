@@ -96,9 +96,7 @@ export async function queueEligibleUsers() {
       }
 
       // 🔥 skills
-      const skills = user.skills.map(
-        (s) => s.skill
-      );
+      const skills = user.skills.map((s) => s.skill);
 
       // 🔥 clean payload
       const payload = {
@@ -109,38 +107,26 @@ export async function queueEligibleUsers() {
         skills,
 
         preferences: {
-          workModes:
-            user.preferences?.workModes ?? [],
+          workModes: user.preferences?.workModes ?? [],
 
-          opportunityTypes:
-            user.preferences
-              ?.opportunityTypes ?? [],
+          opportunityTypes: user.preferences?.opportunityTypes ?? [],
 
-          preferredLocations:
-            user.preferences
-              ?.preferredLocations ?? [],
+          preferredLocations: user.preferences?.preferredLocations ?? [],
 
-          minStipend:
-            user.preferences?.minStipend ?? 0,
+          minStipend: user.preferences?.minStipend ?? 0,
 
-          rolesOfInterest:
-            user.preferences
-              ?.rolesOfInterest ?? [],
+          rolesOfInterest: user.preferences?.rolesOfInterest ?? [],
         },
 
         cookies,
       };
 
       // 🔥 queue job
-      await applyQueue.add(
-        "apply",
-        payload,
-        {
-          jobId: `${user.id}-${now.toDateString()}`,
+      await applyQueue.add("apply", payload, {
+        jobId: `${user.id}-${now.toDateString()}`,
 
-          priority: 1,
-        }
-      );
+        priority: 1,
+      });
 
       // 🔥 update queue metadata
       await prisma.users.update({
@@ -156,12 +142,8 @@ export async function queueEligibleUsers() {
       });
 
       console.log(`Queued user: ${user.id}`);
-
     } catch (err) {
-      console.error(
-        `Queue failed for user ${user.id}`,
-        err
-      );
+      console.error(`Queue failed for user ${user.id}`, err);
     }
   }
 }

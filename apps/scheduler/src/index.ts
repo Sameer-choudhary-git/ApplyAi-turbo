@@ -1,52 +1,25 @@
-import cron from "node-cron";
-import { runAllExtractors } from "@applyai/extractor";
-import { queueEligibleUsers } from "./queueUsers";
-import { validateJobs } from "./validator";
+// import cron from "node-cron";
+// import { runAllExtractors } from "../../../packages/core/extractor";
+// import { queueEligibleUsers } from "./queueUsers";
+// import { validateJobs } from "./validator";
 
-console.log("⏰ Scheduler started...");
+// console.log("⏰ Scheduler started...");
 
-// validateJobs();
-// runAllExtractors();
-// queueEligibleUsers();
+// // validateJobs();
+// // runAllExtractors();
+// // queueEligibleUsers();
 
-// Extractors (every 1 hour)
-cron.schedule("0 * * * *", async () => {
-  console.log("🚀 Running extractors...");
-  try {
-    await runAllExtractors();
-    console.log("✅ Extractors completed");
-  } catch (err) {
-    console.error("❌ Extractor failed:", err);
-  }
-});
+// // User Queue Scheduler (every hour, offset by 5 min)
+// cron.schedule("5 * * * *", async () => {
+//   console.log("📦 Queueing eligible users...");
+//   try {
+//     await queueEligibleUsers();
+//     console.log("✅ Users queued");
+//   } catch (err) {
+//     console.error("❌ Queue failed:", err);
+//   }
+// });
 
-// User Queue Scheduler (every hour, offset by 5 min)
-cron.schedule("5 * * * *", async () => {
-  console.log("📦 Queueing eligible users...");
-  try {
-    await queueEligibleUsers();
-    console.log("✅ Users queued");
-  } catch (err) {
-    console.error("❌ Queue failed:", err);
-  }
-});
+import { startSchedulers } from "./app";
 
-
-// run after every 5 hours to validate old job applications
-cron.schedule("0 */5 * * *", async () => {
-  console.log("🧹 Cleaning up old job applications...");
-  try {
-    await validateJobs();
-    console.log("✅ Cleanup completed");
-  } catch (err) {
-    console.error("❌ Cleanup failed:", err);
-  }
-});
-
-
-
-import "./schedules/hourly";
-import "./schedules/every5Minutes";
-import "./schedules/daily";
-
-console.log("Scheduler Started");
+startSchedulers();

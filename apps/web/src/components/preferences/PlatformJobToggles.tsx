@@ -155,7 +155,10 @@ export function PlatformJobToggles({
             const sessionActive = sessionState[platform.name] ?? false;
 
             // platform.jobs is { internship: 'isUnstopInternshipEnabled', ... }
-            const jobEntries = Object.entries(platform.jobs) as [string, string][];
+            const jobEntries = Object.entries(platform.jobs) as [
+              string,
+              string,
+            ][];
 
             return (
               <motion.div
@@ -167,7 +170,9 @@ export function PlatformJobToggles({
               >
                 {/* Platform header */}
                 <div className="flex items-center justify-between">
-                  <h4 className={`font-bold text-sm uppercase tracking-wider ${accent.text}`}>
+                  <h4
+                    className={`font-bold text-sm uppercase tracking-wider ${accent.text}`}
+                  >
                     {humanise(platform.name)}
                   </h4>
                   <Badge
@@ -201,13 +206,14 @@ export function PlatformJobToggles({
                               {humanise(jobKey)} Auto-{actionVerb(jobKey)}
                             </Label>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              Automatically {actionVerb(jobKey).toLowerCase()} for{" "}
-                              {humanise(jobKey).toLowerCase()} opportunities on{" "}
-                              {humanise(platform.name)} matching your filters.
+                              Automatically {actionVerb(jobKey).toLowerCase()}{" "}
+                              for {humanise(jobKey).toLowerCase()} opportunities
+                              on {humanise(platform.name)} matching your
+                              filters.
                               {!sessionActive && (
                                 <span className="block mt-1 text-amber-400/80">
-                                  ⚠ Requires an active{" "}
-                                  {humanise(platform.name)} session.
+                                  ⚠ Requires an active {humanise(platform.name)}{" "}
+                                  session.
                                 </span>
                               )}
                             </p>

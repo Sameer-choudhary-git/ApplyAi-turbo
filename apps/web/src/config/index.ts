@@ -2,5 +2,5 @@
  * Web App Configuration Exports
  */
 
-export * from './api';
-export * from '@config';
+export * from "./api";
+export * from "@config";

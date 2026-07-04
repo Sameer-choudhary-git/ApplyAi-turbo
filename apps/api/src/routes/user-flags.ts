@@ -9,7 +9,7 @@ interface Jobs {
 export const userFlagsRouter = new Hono();
 
 const allowedFlags = Object.values(enableJobsConfig).flatMap((platform) =>
-  Object.values(platform.jobs).map((j) => j.flag)
+  Object.values(platform.jobs).map((j) => j.flag),
 );
 
 userFlagsRouter.patch("/", authMiddleware, async (c) => {
@@ -21,7 +21,7 @@ userFlagsRouter.patch("/", authMiddleware, async (c) => {
 
   // 🔒 filter only allowed flags
   const safeData: Record<string, boolean> = {};
-  
+
   for (const key of Object.keys(body)) {
     if (allowedFlags.includes(key) && typeof body[key] === "boolean") {
       safeData[key] = body[key];

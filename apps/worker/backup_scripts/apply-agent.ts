@@ -100,7 +100,6 @@ async function runApplyAgent() {
           await applyBtn.click({ force: true });
           await page.waitForTimeout(2500);
 
-          
           const eligibilityMessage = await page.locator("#s_menu", {
             hasText: "You are not eligible",
           });
@@ -112,14 +111,17 @@ async function runApplyAgent() {
             notes = "Eligibility issue detected.";
             await page.keyboard.press("Escape");
           } else {
-            if(await handleGraduationYearEligibility(page)) {
+            if (await handleGraduationYearEligibility(page)) {
               const formResult = await fillRegistrationForm(page, job.link);
               status = formResult.status;
               notes = formResult.notes;
             } else {
-              console.log("⚠️ Some sort of issue with Graduation Year eligibility.");
+              console.log(
+                "⚠️ Some sort of issue with Graduation Year eligibility.",
+              );
               status = "Skipped - Graduation Year Eligibility Uncertain";
-              notes = "Graduation Year eligibility uncertain, manual review needed.";
+              notes =
+                "Graduation Year eligibility uncertain, manual review needed.";
               await page.keyboard.press("Escape");
             }
           }

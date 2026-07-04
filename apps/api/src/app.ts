@@ -6,15 +6,15 @@ import { secureHeaders } from "hono/secure-headers";
 import { envConfig } from "@applyai/config";
 
 import { authRoutes } from "./routes/auth.js";
-import  userRoutes  from "./routes/user.js";
+import userRoutes from "./routes/user.js";
 import { jobRoutes } from "./routes/jobs.js";
 import { healthRoutes } from "./routes/health.js";
 import { errorHandler } from "./middleware/error.js";
-import resume from './routes/resume';
-import { unstopSessionRouter } from './routes/unstop-session';
-import { userFlagsRouter } from './routes/user-flags';
-import { preferencesRouter } from './routes/preferences';
-import { applicationsRouter } from './routes/applications';
+import resume from "./routes/resume";
+import { unstopSessionRouter } from "./routes/unstop-session";
+import { userFlagsRouter } from "./routes/user-flags";
+import { preferencesRouter } from "./routes/preferences";
+import { applicationsRouter } from "./routes/applications";
 
 export const app = new Hono();
 
@@ -29,7 +29,7 @@ app.use(
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 // Log startup info
@@ -42,13 +42,13 @@ app.route("/health", healthRoutes);
 app.route("/api/auth", authRoutes);
 app.route("/api/users", userRoutes);
 app.route("/api/jobs", jobRoutes);
-app.route('/api/resume', resume);
-app.route('/api/sessions/unstop', unstopSessionRouter);
-app.route('/api/users/me/flags', userFlagsRouter);
-app.route('/api/sessions/unstop', unstopSessionRouter);
-app.route('/api/auth/flags', userFlagsRouter); 
-app.route('/api/users/me/preferences', preferencesRouter);
-app.route('/api/applications', applicationsRouter);
+app.route("/api/resume", resume);
+app.route("/api/sessions/unstop", unstopSessionRouter);
+app.route("/api/users/me/flags", userFlagsRouter);
+app.route("/api/sessions/unstop", unstopSessionRouter);
+app.route("/api/auth/flags", userFlagsRouter);
+app.route("/api/users/me/preferences", preferencesRouter);
+app.route("/api/applications", applicationsRouter);
 // ── 404 ────────────────────────────────────────────────────
 app.notFound((c) => {
   return c.json({ success: false, error: "Route not found" }, 404);

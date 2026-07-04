@@ -22,7 +22,7 @@ export type SetupStatus =
 interface SetupState {
   status: SetupStatus;
   error: string | null;
-  deepLink: string | null;  // was: scriptCommand
+  deepLink: string | null; // was: scriptCommand
   token: string | null;
 }
 
@@ -148,8 +148,7 @@ export function useUnstopSetup(onSuccess?: () => void) {
     }
   }, [stopPolling, startPolling]);
 
-  const doesCookiesExst = (platform: string) : boolean => {
-    
+  const doesCookiesExst = (platform: string): boolean => {
     return false;
   };
 

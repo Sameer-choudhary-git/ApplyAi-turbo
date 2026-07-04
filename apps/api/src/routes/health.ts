@@ -30,7 +30,7 @@ healthRoutes.get("/", async (c) => {
       db: dbStatus,
       timestamp: new Date().toISOString(),
     },
-    healthy ? 200 : 503
+    healthy ? 200 : 503,
   );
 });
 
