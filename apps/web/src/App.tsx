@@ -15,6 +15,7 @@ import Preferences from "./pages/Preferences";
 import Networking from "./pages/Networking";
 import SavedJobs from "./pages/SavedJobs";
 import Login from "./pages/Login";
+import AdminJobs from "@/views/AdminJobs";
 
 import { Navigate } from "react-router-dom"; // Make sure Navigate is imported!
 
@@ -49,6 +50,7 @@ const AuthenticatedApp = () => {
         <Route path="/preferences" element={<Preferences />} />
         <Route path="/networking" element={<Networking />} />
         <Route path="/saved-jobs" element={<SavedJobs />} />
+        <Route path="/admin/jobs" element={<AdminJobs />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,43 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import ApplicationsView from "@/components/views/ApplicationsView";
-import { supabase } from "@/supabaseClient";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { api } from "@/lib/api";
+import type { Application } from "@/types/application";
 
 export default function Applications() {
-  const [user, setUser] = useState<any>(null);
-  const [isSessionLoading, setIsSessionLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
 
-  useEffect(() => {
-    const getSession = async () => {
-      const session = await supabase.auth.getSession();
-      // console.log("Session data:", session);
-      setToken(session.data.session?.access_token || null);
-      setUser(session.data.session?.user);
-      setIsSessionLoading(false);
-    };
-    getSession();
-  }, []);
-
-  const { data, isLoading } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ["applications", user?.id],
-    queryFn: () =>
-      fetch("http://localhost:3000/api/applications", {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((r) => r.json())
-        .then((res) => res.data),
-    enabled: !!user?.id && !isSessionLoading,
+    queryFn: async () => {
+      const res = await api<{ success: boolean; data: Application[] }>("/applications");
+      return res.data || [];
+    },
+    enabled: isAuthenticated && !!user?.id,
+      staleTime: 60 * 1000,
+
   });
 
   return (
     <ApplicationsView
-      applications={data ?? []}
-      isLoading={isLoading || isSessionLoading}
+      applications={data}
+      isLoading={isLoading || isLoadingAuth}
     />
   );
 }

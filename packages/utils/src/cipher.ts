@@ -31,8 +31,11 @@ export const encrypt = (data: object | string): string => {
 
 export const decrypt = (encryptedText: string): string => {
   const key = Buffer.from(encryptionKey, "hex");
-  const [ivHex, tagHex, ctHex] = encryptedText.split(":");
 
+  const [ivHex, tagHex, ctHex] = encryptedText.split(":");
+  if (!ivHex || !tagHex || !ctHex) {
+    throw new Error("Missing iv/tag/ciphertext for decryption");
+  }
   const d = crypto.createDecipheriv(
     "aes-256-gcm",
     key,

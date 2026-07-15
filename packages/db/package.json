@@ -6,10 +6,12 @@
   "main": "./index.ts",
   "exports": {
     ".": {
+      "types": "./index.ts",
       "default": "./index.ts"
     }
   },
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "prisma generate"
   },
@@ -17,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "22.10.0",
     "@types/pg": "^8.20.0",
     "prisma": "^7.7.0"
   },

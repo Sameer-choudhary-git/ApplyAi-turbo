@@ -12,14 +12,24 @@ export default function AppShell() {
     queryKey: ["userProfile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      // const { data, error } = await supabase
+      //   .from("users")
+      //   .select("*")
+      //   .eq("id", user.id)
+      //   .single();
+      const response = await fetch("http://localhost:3000/api/users/me", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await supabase.auth.getSession().then(({ data }) => data.session?.access_token)}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile");
+      }
 
-      if (error && error.code !== "PGRST116") throw error;
-      return data;
+      const data = await response.json();
+
+      return data.user;
     },
     enabled: !!user?.id,
   });

@@ -15,12 +15,14 @@ interface WorkerFactoryOptions {
   registry: JobRegistry;
 
   concurrency?: number;
+  lockDuration?: number;
 }
 
 export function createWorker({
   queue,
   registry,
   concurrency = 5,
+  lockDuration = 30000,
 }: WorkerFactoryOptions) {
   const worker = new Worker(
     queue,
@@ -38,6 +40,7 @@ export function createWorker({
     {
       connection,
       concurrency,
+      lockDuration,
     },
   );
 

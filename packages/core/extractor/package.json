@@ -2,21 +2,25 @@
   "name": "@applyai/extractor",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@applyai/db": "workspace:*",
-    "fs": "0.0.1-security",
-    "path": "^0.12.7",
-    "playwright": "^1.59.1"
+    "playwright": "^1.61.1"
   },
   "devDependencies": {
     "@types/node": "^25.6.0"

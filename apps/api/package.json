@@ -3,26 +3,32 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "dev": "node scripts/start-redis.js",
+    "build": "tsup",
+    "check-types": "tsc --noEmit",
     "start": "node dist/index.js",
     "lint": "eslint src"
   },
   "dependencies": {
+    "@applyai/config": "workspace:*",
     "@applyai/db": "workspace:*",
+    "@applyai/jobs": "workspace:*",
+    "@applyai/logger": "workspace:*",
     "@applyai/utils": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.7.6",
     "@supabase/supabase-js": "^2.50.3",
-    "@applyai/config": "workspace:*",
     "dotenv": "^17.4.1",
+    "googleapis": "^173.0.0",
     "hono": "^4.7.11",
-    "playwright": "^1.59.1",
+    "playwright": "^1.61.1",
+    "redis": "^6.1.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
+    "tsup": "^8.5.1",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }

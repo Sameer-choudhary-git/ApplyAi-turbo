@@ -1,19 +1,25 @@
-FROM node:22-alpine
-# Install dependencies for Playwright
-RUN apk add --no-cache \
-    chromium \
-    font-noto \
-    font-noto-cjk \
-    font-noto-emoji
+FROM node:22-bullseye-slim AS base
 
-# Set working directory
+ARG PNPM_VERSION=9.0.0
 WORKDIR /app
 
-# Copy root package files
+# Install OS deps required by native modules / Prisma / OpenSSL
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    build-essential python3 make ca-certificates curl git libssl-dev procps \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm
+RUN npm install -g pnpm@${PNPM_VERSION}
+
+# Copy root package manifests first for efficient caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy apps and packages
+# Copy only what's needed for the worker workspace so install is faster
 COPY apps/worker ./apps/worker
+COPY packages/core/extractor ./packages/core/extractor
+COPY packages/core/validation ./packages/core/validation
+COPY packages/core/apply ./packages/core/apply
 COPY packages/db ./packages/db
 COPY packages/utils ./packages/utils
 COPY packages/types ./packages/types
@@ -21,22 +27,16 @@ COPY packages/config ./packages/config
 COPY packages/queue ./packages/queue
 COPY packages/typescript-config ./packages/typescript-config
 COPY packages/eslint-config ./packages/eslint-config
-COPY packages/core/extractor ./packages/core/extractor
-COPY packages/core/validation ./packages/core/validation
-COPY packages/core/apply ./packages/core/apply
 
-# Install pnpm
-RUN npm install -g pnpm@9.0.0
-
-# Install dependencies
+# Install dependencies (uses pnpm workspace layout)
 RUN pnpm install --frozen-lockfile
 
-# Build packages
+# Build only the packages needed at runtime
 RUN pnpm --filter @applyai/db build
 RUN pnpm --filter @applyai/utils build
 
-# Set Playwright to use system chromium
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+# Set production env by default (override with docker-compose env if needed)
+ENV NODE_ENV=production
 
-# Start worker
+# Default command (development mode by name in workspace)
 CMD ["pnpm", "--filter", "worker", "run", "dev"]

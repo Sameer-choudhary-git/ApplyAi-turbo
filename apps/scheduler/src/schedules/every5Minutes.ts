@@ -1,6 +1,6 @@
 import cron from "node-cron";
 
-import { ExtractUnstopJob, ExtractCommudleJob } from "@applyai/jobs";
+import { ExtractCommudleJob } from "@applyai/jobs";
 
 export function startEveryFiveMinuteScheduler() {
   cron.schedule("*/5 * * * *", async () => {

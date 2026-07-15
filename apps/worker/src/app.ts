@@ -1,5 +1,5 @@
-import "./workers/apply.worker";
-import "./workers/extract.worker";
-import "./workers/validation.worker";
+export * from "./workers/apply.worker";
+export * from "./workers/extract.worker";
+export * from "./workers/validation.worker";
 
 console.log("Workers started...");

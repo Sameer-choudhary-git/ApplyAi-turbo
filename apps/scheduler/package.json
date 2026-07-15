@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "build": "tsup",
+    "check-types": "tsc --noEmit",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,14 +15,17 @@
   "dependencies": {
     "@applyai/db": "workspace:*",
     "@applyai/extractor": "workspace:*",
-    "@applyai/queue": "workspace:*",
     "@applyai/jobs": "workspace:*",
+    "@applyai/queue": "workspace:*",
     "fs": "0.0.1-security",
     "node-cron": "^4.2.1",
     "path": "^0.12.7",
-    "playwright": "^1.59.1"
+    "playwright": "^1.61.1"
   },
   "devDependencies": {
-    "tsx": "^4.21.0"
+    "@types/node": "22.10.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.2"
   }
 }

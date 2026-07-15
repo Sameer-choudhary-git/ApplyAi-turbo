@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { prisma } from "@applyai/db";
 import { authMiddleware } from "../middleware/auth";
+import { getCached, setCached, deleteCachedPattern } from "../lib/cache.js";
 
 const user = new Hono();
 
@@ -130,6 +131,9 @@ user.post("/onboard", authMiddleware, async (c) => {
       return u;
     });
 
+    // Invalidate user cache
+    await deleteCachedPattern(`user:${userId}*`);
+
     return c.json({ success: true, userId: createdUser.id });
   } catch (err) {
     console.error("Onboarding error:", err);
@@ -142,6 +146,13 @@ user.get("/me", authMiddleware, async (c) => {
   const userId = c.get("userId") as string;
 
   try {
+    // Check cache first
+    const cacheKey = `user:${userId}:profile`;
+    const cached = await getCached(cacheKey);
+    if (cached) {
+      return c.json(cached);
+    }
+
     const user = await prisma.users.findUnique({
       where: { id: userId },
       include: {
@@ -206,7 +217,7 @@ user.get("/me", authMiddleware, async (c) => {
     // Final response
     // ─────────────────────────────────────────────────────────────
 
-    return c.json({
+    const response = {
       success: true,
 
       user: {
@@ -231,7 +242,12 @@ user.get("/me", authMiddleware, async (c) => {
         experience: user.experience,
         skills: user.skills.map((s) => s.skill),
       },
-    });
+    };
+
+    // Cache the result for 5 minutes
+    await setCached(cacheKey, response, 300);
+
+    return c.json(response);
   } catch (err) {
     console.error("GET /me error:", err);
     return c.json({ success: false, error: "Failed to fetch user data" }, 500);

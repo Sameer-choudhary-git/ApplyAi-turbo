@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Calendar, Trash2, CheckSquare, SearchX } from "lucide-react";
+import { Plus, Calendar, Trash2, CheckSquare, SearchX, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const priorityConfig = {
+// Adjust this import path to wherever you saved the api utility
+import { api } from "@/lib/api"; 
+
+const priorityConfig: Record<string, { label: string; class: string }> = {
   low: {
     label: "Low",
     class: "bg-muted/50 text-muted-foreground border-border/50",
@@ -31,7 +35,7 @@ const priorityConfig = {
   },
 };
 
-const categoryConfig = {
+const categoryConfig: Record<string, string> = {
   interview_prep: "Interview Prep",
   document: "Document",
   follow_up: "Follow Up",
@@ -39,58 +43,86 @@ const categoryConfig = {
   other: "Other",
 };
 
-const mockTasks = [
-  {
-    id: 1,
-    title: "Update Resume with React Projects",
-    priority: "high",
-    completed: false,
-    due_date: new Date(Date.now() + 86400000).toISOString(),
-    category: "document",
-  },
-  {
-    id: 2,
-    title: "Practice System Design (Rate Limiter)",
-    priority: "medium",
-    completed: false,
-    due_date: new Date(Date.now() + 172800000).toISOString(),
-    category: "skill_building",
-  },
-  {
-    id: 3,
-    title: "Send Thank You email to Google recruiter",
-    priority: "low",
-    completed: true,
-    due_date: new Date(Date.now() - 86400000).toISOString(),
-    category: "follow_up",
-  },
-];
+type Task = {
+  id: string;
+  title: string;
+  priority: string;
+  category: string;
+  completed: boolean;
+  dueDate: string | null;
+  createdAt: string;
+};
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const queryClient = useQueryClient();
   const [newTask, setNewTask] = useState("");
   const [newPriority, setNewPriority] = useState("medium");
   const [filter, setFilter] = useState("all");
 
+  // Fetch tasks
+  const { data, isLoading } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: async () => {
+      const res = await api<{ success: boolean; tasks: Task[] }>("/tasks");
+      return res.tasks;
+    },
+  });
+
+  const tasks = data || [];
+
+  // Mutations
+  const addMutation = useMutation({
+    mutationFn: (taskData: Partial<Task>) =>
+      api("/tasks", {
+        method: "POST",
+        body: JSON.stringify(taskData),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      setNewTask("");
+    },
+    onError: (error: any) => {
+      console.error("Mutation failed:", error);
+      alert(`Failed to add task: ${error.message || "Check console"}`);
+    }
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      api(`/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ completed }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      api(`/tasks/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
   const handleAdd = () => {
-    if (!newTask.trim()) return;
-    const newTaskObj = {
-      id: Math.max(...tasks.map((t) => t.id), 0) + 1,
-      title: newTask,
+    if (!newTask.trim() || addMutation.isPending) return;
+    addMutation.mutate({
+      title: newTask.trim(),
       priority: newPriority,
-      completed: false,
       category: "other",
-    };
-    setTasks([newTaskObj, ...tasks]);
-    setNewTask("");
+    });
   };
 
-  const handleToggle = (id: number, completed: boolean) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, completed } : t)));
+  const handleToggle = (id: string, completed: boolean) => {
+    toggleMutation.mutate({ id, completed });
   };
 
-  const handleDelete = (id: number) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
   };
 
   const filtered = tasks.filter((t) => {
@@ -145,10 +177,11 @@ export default function Tasks() {
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            disabled={addMutation.isPending}
             className="flex-1 bg-background/50 border-0 h-11 focus-visible:ring-1 focus-visible:ring-primary/30 text-base"
           />
           <div className="flex gap-2">
-            <Select value={newPriority} onValueChange={setNewPriority}>
+            <Select value={newPriority} onValueChange={setNewPriority} disabled={addMutation.isPending}>
               <SelectTrigger className="w-[110px] h-11 bg-background/50 border-border/50 font-medium">
                 <SelectValue />
               </SelectTrigger>
@@ -160,10 +193,15 @@ export default function Tasks() {
             </Select>
             <Button
               onClick={handleAdd}
-              disabled={!newTask.trim()}
+              disabled={!newTask.trim() || addMutation.isPending}
               className="h-11 px-5 gradient-primary text-white border-0 shadow-md hover:opacity-90 transition-opacity"
             >
-              <Plus className="w-4 h-4 mr-1.5" /> Add
+              {addMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 mr-1.5" />
+              )}
+              Add
             </Button>
           </div>
         </Card>
@@ -195,7 +233,11 @@ export default function Tasks() {
         transition={{ delay: 0.2 }}
       >
         <Card className="border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden min-h-[300px]">
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center h-full">
               <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mb-4 border border-border/50">
                 {filter === "all" ? (
@@ -235,6 +277,7 @@ export default function Tasks() {
                       onCheckedChange={(checked) =>
                         handleToggle(task.id, checked as boolean)
                       }
+                      disabled={toggleMutation.isPending}
                       className="w-5 h-5 rounded-md data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                     />
                     <div className="flex-1 min-w-0">
@@ -255,12 +298,12 @@ export default function Tasks() {
                             priorityConfig[task.priority]?.class,
                           )}
                         >
-                          {priorityConfig[task.priority]?.label}
+                          {priorityConfig[task.priority]?.label || task.priority}
                         </Badge>
-                        {task.due_date && (
+                        {task.dueDate && (
                           <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5 bg-background/50 px-2 py-0.5 rounded-md border border-border/50">
                             <Calendar className="w-3 h-3" />
-                            {format(new Date(task.due_date), "MMM d")}
+                            {format(new Date(task.dueDate), "MMM d")}
                           </span>
                         )}
                         {task.category && task.category !== "other" && (
@@ -273,10 +316,15 @@ export default function Tasks() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      disabled={deleteMutation.isPending}
                       className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
                       onClick={() => handleDelete(task.id)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deleteMutation.isPending ? (
+                         <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                         <Trash2 className="w-4 h-4" />
+                      )}
                     </Button>
                   </motion.div>
                 ))}

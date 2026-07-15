@@ -1,22 +1,35 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Briefcase, SearchX } from "lucide-react";
 import ApplicationFilters from "../applications/ApplicationFilters";
 import ApplicationRow from "../applications/ApplicationRow";
+import type { Application as ApplicationData } from "@/types/application";
+import { useQueryClient } from "@tanstack/react-query";
 
-export default function Applications({ applications = [], isLoading = false }) {
+interface ApplicationsProps {
+  applications?: ApplicationData[];
+  isLoading?: boolean;
+}
+
+export default function Applications({
+  applications = [],
+  isLoading = false,
+}: ApplicationsProps) {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  // Normalise field names to what ApplicationRow expects
-  const normalised = applications.map((app) => ({
-    ...app,
-    title: app.jobTitle ?? app.title ?? "", // ApplicationRow uses `title`
-    applied_date: app.appliedAt ?? app.applied_date, // ApplicationRow uses `applied_date`
-    stipend: app.metadata?.stipend ?? app.stipend, // pull stipend out of metadata if stored there
-  }));
+  // Normalize field names to what ApplicationRow expects
+  const normalised = useMemo(() => {
+    return applications.map((app) => ({
+      ...app,
+      title: app.jobTitle ?? app.title ?? "",
+      applied_date: app.appliedAt ?? app.applied_date,
+      stipend: app.metadata?.stipend ?? app.stipend,
+    }));
+  }, [applications]);
 
   const filtered = normalised.filter((app) => {
     const matchSearch =
@@ -85,7 +98,17 @@ export default function Applications({ applications = [], isLoading = false }) {
           ) : (
             <div className="divide-y divide-border/50">
               {filtered.map((app) => (
-                <ApplicationRow key={app.id} app={app} />
+                <ApplicationRow
+                  key={app.id}
+                  app={app}
+                  onInterviewScheduled={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["applications"],
+                    });
+                    queryClient.invalidateQueries({ queryKey: ["schedule"] });
+                    queryClient.invalidateQueries({ queryKey: ["interviews"] });
+                  }}
+                />
               ))}
             </div>
           )}

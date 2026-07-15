@@ -1,0 +1,26 @@
+# Node and package managers
+node_modules
+**/node_modules
+.pnpm-store
+.pnpm-debug.log
+pnpm-lock.yaml
+
+# Build output
+dist
+build
+coverage
+.vscode
+.env
+.env.*
+.DS_Store
+
+# Git and editor metadata
+.git
+.gitignore
+*.log
+
+# Turbo / cache / local files
+.cache
+.nyc_output
+turbo
+.terraform

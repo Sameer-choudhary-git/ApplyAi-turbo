@@ -10,7 +10,7 @@
          ▼                        ▼
      PostgreSQL          Playwright Apply
 
-
+ 
 packages/
     db
     utils
@@ -104,3 +104,8 @@ Extract Worker           Apply Worker
  LinkedIn                LinkedIn Apply
 
  Commudle                Commudle Apply
+
+
+
+
+ update google service form google cloud for depplpoy or public

@@ -34,7 +34,9 @@ resume.post("/upload", authMiddleware, async (c) => {
     const url = await uploadFileToR2(buffer, fileName, file.type);
     await prisma.users.update({
       where: { id: userId },
-      data: { resumeUrl: url },
+      data: {
+        resumeUrl: url,
+      },
     });
 
     return c.json({ url, fileName });
@@ -71,7 +73,9 @@ resume.post("/update", authMiddleware, async (c) => {
     const url = await uploadFileToR2(buffer, fileName, file.type);
     await prisma.users.update({
       where: { id: userId },
-      data: { resumeUrl: url },
+      data: {
+        resumeUrl: url,
+      },
     });
 
     return c.json({ url, fileName });

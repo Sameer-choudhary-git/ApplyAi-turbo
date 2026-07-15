@@ -25,17 +25,20 @@ export async function validateByDate(jobs: any[]) {
   const now = new Date();
 
   for (const job of jobs) {
-    const postedDate = parsePostedDate(job.postedDate);
+    const scrapedAt =
+      job.scrapedAt instanceof Date ? job.scrapedAt : new Date(job.scrapedAt);
     const daysLeft = parseDaysLeft(job.daysLeft);
 
-    if (!postedDate || daysLeft === null) {
+    if (isNaN(scrapedAt.getTime()) || daysLeft === null) {
       continue;
     }
 
-    // expiry = postedDate + daysLeft
-    const expiryDate = new Date(postedDate);
+    // ✅ expiry = scrapedAt + daysLeft (daysLeft is "days left" as of the
+    // moment we scraped it, so the countdown starts from scrapedAt, not
+    // from the posted date — postedDate has no bearing on the expiry math)
+    const expiryDate = new Date(scrapedAt);
 
-    expiryDate.setDate(postedDate.getDate() + daysLeft);
+    expiryDate.setDate(scrapedAt.getDate() + daysLeft);
 
     const isActive = expiryDate >= now;
 

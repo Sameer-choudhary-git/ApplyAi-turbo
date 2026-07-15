@@ -9,6 +9,7 @@ import { AutomationControlCard } from "../components/preferences/AutomationContr
 import { RoleSpecificationsCard } from "../components/preferences/RoleSpecificationsCard";
 import { KeywordsTargetsCard } from "../components/preferences/KeywordsTargetsCard";
 import { PlatformIntegrationsCard } from "../components/preferences/PlatformIntegrationsCard";
+import GoogleCalendarCard from "../components/preferences/GoogleCalendarCard";
 import { supabase } from "@/supabaseClient";
 
 // ─────────────────────────────────────────────────────────────
@@ -408,6 +409,9 @@ export default function Preferences() {
         platformPrefs={platformPrefs}
         onPlatformPrefsChange={handlePlatformPrefsChange}
       />
+
+      {/* Calendar sync */}
+      <GoogleCalendarCard />
     </div>
   );
 }

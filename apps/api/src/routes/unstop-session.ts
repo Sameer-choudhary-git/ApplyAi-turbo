@@ -90,13 +90,14 @@ unstopSessionRouter.get("/status", authMiddleware, async (c) => {
  */
 unstopSessionRouter.post("/submit", async (c) => {
   const body = await c.req.json().catch(() => null);
-  if (!body?.setupToken || !body?.storageState) {
-    return c.json({ error: "setupToken and storageState are required" }, 400);
+
+  if (!body?.setupToken || !body?.encryptedCookie) {
+    return c.json({ error: "setupToken and encryptedCookie are required" }, 400);
   }
 
-  const { setupToken, storageState } = body as {
+  const { setupToken, encryptedCookie } = body as {
     setupToken: string;
-    storageState: any;
+    encryptedCookie: string;
   };
 
   const tokenRow = await prisma.unstop_setup_tokens.findUnique({
@@ -117,12 +118,12 @@ unstopSessionRouter.post("/submit", async (c) => {
     data: { used: true },
   });
 
-  const encryptedCookie = encrypt(storageState); // In real life, encrypt this before storing!
-
+  // encryptedCookie arrives already encrypted by the Electron app —
+  // store it as-is, do NOT re-encrypt server-side.
   await prisma.user_platform_sessions.upsert({
     where: { userId_platform: { userId, platform: "unstop" } },
     update: {
-      encryptedCookie: encryptedCookie,
+      encryptedCookie,
       isActive: true,
       lastVerifiedAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -131,7 +132,7 @@ unstopSessionRouter.post("/submit", async (c) => {
     create: {
       userId,
       platform: "unstop",
-      encryptedCookie: encryptedCookie,
+      encryptedCookie,
       isActive: true,
       lastVerifiedAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

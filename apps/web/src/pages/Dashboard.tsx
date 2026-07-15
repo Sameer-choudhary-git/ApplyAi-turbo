@@ -1,8 +1,8 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
-import { supabase } from "@/supabaseClient";
 import { Send, CheckCircle2, Clock, TrendingUp, Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
 
 import StatCard from "../components/dashboard/StatCard";
 import DailySummaryCard from "../components/dashboard/DailySummaryCard";
@@ -13,42 +13,93 @@ import AgentStatus from "../components/dashboard/AgentStatus";
 export default function Dashboard() {
   const { user } = useAuth();
 
-  // Fetch real profile from the cache initialized in AppShell
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading: isProfileLoading } = useQuery({
     queryKey: ["userProfile", user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      const { data, error } = await supabase
-        .from("users")
-        .select("*, preferences:user_preferences(*)")
-        .eq("email", user.email)
-        .single();
-      if (error) throw error;
-      return data;
+      const res = await api<{ user: any }>("/users/me");
+      return res.user;
     },
     enabled: !!user?.email,
   });
 
-  // TODO: Replace with real applications fetch once your backend supports it
-  const applications = [];
+  const { data: applications = [], isLoading: isAppsLoading } = useQuery({
+    queryKey: ["applications", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const res = await api<{ success: boolean; data: any[] }>("/applications");
+      return res.data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: tasks = [], isLoading: isTasksLoading } = useQuery({
+    queryKey: ["tasks", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const res = await api<{ success: boolean; tasks: any[] }>("/tasks");
+      return res.tasks || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: interviews = [] } = useQuery({
+    queryKey: ["interviews", user?.id],
+
+    queryFn: async () => {
+      const res = await api<{
+        success: boolean;
+        interviews: any[];
+      }>("/interviews");
+
+      return res.interviews;
+    },
+
+    enabled: !!user?.id,
+  });
+
+  const isToday = (date: Date | string) => {
+    const d = new Date(date);
+    const now = new Date();
+
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  };
+
+  const applicationsSentToday = applications.filter((a) =>
+    isToday(a.appliedAt),
+  ).length;
+
+  const isLoading = isProfileLoading || isAppsLoading;
+
+  const totalApplied = applications.length;
+  // Using the interviewScheduled boolean from the user_job_applications schema
+  const interviewsScheduledToday = interviews.filter((i) =>
+    isToday(i.createdAt),
+  ).length;
+
+  const pendingApplications = applications.filter(
+    (a) => !a.interviewScheduled,
+  ).length;
+
+  const successRate =
+    totalApplied > 0
+      ? Math.round((interviewsScheduledToday / totalApplied) * 100)
+      : 0;
+
   const summaries = {
-    applications_sent: profile?.queueCountToday || 0,
-    responses_received: 0,
-    interviews_scheduled: 0,
+    applications_sent: applicationsSentToday,
+    repliesToday: applications.filter(
+      (app) => app.responseReceivedAt && isToday(app.responseReceivedAt),
+    ).length,
+    interviews_scheduled: interviewsScheduledToday,
     ai_insights:
       "Your agent is calibrated and scanning for new opportunities matching your preferences.",
     highlights: ["Profile Optimization Complete"],
   };
-
-  const totalApplied = applications.length;
-  const shortlisted = applications.filter((a) =>
-    ["shortlisted", "interview_scheduled", "accepted"].includes(a.status),
-  ).length;
-  const pending = applications.filter((a) =>
-    ["applied", "under_review"].includes(a.status),
-  ).length;
-  const successRate =
-    totalApplied > 0 ? Math.round((shortlisted / totalApplied) * 100) : 0;
 
   if (isLoading) {
     return (
@@ -58,17 +109,16 @@ export default function Dashboard() {
     );
   }
 
-  // Get first name safely based on Prisma schema 'fullName'
   const firstName = profile?.fullName
     ? profile.fullName.split(" ")[0]
     : "Engineer";
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening";
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Welcome Banner */}
-      {/* Replace the top banner in Dashboard.tsx with this tightened version */}
       <div
         className="relative overflow-hidden rounded-2xl border border-violet-500/20 px-6 py-6"
         style={{
@@ -106,23 +156,23 @@ export default function Dashboard() {
         <StatCard
           icon={CheckCircle2}
           label="Shortlisted"
-          value={shortlisted}
+          value={interviewsScheduledToday}
           sublabel={`${successRate}% success rate`}
           color="accent"
           delay={0.05}
         />
         <StatCard
           icon={Clock}
-          label="Pending"
-          value={pending}
+          label="Pending Applications"
+          value={pendingApplications}
           sublabel="Awaiting response"
           color="warning"
           delay={0.1}
         />
         <StatCard
           icon={TrendingUp}
-          label="Platform Rank"
-          value="Top 15%"
+          label="Tasks"
+          value={tasks.length}
           sublabel="Profile strength"
           color="blue"
           delay={0.15}
@@ -137,7 +187,7 @@ export default function Dashboard() {
         </div>
         <div className="space-y-6">
           <AgentStatus profile={profile} />
-          <UpcomingInterviews applications={applications} />
+          <UpcomingInterviews interviews={interviews} />
         </div>
       </div>
     </div>

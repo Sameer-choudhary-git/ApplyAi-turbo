@@ -44,7 +44,7 @@ services:
       - applyai-network
     restart: on-failure
     healthcheck:
-      test: ["CMD", "node", "-e", "console.log('ok')"]
+      test: ["CMD-SHELL", "ps aux | grep node | grep -v grep || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -87,7 +87,7 @@ services:
     restart: on-failure
     # Scale this service: docker-compose up --scale worker=3
     healthcheck:
-      test: ["CMD", "node", "-e", "console.log('ok')"]
+      test: ["CMD-SHELL", "ps aux | grep node | grep -v grep || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1,0 +1,182 @@
+==== apps/worker/tsconfig.json ====
+[MISSING FILE: apps/worker/tsconfig.json]
+
+==== apps/scheduler/tsconfig.json ====
+[MISSING FILE: apps/scheduler/tsconfig.json]
+
+==== packages/jobs/package.json ====
+{
+  "name": "@applyai/jobs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+
+  "dependencies": {
+    "@applyai/queue": "workspace:*",
+    "@applyai/utils": "workspace:*",
+    "@applyai/db": "workspace:*",
+    "@applyai/apply": "workspace:*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+==== packages/utils/package.json ====
+{
+  "name": "@applyai/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for ApplyAI",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@applyai/config": "workspace:*",
+    "@aws-sdk/client-s3": "^3.1026.0",
+    "dotenv": "^17.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17"
+  }
+}
+
+==== packages/queue/package.json ====
+{
+  "name": "@applyai/queue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+    "exports": {
+      ".": "./index.ts"
+    },
+    "types": "./index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bullmq": "^5.73.1",
+    "ioredis": "^5.10.1"
+  }
+}
+
+
+==== packages/config/package.json ====
+{
+  "name": "@applyai/config",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
+}
+
+==== packages/core/apply/package.json ====
+{
+  "name": "@applyai/apply",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@applyai/db" : "workspace:*"
+  },
+
+  "exports": {
+   ".": "./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+==== packages/core/extractor/package.json ====
+{
+  "name": "@applyai/extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@applyai/db": "workspace:*",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "playwright": "^1.59.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
+}
+
+
+==== packages/core/validation/package.json ====
+{
+  "name": "@applyai/validation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+   ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@applyai/db": "workspace:*",
+    "playwright": "^1.59.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+

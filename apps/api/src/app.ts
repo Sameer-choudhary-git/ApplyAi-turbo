@@ -15,11 +15,21 @@ import { unstopSessionRouter } from "./routes/unstop-session";
 import { userFlagsRouter } from "./routes/user-flags";
 import { preferencesRouter } from "./routes/preferences";
 import { applicationsRouter } from "./routes/applications";
+import { requestLogger } from "@applyai/logger";
+import tasks from "./routes/tasks";
+import interviews from "./routes/interviews.js";
+import scheduleRouter from "./routes/schedule.js";
+import { networking } from "./routes/networking.js";
+import googleCalendar from "./routes/google-calendar";
+import adminJobsRouter from "./routes/admin-jobs";
+
+
 
 export const app = new Hono();
 
 // ── Global middleware ──────────────────────────────────────
-app.use("*", logger());
+// app.use("*", logger());
+app.use("*", requestLogger());
 app.use("*", secureHeaders());
 app.use("*", prettyJSON());
 app.use(
@@ -49,6 +59,14 @@ app.route("/api/sessions/unstop", unstopSessionRouter);
 app.route("/api/auth/flags", userFlagsRouter);
 app.route("/api/users/me/preferences", preferencesRouter);
 app.route("/api/applications", applicationsRouter);
+app.route("/api/tasks", tasks);
+app.route("/api/schedule", scheduleRouter);
+app.route("/api/interviews", interviews);
+app.route("/api/networking", networking);
+app.route("/api/google-calendar", googleCalendar);
+app.route("/api/admin/jobs", adminJobsRouter);
+
+
 // ── 404 ────────────────────────────────────────────────────
 app.notFound((c) => {
   return c.json({ success: false, error: "Route not found" }, 404);

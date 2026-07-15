@@ -2,23 +2,27 @@
   "name": "@applyai/jobs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
     ".": {
+      "types": "./src/index.ts",
       "default": "./src/index.ts"
     }
   },
-
   "dependencies": {
-    "@applyai/queue": "workspace:*",
-    "@applyai/utils": "workspace:*",
+    "@applyai/apply": "workspace:*",
     "@applyai/db": "workspace:*",
-    "@applyai/apply": "workspace:*"
+    "@applyai/queue": "workspace:*",
+    "@applyai/utils": "workspace:*"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "22.10.0"
+  }
 }

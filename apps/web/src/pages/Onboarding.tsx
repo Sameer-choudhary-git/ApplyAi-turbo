@@ -203,45 +203,9 @@ export default function Onboarding() {
       return;
     }
 
+    // DON'T upload here
     setResumeFile(file);
-    setUploadStatus("uploading");
-
-    try {
-      const formData = new FormData();
-      formData.append("resume", file);
-
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-
-      if (!token) {
-        setUploadError("You are not authenticated");
-        setUploadStatus("error");
-        return;
-      }
-
-      const res = await fetch(
-        `${apiConfig.baseUrl}${apiConfig.endpoints.resume.upload}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        },
-      );
-
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error((json as any).error || "Upload failed");
-      }
-
-      const { url } = (await res.json()) as { url: string };
-      setResumeUrl(url);
-      setUploadStatus("done");
-    } catch (err: any) {
-      setUploadError(err.message ?? "Upload failed. Please try again.");
-      setUploadStatus("error");
-    }
+    setUploadStatus("done");
   };
 
   const handleComplete = async () => {
@@ -307,6 +271,31 @@ export default function Onboarding() {
       );
 
       if (!res.ok) throw new Error("Failed to save profile");
+
+      if (resumeFile) {
+        const formData = new FormData();
+        formData.append("resume", resumeFile);
+
+        const uploadRes = await fetch(
+          `${apiConfig.baseUrl}${apiConfig.endpoints.resume.upload}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          },
+        );
+
+        if (!uploadRes.ok) {
+          throw new Error("Resume upload failed");
+        }
+
+        const { url } = await uploadRes.json();
+        setResumeUrl(url);
+      } else{
+        console.log("No resume file to upload");
+      }
 
       // 🔥 ensure fresh fetch
       await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
