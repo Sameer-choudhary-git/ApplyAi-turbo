@@ -15,5 +15,5 @@ export default defineConfig({
   noExternal: [/^@applyai\//],
   // Keep heavy/native deps external — they must be real node_modules
   // installed in the deploy image, not bundled.
-  external: ["playwright", "pg", "@prisma/adapter-pg"],
+  external: ["playwright", "pg", "@prisma/adapter-pg", "@prisma/client"],
 });
