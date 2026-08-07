@@ -17,6 +17,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Copy only what's needed for the scheduler workspace so install is faster
 COPY apps/scheduler ./apps/scheduler
+COPY packages/jobs ./packages/jobs
 COPY packages/core/extractor ./packages/core/extractor
 COPY packages/core/validation ./packages/core/validation
 COPY packages/core/apply ./packages/core/apply
@@ -32,11 +33,16 @@ COPY packages/eslint-config ./packages/eslint-config
 RUN pnpm install --frozen-lockfile
 
 # Build only the packages needed at runtime
+RUN pnpm --filter @applyai/db generate
 RUN pnpm --filter @applyai/db build
 RUN pnpm --filter @applyai/utils build
+RUN pnpm --filter scheduler build
+
+# The scheduler also runs extractors that use Playwright.
+RUN pnpm --filter scheduler exec playwright install --with-deps firefox
 
 # Set production env by default (override with docker-compose env if needed)
 ENV NODE_ENV=production
 
-# Default command (development mode by name in workspace)
-CMD ["pnpm", "--filter", "scheduler", "run", "dev"]
+# Production scheduler process
+CMD ["pnpm", "--filter", "scheduler", "start"]

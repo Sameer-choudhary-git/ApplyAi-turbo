@@ -12,9 +12,16 @@ const env = (key: string): string => {
   return "";
 };
 
+const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
+
+// VITE_API_URL is the browser-facing API origin. PUBLIC_API_URL remains for
+// server-side consumers that need to generate a public API link.
+const apiBaseUrl = trimTrailingSlash(
+  env("VITE_API_URL") || env("PUBLIC_API_URL") || env("API_URL"),
+) ?? "http://localhost:3000";
+
 export const apiConfig = {
-  baseUrl:
-    env("VITE_API_URL") || env("REACT_APP_API_URL") || "http://localhost:3000",
+  baseUrl: apiBaseUrl,
   endpoints: {
     user: {
       me: "/api/users/me",
@@ -37,7 +44,8 @@ export const apiConfig = {
 };
 
 export function getApiUrl(endpoint: string): string {
-  return `${apiConfig.baseUrl}${endpoint}`;
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  return `${apiConfig.baseUrl}${normalizedEndpoint}`;
 }
 
 export const dbConfig = {
@@ -62,7 +70,7 @@ export const encryptionConfig = {
 };
 
 export const publicConfig = {
-  apiUrl: env("PUBLIC_API_URL") || "http://localhost:3000",
+  apiUrl: trimTrailingSlash(env("PUBLIC_API_URL") || env("API_URL")),
 };
 
 export const envConfig = {

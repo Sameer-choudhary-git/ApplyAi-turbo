@@ -1,6 +1,13 @@
 import { supabase } from "@/supabaseClient";
+import { apiConfig, getApiUrl } from "@applyai/config";
 
-const API = "http://localhost:3000/api";
+if (!apiConfig.baseUrl) {
+  throw new Error(
+    "Missing VITE_API_URL. Add it to apps/web/.env.local or your Vercel environment variables.",
+  );
+}
+
+const API = getApiUrl("/api");
 
 async function authHeaders() {
   const {

@@ -9,10 +9,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    // Optional: Setup a proxy here later when your local backend is ready
-    // proxy: {
-    //   '/api': 'http://localhost:3000'
-    // }
-  },
 });

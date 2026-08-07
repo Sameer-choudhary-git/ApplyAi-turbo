@@ -23,6 +23,10 @@ import { networking } from "./routes/networking.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
 
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 
 export const app = new Hono();
@@ -35,7 +39,8 @@ app.use("*", prettyJSON());
 app.use(
   "*",
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin) =>
+      !origin || allowedOrigins.includes(origin) ? origin : undefined,
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

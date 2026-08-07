@@ -1,0 +1,31 @@
+FROM node:22-bullseye-slim
+
+ARG PNPM_VERSION=9.0.0
+WORKDIR /app
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl openssl \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g pnpm@${PNPM_VERSION}
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api ./apps/api
+COPY packages/config ./packages/config
+COPY packages/db ./packages/db
+COPY packages/jobs ./packages/jobs
+COPY packages/logger ./packages/logger
+COPY packages/utils ./packages/utils
+COPY packages/queue ./packages/queue
+COPY packages/core/apply ./packages/core/apply
+COPY packages/types ./packages/types
+COPY packages/typescript-config ./packages/typescript-config
+COPY packages/eslint-config ./packages/eslint-config
+
+RUN pnpm install --frozen-lockfile \
+  && pnpm --filter @applyai/db generate \
+  && pnpm --filter @applyai/api build
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+CMD ["pnpm", "--filter", "@applyai/api", "start"]

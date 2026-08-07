@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import Onboarding from "../pages/Onboarding";
 import { useAuth } from "@/lib/AuthContext";
-import { supabase } from "@/supabaseClient";
+import { api } from "@/lib/api";
 
 export default function AppShell() {
   const { user, isLoadingAuth } = useAuth();
@@ -12,23 +12,9 @@ export default function AppShell() {
     queryKey: ["userProfile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      // const { data, error } = await supabase
-      //   .from("users")
-      //   .select("*")
-      //   .eq("id", user.id)
-      //   .single();
-      const response = await fetch("http://localhost:3000/api/users/me", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await supabase.auth.getSession().then(({ data }) => data.session?.access_token)}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch profile");
-      }
-
-      const data = await response.json();
-
+      const data = await api<{ user: { isOnboarded?: boolean } }>(
+        "/users/me",
+      );
       return data.user;
     },
     enabled: !!user?.id,

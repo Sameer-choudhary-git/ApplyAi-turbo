@@ -3,8 +3,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: applyai-redis
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -18,6 +18,45 @@ services:
     environment:
       - REDIS_REPLICATION_DISKLESS_SYNC=yes
 
+  # Public API consumed by the Vercel frontend.
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_HOST_PORT:-3000}:${API_PORT:-3000}"
+    environment:
+      PORT: ${API_PORT:-3000}
+      NODE_ENV: ${NODE_ENV:-production}
+      FRONTEND_URL: ${FRONTEND_URL}
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      R2_ENDPOINT_URL: ${R2_ENDPOINT_URL}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
+    networks:
+      - applyai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:$${PORT}/health/ping || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   # Scheduler Service - Job Queue Orchestration (Cron-based)
   scheduler:
     build:
@@ -27,8 +66,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      extractor:
-        condition: service_started
     environment:
       # Database (Supabase)
       DATABASE_URL: ${DATABASE_URL}
@@ -37,12 +74,13 @@ services:
       # Redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
 
       # Encryption
       COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
     networks:
       - applyai-network
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep node | grep -v grep || exit 1"]
       interval: 30s
@@ -68,6 +106,7 @@ services:
       # Redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
 
       # Encryption
       COOKIE_ENCRYPTION_KEY: ${COOKIE_ENCRYPTION_KEY}
@@ -84,7 +123,7 @@ services:
       R2_PUBLIC_URL: ${R2_PUBLIC_URL}
     networks:
       - applyai-network
-    restart: on-failure
+    restart: unless-stopped
     # Scale this service: docker-compose up --scale worker=3
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep node | grep -v grep || exit 1"]
@@ -98,8 +137,9 @@ services:
     container_name: applyai-redis-ui
     depends_on:
       - redis
+    profiles: ["tools"]
     ports:
-      - "8081:8081"
+      - "${REDIS_UI_HOST_PORT:-8081}:8081"
     environment:
       REDIS_HOSTS: local:redis:6379
     networks:

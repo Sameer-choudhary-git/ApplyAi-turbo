@@ -5,9 +5,7 @@ let redisClient: RedisClientType | null = null;
 export async function initializeRedis() {
   if (redisClient) return redisClient;
 
-  const redisUrl =
-    process.env.REDIS_URL ||
-    `redis://${process.env.REDIS_HOST || "localhost"}:${parseInt(process.env.REDIS_PORT || "6380")}`;
+  const redisUrl = process.env.REDIS_URL || buildRedisUrl();
 
   redisClient = createClient({
     url: redisUrl,
@@ -101,4 +99,11 @@ export async function clearAllCache(): Promise<void> {
   } catch (err) {
     console.error("Cache FLUSH error:", err);
   }
+}
+
+function buildRedisUrl(): string | undefined {
+  if (!process.env.REDIS_HOST) return undefined;
+
+  const port = process.env.REDIS_PORT ? `:${process.env.REDIS_PORT}` : "";
+  return `redis://${process.env.REDIS_HOST}${port}`;
 }

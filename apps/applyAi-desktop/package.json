@@ -29,8 +29,8 @@
     },
     "extraMetadata": {
       "env": {
-        "API_ENDPOINT": "http://localhost:3000/api/sessions/unstop/submit",
-        "ENCRYPTION_KEY": "b2e03ff7cb1e3daa56dfa16fa97f45a34730eb723088f8c13581a4752867ce14"
+        "API_ENDPOINT": "",
+        "ENCRYPTION_KEY": ""
       }
     }
   }

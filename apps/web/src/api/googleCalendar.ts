@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { supabase } from "@/supabaseClient";
+import { getApiUrl } from "@applyai/config";
 
 export interface GoogleCalendarStatus {
   connected: boolean;
@@ -16,11 +17,10 @@ export function disconnectGoogleCalendar(): Promise<{ success: boolean }> {
 
 // now async — needs to read the current session token before building the URL
 export async function connectGoogleCalendarUrl(): Promise<string> {
-  const API = "http://localhost:3000/api";
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   const token = session?.access_token;
-  return `${API}/google-calendar/connect?token=${encodeURIComponent(token || "")}`;
+  return `${getApiUrl("/api/google-calendar/connect")}?token=${encodeURIComponent(token || "")}`;
 }

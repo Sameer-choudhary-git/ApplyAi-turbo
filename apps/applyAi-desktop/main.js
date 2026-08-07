@@ -9,7 +9,7 @@ const path = require('path');
 const pkg = require('./package.json');
 const ENV = pkg.env || {};
 
-const API_ENDPOINT = process.env.API_ENDPOINT || ENV.API_ENDPOINT || 'http://localhost:3000/api/sessions/unstop/submit';
+const API_ENDPOINT = process.env.API_ENDPOINT || ENV.API_ENDPOINT;
 const ENCRYPTION_KEY_HEX = process.env.ENCRYPTION_KEY || ENV.ENCRYPTION_KEY;
 
 if (process.defaultApp) {
@@ -32,8 +32,8 @@ if (!gotTheLock) {
 
   app.whenReady().then(() => {
     // ✅ Now dialog is safe to use
-    if (!ENCRYPTION_KEY_HEX) {
-      dialog.showErrorBox('Config Error', 'ENCRYPTION_KEY env var is missing. Cannot start.');
+    if (!API_ENDPOINT || !ENCRYPTION_KEY_HEX) {
+      dialog.showErrorBox('Config Error', 'API_ENDPOINT and ENCRYPTION_KEY configuration values are required. Cannot start.');
       app.quit();
       return;
     }
