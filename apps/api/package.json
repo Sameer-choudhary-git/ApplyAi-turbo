@@ -17,11 +17,13 @@
     "@applyai/utils": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.7.6",
+    "@prisma/adapter-pg": "^7.7.0",
     "@supabase/supabase-js": "^2.50.3",
     "dotenv": "^17.4.1",
     "googleapis": "^173.0.0",
     "hono": "^4.7.11",
     "playwright": "^1.61.1",
+    "pg": "^8.20.0",
     "redis": "^6.1.0",
     "zod": "^3.25.67"
   },
