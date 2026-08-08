@@ -39,10 +39,13 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
+      // Use VITE_APP_BASE_URL if available, fallback to window.location.origin
+      const redirectUrl = import.meta.env.VITE_APP_BASE_URL || window.location.origin;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
         },
       });
       if (error) throw error;
