@@ -19,8 +19,7 @@
     "@applyai/queue": "workspace:*",
     "fs": "0.0.1-security",
     "node-cron": "^4.2.1",
-    "path": "^0.12.7",
-    "playwright": "^1.61.1"
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@types/node": "22.10.0",

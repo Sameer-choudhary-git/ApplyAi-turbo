@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  scheduler:
+    build: .
+    container_name: applyai-scheduler
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

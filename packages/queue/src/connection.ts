@@ -4,8 +4,8 @@ const connectionOptions: RedisOptions = {
   maxRetriesPerRequest: null,
 };
 
-export const connection = process.env.REDIS_URL
-  ? new Redis(process.env.REDIS_URL, connectionOptions)
+export const connection = process.env.REDIS_QUEUE_URL
+  ? new Redis(process.env.REDIS_QUEUE_URL, connectionOptions)
   : new Redis({
       ...connectionOptions,
       host: process.env.REDIS_HOST,

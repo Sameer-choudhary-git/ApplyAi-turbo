@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { prisma } from "@applyai/db";
 import type { ApplyAgentInput, ApplyResult } from "../../types/ApplyTypes";
-import { makeInActive } from "../../../../../../apps/worker/utils";
+import { makeInActive } from "../../utils";
 
 export async function unstopApplyAgent(
   input: ApplyAgentInput,
