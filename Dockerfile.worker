@@ -1,0 +1,17 @@
+FROM node:20-slim
+RUN corepack enable
+WORKDIR /app
+
+COPY . .
+RUN pnpm install --no-frozen-lockfile
+
+RUN npx playwright install --with-deps chromium
+
+ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+ENV DATABASE_URL=$DATABASE_URL
+
+RUN pnpm --filter @applyai/db exec prisma generate
+RUN pnpm turbo build --filter=worker
+
+ENV NODE_ENV=production
+CMD ["node", "apps/worker/dist/index.js"]
