@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "ApplyAI Networking Assistant",
+  "version": "1.0.0",
+  "description": "Capture a LinkedIn profile and save it directly to the ApplyAI networking app.",
+  "action": {
+    "default_title": "ApplyAI Networking Assistant",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": ["https://www.linkedin.com/*", "https://linkedin.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/in/*", "https://linkedin.com/in/*"],
+      "js": ["content-scripts/linkedin.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

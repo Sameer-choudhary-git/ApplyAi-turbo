@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ApplyAI Networking Assistant</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Networking</p>
+          <h1>Save LinkedIn profile</h1>
+        </div>
+        <div id="statusDot" class="status-dot"></div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>Session</h2>
+          <button id="importTokenBtn" class="secondary">Import from this tab</button>
+        </div>
+        <p class="help">
+          Open the ApplyAI web app in another tab, then import the active session token once.
+        </p>
+        <div class="field-grid">
+          <label>
+            <span>Backend URL</span>
+            <input id="apiBaseUrl" type="url" placeholder="https://api.example.com" />
+          </label>
+          <label>
+            <span>Auth token</span>
+            <input id="authToken" type="password" placeholder="Saved token will appear here" />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="saveSettingsBtn" class="secondary">Save settings</button>
+          <button id="clearTokenBtn" class="ghost">Clear token</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>Current LinkedIn profile</h2>
+          <button id="extractBtn" class="secondary">Capture profile</button>
+        </div>
+        <p id="pageHint" class="help">Open a LinkedIn profile page, then capture the contact draft.</p>
+
+        <div class="draft">
+          <label>
+            <span>Name</span>
+            <input id="name" type="text" placeholder="Person name" />
+          </label>
+          <label>
+            <span>Title</span>
+            <input id="title" type="text" placeholder="Role or headline" />
+          </label>
+          <label>
+            <span>Company</span>
+            <input id="company" type="text" placeholder="Company" />
+          </label>
+          <label>
+            <span>Profile URL</span>
+            <input id="profileUrl" type="url" placeholder="https://www.linkedin.com/in/..." />
+          </label>
+          <label>
+            <span>Notes</span>
+            <textarea id="notes" rows="3" placeholder="Optional notes"></textarea>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="saveContactBtn" class="primary">Save to networking</button>
+        </div>
+        <p id="result" class="result"></p>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
