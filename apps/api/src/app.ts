@@ -23,10 +23,14 @@ import { networking } from "./routes/networking.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
 
-const allowedOrigins = (process.env.FRONTEND_URL || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  "https://apply-ai-turbo-web.vercel.app",
+  "chrome-extension://jnaodcfhebmjmkahjkanclegonmlkmhn",
+  ...(process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean),
+];
 
 
 export const app = new Hono();
@@ -39,12 +43,40 @@ app.use("*", prettyJSON());
 app.use(
   "*",
   cors({
-    origin: (origin) =>
-      !origin || allowedOrigins.includes(origin) ? origin : undefined,
+    origin: (origin) => {
+      if (!origin) {
+        return undefined;
+      }
+
+      const normalizedOrigin = origin.replace(/\/+$/, "");
+
+      if (allowedOrigins.includes(normalizedOrigin)) {
+        return normalizedOrigin;
+      }
+
+      console.warn(
+        `[CORS] Rejected origin: ${origin}`
+      );
+
+      return undefined;
+    },
+
     credentials: true,
-    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-  }),
+
+    allowMethods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+  })
 );
 
 // Log startup info

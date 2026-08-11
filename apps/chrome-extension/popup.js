@@ -83,27 +83,90 @@ async function persistSettings() {
 async function captureLinkedInProfile() {
   setLoading(true);
   setResult("Reading the current tab...");
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) throw new Error("No active tab found.");
 
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "APPLYAI_EXTRACT_LINKEDIN_PROFILE" });
-    if (!response?.success) {
-      throw new Error(response?.error || "Open a LinkedIn profile page first.");
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (!tab?.id) {
+      throw new Error("No active tab found.");
     }
 
+    if (
+      !tab.url ||
+      !/^https:\/\/(www\.)?linkedin\.com\/in\//i.test(tab.url)
+    ) {
+      throw new Error("Open a LinkedIn profile page first.");
+    }
+
+    let response;
+
+    try {
+      // Try the automatically injected content script first.
+      response = await chrome.tabs.sendMessage(tab.id, {
+        type: "APPLYAI_EXTRACT_LINKEDIN_PROFILE",
+      });
+    } catch (error) {
+      console.log(
+        "[ApplyAI] Content script not available. Injecting it...",
+        error
+      );
+
+      // Content script wasn't running.
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id,
+        },
+        files: ["content-scripts/linkedin.js"],
+      });
+
+      // Allow the injected script to register its listener.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Try again.
+      response = await chrome.tabs.sendMessage(tab.id, {
+        type: "APPLYAI_EXTRACT_LINKEDIN_PROFILE",
+      });
+    }
+
+    if (!response?.success) {
+      throw new Error(
+        response?.error ||
+          "Could not extract the LinkedIn profile."
+      );
+    }
+
+    const profile = response.profile || {};
+
     state.draft = {
-      name: response.profile.name || "",
-      title: response.profile.title || "",
-      company: response.profile.company || "",
-      profileUrl: response.profile.profileUrl || "",
-      notes: response.profile.notes || "",
+      name: profile.name || "",
+      title: profile.title || "",
+      company: profile.company || "",
+      profileUrl: profile.profileUrl || "",
+      notes: profile.notes || "",
     };
+
     updateFormFromDraft();
-    await chrome.storage.local.set({ draft: state.draft });
+
+    await chrome.storage.local.set({
+      draft: state.draft,
+    });
+
     setResult("Profile captured.", "ok");
   } catch (error) {
-    setResult(error instanceof Error ? error.message : String(error), "warn");
+    console.error(
+      "[ApplyAI] LinkedIn capture failed:",
+      error
+    );
+
+    setResult(
+      error instanceof Error
+        ? error.message
+        : String(error),
+      "warn"
+    );
   } finally {
     setLoading(false);
   }
@@ -198,22 +261,56 @@ async function saveContact() {
 
 function wireEvents() {
   el.saveSettingsBtn.addEventListener("click", persistSettings);
-  el.importTokenBtn.addEventListener("click", importSessionToken);
-  el.extractBtn.addEventListener("click", captureLinkedInProfile);
-  el.saveContactBtn.addEventListener("click", saveContact);
+
+  el.importTokenBtn.addEventListener(
+    "click",
+    importSessionToken
+  );
+
+  el.extractBtn.addEventListener(
+    "click",
+    captureLinkedInProfile
+  );
+
+  el.saveContactBtn.addEventListener(
+    "click",
+    saveContact
+  );
+
   el.clearTokenBtn.addEventListener("click", async () => {
     state.authToken = "";
     el.authToken.value = "";
+
     await chrome.storage.local.remove("authToken");
+
     setResult("Session token cleared.", "warn");
   });
-  [el.name, el.title, el.company, el.profileUrl, el.notes].forEach((field) => {
+
+  [
+    el.name,
+    el.title,
+    el.company,
+    el.profileUrl,
+    el.notes,
+  ].forEach((field) => {
     field.addEventListener("input", () => {
       readFormIntoDraft();
-      chrome.storage.local.set({ draft: state.draft });
+
+      chrome.storage.local.set({
+        draft: state.draft,
+      });
     });
   });
 }
 
+
 wireEvents();
-loadSettings().catch((error) => setResult(error instanceof Error ? error.message : String(error), "warn"));
+
+loadSettings().catch((error) =>
+  setResult(
+    error instanceof Error
+      ? error.message
+      : String(error),
+    "warn"
+  )
+);
