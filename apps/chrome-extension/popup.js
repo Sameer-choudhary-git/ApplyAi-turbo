@@ -1,5 +1,51 @@
 const DEFAULT_API_BASE_URL = "http://localhost:3000";
 
+// Initialize error tracking
+const ErrorTracker = {
+  apiBaseUrl: DEFAULT_API_BASE_URL,
+  authToken: "",
+  maxErrors: 50,
+  errors: [],
+
+  async init(apiBaseUrl) {
+    this.apiBaseUrl = apiBaseUrl;
+    const storage = await chrome.storage.local.get(['authToken']);
+    this.authToken = storage.authToken || null;
+    const stored = await chrome.storage.local.get(['errorLog']);
+    this.errors = stored.errorLog || [];
+    console.log(`✅ Error tracker initialized (${this.errors.length} stored errors)`);
+  },
+
+  async logError(error, context = {}) {
+    const errorEntry = {
+      timestamp: new Date().toISOString(),
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : null,
+      context: context,
+      url: window.location.href,
+    };
+    this.errors.unshift(errorEntry);
+    if (this.errors.length > this.maxErrors) this.errors.pop();
+    await chrome.storage.local.set({ errorLog: this.errors });
+    console.error('[ErrorTracker]', errorEntry);
+    return errorEntry;
+  },
+
+  async captureException(error, context = {}) {
+    return this.logError(error, { ...context, type: 'exception' });
+  },
+
+  async logBreadcrumb(message, category = 'user-action') {
+    console.log('[Breadcrumb]', message, category);
+  },
+};
+
+// Initialize error tracker on load
+(async () => {
+  const data = await chrome.storage.local.get(['apiBaseUrl']);
+  await ErrorTracker.init(data.apiBaseUrl || DEFAULT_API_BASE_URL);
+})();
+
 const state = {
   apiBaseUrl: DEFAULT_API_BASE_URL,
   authToken: "",
@@ -154,12 +200,18 @@ async function captureLinkedInProfile() {
       draft: state.draft,
     });
 
+    await ErrorTracker.logBreadcrumb('Profile captured successfully', 'linkedin-extraction');
     setResult("Profile captured.", "ok");
   } catch (error) {
     console.error(
       "[ApplyAI] LinkedIn capture failed:",
       error
     );
+
+    await ErrorTracker.captureException(error, {
+      context: 'linkedin_capture',
+      send: false,
+    });
 
     setResult(
       error instanceof Error
@@ -226,6 +278,8 @@ async function saveContact() {
       throw new Error("A LinkedIn name is required.");
     }
 
+    await ErrorTracker.logBreadcrumb(`Saving contact: ${state.draft.name}`, 'contact-save');
+
     const res = await fetch(`${state.apiBaseUrl.replace(/\/+$/, "")}/api/networking`, {
       method: "POST",
       headers: {
@@ -248,11 +302,17 @@ async function saveContact() {
 
     const payload = await res.json().catch(() => null);
     if (!res.ok) {
-      throw new Error(payload?.error || payload?.message || `Save failed (${res.status})`);
+      const errorMsg = payload?.error || payload?.message || `Save failed (${res.status})`;
+      throw new Error(errorMsg);
     }
 
+    await ErrorTracker.logBreadcrumb(`Contact saved: ${payload?.name || state.draft.name}`, 'contact-save');
     setResult(`Saved ${payload?.name || state.draft.name} to networking.`, "ok");
   } catch (error) {
+    await ErrorTracker.captureException(error, {
+      context: 'save_contact',
+      send: false,
+    });
     setResult(error instanceof Error ? error.message : String(error), "warn");
   } finally {
     setLoading(false);

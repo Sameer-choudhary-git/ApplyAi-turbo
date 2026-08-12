@@ -10,7 +10,28 @@ export const requestLogger = (): MiddlewareHandler => {
 
     c.set("requestId", requestId);
 
-    await next();
+    try {
+      await next();
+    } catch (error) {
+      const duration = Number((performance.now() - start).toFixed(2));
+
+      // Log error with full context
+      logger.error({
+        requestId,
+        method: c.req.method,
+        path: c.req.path,
+        status: c.res.status || 500,
+        duration,
+        ip:
+          c.req.header("x-forwarded-for") ??
+          c.req.header("cf-connecting-ip") ??
+          "unknown",
+        userId: c.get("userId") ?? null,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      throw error;
+    }
 
     const duration = Number((performance.now() - start).toFixed(2));
 

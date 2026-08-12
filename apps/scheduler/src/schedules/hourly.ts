@@ -1,16 +1,12 @@
-import cron from "node-cron";
 import { QueueEligibleUsersJob } from "@applyai/jobs";
+import { scheduleWithSentry } from "../lib/sentryScheduler";
 
 export function startHourlyScheduler() {
-  cron.schedule("0 * * * *", async () => {
-    console.log("Starting hourly extraction...");
-
-    try {
-      await Promise.all([await new QueueEligibleUsersJob().enqueue()]);
-
-      console.log("Hourly extraction jobs queued.");
-    } catch (error) {
-      console.error("Failed to queue hourly extraction jobs:", error);
-    }
+  scheduleWithSentry({
+    name: "Hourly User Queue",
+    schedule: "0 * * * *", // Every hour at the top of the hour
+    task: async () => {
+      await new QueueEligibleUsersJob().enqueue();
+    },
   });
 }

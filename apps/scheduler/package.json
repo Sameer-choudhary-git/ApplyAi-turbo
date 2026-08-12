@@ -17,6 +17,7 @@
     "@applyai/extractor": "workspace:*",
     "@applyai/jobs": "workspace:*",
     "@applyai/queue": "workspace:*",
+    "@applyai/sentry": "workspace:*",
     "fs": "0.0.1-security",
     "node-cron": "^4.2.1",
     "path": "^0.12.7"

@@ -1,0 +1,32 @@
+{
+  "name": "@applyai/error-tracking",
+  "version": "1.0.0",
+  "description": "Vendor-agnostic error tracking abstraction using Strategy pattern",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "import": "./index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": [
+    "error-tracking",
+    "sentry",
+    "datadog",
+    "rollbar",
+    "strategy-pattern",
+    "abstraction"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "22.10.0",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,8 +1,8 @@
-import { createWorker, WorkerService, QueueName } from "@applyai/queue";
+import { createSentryWorker, WorkerService, QueueName } from "@applyai/queue";
 
 import { extractRegistry } from "../registry/extractRegistry";
 
-const worker = createWorker({
+const worker = createSentryWorker({
   queue: QueueName.EXTRACT,
   registry: extractRegistry,
   concurrency: 2,

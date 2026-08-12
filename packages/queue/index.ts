@@ -4,4 +4,5 @@ export * from "./src/queueNames";
 export * from "./src/queueService";
 export * from "./types";
 export * from "./src/workerFactory";
+export * from "./src/sentryWorkerFactory";
 export * from "./src/workerService";

@@ -1,8 +1,8 @@
-import { createWorker, WorkerService, QueueName } from "@applyai/queue";
+import { createSentryWorker, WorkerService, QueueName } from "@applyai/queue";
 
 import { validationRegistry } from "../registry/validationRegistry";
 
-const worker = createWorker({
+const worker = createSentryWorker({
   queue: QueueName.VALIDATION,
   registry: validationRegistry,
 });

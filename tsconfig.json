@@ -15,6 +15,7 @@
     { "path": "packages/jobs" },
     { "path": "packages/logger" },
     { "path": "packages/queue" },
+    { "path": "packages/sentry" },
     { "path": "packages/ui" },
     { "path": "packages/utils" }
   ]

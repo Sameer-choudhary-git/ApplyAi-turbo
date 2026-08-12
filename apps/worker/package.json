@@ -18,6 +18,7 @@
     "@applyai/extractor": "workspace:*",
     "@applyai/jobs": "workspace:*",
     "@applyai/queue": "workspace:*",
+    "@applyai/sentry": "workspace:*",
     "@applyai/utils": "workspace:*",
     "@applyai/validation": "workspace:*",
     "@bull-board/api": "^7.1.5",

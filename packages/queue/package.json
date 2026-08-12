@@ -19,6 +19,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@applyai/sentry": "workspace:*",
+    "@sentry/node": "^10.70.0",
     "bullmq": "^5.73.1",
     "ioredis": "^5.10.1"
   },

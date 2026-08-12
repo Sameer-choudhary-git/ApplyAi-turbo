@@ -16,6 +16,8 @@ import Networking from "./pages/Networking";
 import SavedJobs from "./pages/SavedJobs";
 import Login from "./pages/Login";
 import AdminJobs from "@/views/AdminJobs";
+import { SentryRouteTracker } from "@/components/SentryRouteTracker";
+import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
 
 import { Navigate } from "react-router-dom"; // Make sure Navigate is imported!
 
@@ -42,15 +44,78 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/applications" element={<Applications />} />
-        <Route path="/schedule" element={<Schedule />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/preferences" element={<Preferences />} />
-        <Route path="/networking" element={<Networking />} />
-        <Route path="/saved-jobs" element={<SavedJobs />} />
-        <Route path="/admin/jobs" element={<AdminJobs />} />
+        <Route
+          path="/"
+          element={
+            <ErrorBoundaryWrapper componentName="Dashboard">
+              <Dashboard />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/applications"
+          element={
+            <ErrorBoundaryWrapper componentName="Applications">
+              <Applications />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/schedule"
+          element={
+            <ErrorBoundaryWrapper componentName="Schedule">
+              <Schedule />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/tasks"
+          element={
+            <ErrorBoundaryWrapper componentName="Tasks">
+              <Tasks />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ErrorBoundaryWrapper componentName="Analytics">
+              <Analytics />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/preferences"
+          element={
+            <ErrorBoundaryWrapper componentName="Preferences">
+              <Preferences />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/networking"
+          element={
+            <ErrorBoundaryWrapper componentName="Networking">
+              <Networking />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/saved-jobs"
+          element={
+            <ErrorBoundaryWrapper componentName="SavedJobs">
+              <SavedJobs />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/admin/jobs"
+          element={
+            <ErrorBoundaryWrapper componentName="Admin Jobs">
+              <AdminJobs />
+            </ErrorBoundaryWrapper>
+          }
+        />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -62,6 +127,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <SentryRouteTracker />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/*" element={<AuthenticatedApp />} />

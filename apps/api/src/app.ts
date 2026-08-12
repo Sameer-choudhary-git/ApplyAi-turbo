@@ -10,6 +10,7 @@ import userRoutes from "./routes/user.js";
 import { jobRoutes } from "./routes/jobs.js";
 import { healthRoutes } from "./routes/health.js";
 import { errorHandler } from "./middleware/error.js";
+import { sentryContextMiddleware } from "./middleware/sentry.js";
 import resume from "./routes/resume";
 import { unstopSessionRouter } from "./routes/unstop-session";
 import { userFlagsRouter } from "./routes/user-flags";
@@ -36,6 +37,10 @@ const allowedOrigins = [
 export const app = new Hono();
 
 // ── Global middleware ──────────────────────────────────────
+// Sentry middleware for context and error tracking (should be early)
+app.use("*", sentryContextMiddleware);
+
+// Standard middleware
 // app.use("*", logger());
 app.use("*", requestLogger());
 app.use("*", secureHeaders());
