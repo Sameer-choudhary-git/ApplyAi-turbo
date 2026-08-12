@@ -134,22 +134,14 @@ export function sentryRouteMiddleware(operation: string) {
  */
 export function withSentryTransaction(transactionName: string) {
   return async (c: Context, next: Next) => {
-    const transaction = Sentry.startTransaction({
-      name: transactionName,
-      op: "http.server",
-      description: `${c.req.method} ${c.req.path}`,
-    });
-
-    return Sentry.runInContext(async () => {
-      try {
+    return Sentry.startSpan(
+      {
+        name: transactionName,
+        op: "http.server",
+      },
+      async () => {
         await next();
-        transaction.setStatus("ok");
-      } catch (error) {
-        transaction.setStatus("error");
-        throw error;
-      } finally {
-        transaction.finish();
       }
-    });
+    );
   };
 }

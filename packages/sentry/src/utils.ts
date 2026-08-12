@@ -142,40 +142,41 @@ export function withSentryTrackingSync<T extends (...args: any[]) => any>(
 }
 
 /**
- * Create a Sentry transaction for tracking operations
+ * Create a Sentry span for tracking operations.
+ *
+ * Migrated from `Sentry.startTransaction` (removed in v8) to `Sentry.startSpan`.
+ * `startSpan` automatically finishes the span and sets OK/error status based on
+ * whether the callback resolves or throws.
  */
 export async function trackTransaction<T>(
   name: string,
-  fn: (transaction: Sentry.Transaction) => Promise<T>,
+  fn: (span: Sentry.Span) => Promise<T>,
   options?: {
     op?: string;
     description?: string;
     tags?: Record<string, string>;
   }
 ): Promise<T> {
-  const transaction = Sentry.startTransaction({
-    name: name,
-    op: options?.op || "operation",
-    description: options?.description,
-  });
-
-  if (options?.tags) {
-    Object.entries(options.tags).forEach(([key, value]) => {
-      transaction.setTag(key, value);
-    });
-  }
-
-  try {
-    const result = await fn(transaction);
-    transaction.setStatus("ok");
-    return result;
-  } catch (error) {
-    transaction.setStatus("error");
-    Sentry.captureException(error);
-    throw error;
-  } finally {
-    transaction.finish();
-  }
+  return Sentry.startSpan(
+    {
+      name,
+      op: options?.op || "operation",
+      attributes: options?.tags,
+    },
+    async (span) => {
+      if (options?.tags) {
+        Object.entries(options.tags).forEach(([key, value]) => {
+          span.setAttribute(key, value);
+        });
+      }
+      try {
+        return await fn(span);
+      } catch (error) {
+        Sentry.captureException(error);
+        throw error;
+      }
+    }
+  );
 }
 
 /**

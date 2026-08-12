@@ -1,5 +1,4 @@
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 import React from "react";
 
 export interface SentryBrowserConfig {
@@ -9,34 +8,16 @@ export interface SentryBrowserConfig {
   tracesSampleRate?: number;
   replaysSessionSampleRate?: number;
   replaysOnErrorSampleRate?: number;
-  beforeSend?: (event: Sentry.Event) => Sentry.Event | null;
+  beforeSend?: (event: Sentry.ErrorEvent) => Sentry.ErrorEvent | null;
   /**
    * Optional React Router v6 bindings for route-based transaction naming.
-   * FIX: Sentry.reactRouterV6Instrumentation does NOT take window.history —
-   * it needs these five things from react-router-dom. This package doesn't
-   * depend on react-router itself, so the consuming app passes them in:
    *
-   *   import { useEffect } from "react";
-   *   import {
-   *     useLocation,
-   *     useNavigationType,
-   *     createRoutesFromChildren,
-   *     matchRoutes,
-   *   } from "react-router-dom";
-   *
-   *   initSentryBrowser({
-   *     ...,
-   *     reactRouter: {
-   *       useEffect,
-   *       useLocation,
-   *       useNavigationType,
-   *       createRoutesFromChildren,
-   *       matchRoutes,
-   *     },
-   *   });
-   *
-   * If omitted, BrowserTracing still works, it just won't get clean
-   * route-name-based transaction names.
+   * NOTE (Sentry v8+): `reactRouterV6Instrumentation` and the `routingInstrumentation`
+   * option on BrowserTracing were removed in Sentry v8. Route-based tracing in v8+
+   * requires wrapping your router with `Sentry.wrapCreateBrowserRouter` or using
+   * `Sentry.reactRouterV6BrowserTracingIntegration` from `@sentry/react`. This field
+   * is kept for backward-compatibility but is not used in the integration setup.
+   * See: https://docs.sentry.io/platforms/javascript/guides/react/features/react-router/
    */
   reactRouter?: {
     useEffect: typeof React.useEffect;
@@ -57,39 +38,17 @@ export function initSentryBrowser(config: SentryBrowserConfig): void {
     return;
   }
 
-  const browserTracingIntegration = config.reactRouter
-    ? new BrowserTracing({
-        tracingOrigins: [
-          "localhost",
-          /^\//,
-          // Match API URLs
-          /^https:\/\/.*\.(?:apply-ai|example\.com)\/api/,
-        ],
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          config.reactRouter.useEffect,
-          config.reactRouter.useLocation,
-          config.reactRouter.useNavigationType,
-          config.reactRouter.createRoutesFromChildren,
-          config.reactRouter.matchRoutes
-        ),
-      })
-    : new BrowserTracing({
-        tracingOrigins: [
-          "localhost",
-          /^\//,
-          /^https:\/\/.*\.(?:apply-ai|example\.com)\/api/,
-        ],
-      });
-
   Sentry.init({
     dsn: config.dsn,
     environment: config.environment,
     debug: config.debug ?? false,
 
     // Performance Monitoring
+    // tracePropagationTargets controls which outgoing requests receive tracing headers.
+    tracePropagationTargets: ["localhost", /^\//, /^https:\/\/.*\.(?:apply-ai|example\.com)\/api/],
     integrations: [
-      browserTracingIntegration,
-      new Sentry.Replay({
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
         maskAllText: true,
         blockAllMedia: true,
       }),

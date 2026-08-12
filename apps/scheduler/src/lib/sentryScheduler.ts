@@ -54,10 +54,9 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): cron.ScheduledT
         console.log(`🚀 [${name}] Cron job started`);
 
         // Create transaction for this cron execution
-        const transaction = Sentry.startTransaction({
+        const transaction = Sentry.startInactiveSpan({
           name: `cron.${name}`,
           op: "cron.schedule",
-          description: `Executing ${name} (${schedule})`,
         });
 
         try {
@@ -65,8 +64,7 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): cron.ScheduledT
           await task();
 
           const duration = Date.now() - startTime;
-          transaction.setStatus("ok");
-          transaction.finish();
+          transaction.end();
 
           // Track successful cron job
           trackCronJob({
@@ -95,8 +93,8 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): cron.ScheduledT
           console.log(`✅ [${name}] Cron job completed successfully (${duration}ms)`);
         } catch (executionError) {
           const duration = Date.now() - startTime;
-          transaction.setStatus("error");
-          transaction.finish();
+          transaction.setStatus({ code: 2 });
+          transaction.end();
 
           // Capture error with context
           Sentry.captureException(executionError, {

@@ -29,11 +29,10 @@ export class SentryStrategy implements IErrorTrackingProvider {
       tracesSampleRate: config.tracesSampleRate ?? 1.0,
       profilesSampleRate: config.profilesSampleRate ?? 1.0,
       integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.OnUncaughtException(),
-        new Sentry.Integrations.OnUnhandledRejection(),
+        Sentry.httpIntegration({ spans: true }),
+        Sentry.onUncaughtExceptionIntegration(),
+        Sentry.onUnhandledRejectionIntegration(),
       ],
-      autoSessionTracking: true,
       beforeSend: (event) => {
         // Redact sensitive data
         if (event.request?.headers) {
@@ -134,19 +133,25 @@ export class SentryStrategy implements IErrorTrackingProvider {
       };
     }
 
-    const sentryTransaction = Sentry.startTransaction({
+    const sentryTransaction = Sentry.startInactiveSpan({
       name: transaction.name,
       op: transaction.op,
-      description: transaction.description,
     });
 
     if (transaction.tags) {
       Object.entries(transaction.tags).forEach(([key, value]) => {
-        sentryTransaction.setTag(key, value);
+        sentryTransaction.setAttribute(key, value);
       });
     }
 
-    return sentryTransaction;
+    return {
+      setStatus: (status: "ok" | "error") => {
+        sentryTransaction.setStatus({ code: status === "ok" ? 1 : 2 });
+      },
+      finish: () => {
+        sentryTransaction.end();
+      },
+    };
   }
 
   async withScope<T>(fn: (scope: any) => T | Promise<T>): Promise<T> {

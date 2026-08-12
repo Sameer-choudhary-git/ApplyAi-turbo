@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/node";
+import type { Integration } from "@sentry/core";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 export interface SentryNodeConfig {
@@ -7,8 +8,8 @@ export interface SentryNodeConfig {
   debug?: boolean;
   tracesSampleRate?: number;
   profilesSampleRate?: number;
-  beforeSend?: (event: Sentry.Event) => Sentry.Event | null;
-  integrations?: Sentry.Integration[];
+  beforeSend?: (event: Sentry.ErrorEvent) => Sentry.ErrorEvent | null;
+  integrations?: Integration[];
 }
 
 /**
@@ -33,14 +34,11 @@ export function initSentryNode(config: SentryNodeConfig): void {
     profilesSampleRate: config.profilesSampleRate ?? 1.0,
     integrations: [
       nodeProfilingIntegration(),
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.OnUncaughtException(),
-      new Sentry.Integrations.OnUnhandledRejection(),
+      Sentry.httpIntegration({ spans: true }),
+      Sentry.onUncaughtExceptionIntegration(),
+      Sentry.onUnhandledRejectionIntegration(),
       ...(config.integrations ?? []),
     ],
-
-    // Automatic request context
-    autoSessionTracking: true,
 
     // Custom before send for filtering/redacting sensitive data
     beforeSend: (event, hint) => {

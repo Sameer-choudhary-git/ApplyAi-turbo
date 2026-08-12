@@ -81,18 +81,16 @@ export function createSentryWorker({
           }
 
           // Execute with transaction tracking
-          const transaction = Sentry.startTransaction({
+          const transaction = Sentry.startInactiveSpan({
             name: `job.${jobName}`,
             op: "queue.job",
-            description: `Processing ${jobName} (${jobId})`,
           });
 
           try {
             await handler.execute(job.data);
 
             const duration = Date.now() - startTime;
-            transaction.setStatus("ok");
-            transaction.finish();
+            transaction.end();
 
             // Track successful job
             trackJob({
@@ -125,8 +123,8 @@ export function createSentryWorker({
             );
           } catch (executionError) {
             const duration = Date.now() - startTime;
-            transaction.setStatus("error");
-            transaction.finish();
+            transaction.setStatus({ code: 2 });
+            transaction.end();
 
             // Capture with context
             Sentry.captureException(executionError, {
