@@ -1,7 +1,7 @@
-import type { Context } from "hono";
+﻿import type { Context } from "hono";
 import { ZodError } from "zod";
 import * as Sentry from "@sentry/node";
-import { captureHandledError } from "@applyai/sentry";
+import { captureHandledError } from "@applyai/sentry/node";
 
 export function errorHandler(err: Error, c: Context) {
   const method = c.req.method;
@@ -11,7 +11,7 @@ export function errorHandler(err: Error, c: Context) {
 
   console.error(`[ERROR] ${method} ${path}`, err);
 
-  // Zod validation errors → 400
+  // Zod validation errors â†’ 400
   if (err instanceof ZodError) {
     const issues = err.errors.map((e) => ({
       field: e.path.join("."),
@@ -64,7 +64,7 @@ export function errorHandler(err: Error, c: Context) {
   // Determine status code
   const statusCode = (err as any).statusCode || 500;
 
-  // Generic server error → 500
+  // Generic server error â†’ 500
   return c.json(
     {
       success: false,

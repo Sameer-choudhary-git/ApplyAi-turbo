@@ -295,4 +295,48 @@ export function useSetSentryUser() {
   };
 }
 
-export default Sentry;
+export default Sentry;export interface SentryConfig {
+  dsn: string;
+  environment: string;
+  debug?: boolean;
+  tracesSampleRate?: number;
+  replaysSessionSampleRate?: number;
+  replaysOnErrorSampleRate?: number;
+}
+
+type BrowserEnv = Record<string, string | undefined>;
+
+function getBrowserEnv(): BrowserEnv {
+  return ((import.meta as ImportMeta & { env?: BrowserEnv }).env ?? {});
+}
+
+export function getSentryDSN(): string {
+  const env = getBrowserEnv();
+  return env.VITE_SENTRY_DSN ?? env.SENTRY_DSN ?? (typeof process !== "undefined" ? process.env.SENTRY_DSN : undefined) ?? "";
+}
+
+export function getEnvironment(): string {
+  const env = getBrowserEnv();
+  return env.VITE_APP_ENV ?? env.MODE ?? (typeof process !== "undefined" ? process.env.NODE_ENV : undefined) ?? "development";
+}
+
+export function isSentryEnabled(): boolean {
+  const env = getBrowserEnv();
+  return env.VITE_ENABLE_SENTRY === "true" && Boolean(getSentryDSN());
+}
+
+export function isProduction(): boolean {
+  return getEnvironment() === "production";
+}
+
+export function createSentryConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+  return {
+    dsn: getSentryDSN(),
+    environment: getEnvironment(),
+    debug: getEnvironment() !== "production",
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.05,
+    replaysOnErrorSampleRate: 1,
+    ...overrides,
+  };
+}

@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+﻿import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
@@ -33,10 +33,9 @@ const allowedOrigins = [
     .filter(Boolean),
 ];
 
-
 export const app = new Hono();
 
-// ── Global middleware ──────────────────────────────────────
+// â”€â”€ Global middleware â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Sentry middleware for context and error tracking (should be early)
 app.use("*", sentryContextMiddleware);
 
@@ -86,10 +85,10 @@ app.use(
 
 // Log startup info
 if (envConfig.isDevelopment) {
-  console.log(`🚀 Running in ${envConfig.environment} mode`);
+  console.log(`ðŸš€ Running in ${envConfig.environment} mode`);
 }
 
-// ── Routes ─────────────────────────────────────────────────
+// â”€â”€ Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.route("/health", healthRoutes);
 app.route("/api/auth", authRoutes);
 app.route("/api/users", userRoutes);
@@ -109,10 +108,10 @@ app.route("/api/google-calendar", googleCalendar);
 app.route("/api/admin/jobs", adminJobsRouter);
 
 
-// ── 404 ────────────────────────────────────────────────────
+// â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.notFound((c) => {
   return c.json({ success: false, error: "Route not found" }, 404);
 });
 
-// ── Global error handler ───────────────────────────────────
+// â”€â”€ Global error handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.onError(errorHandler);

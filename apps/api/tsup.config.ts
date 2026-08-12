@@ -8,13 +8,10 @@ export default defineConfig({
   outDir: "dist",
   clean: true,
   sourcemap: true,
-  // Bundle all @applyai/* workspace packages inline, since most of them
-  // ship raw .ts source (main -> ./src/index.ts) rather than pre-built JS.
-  // Without this, `node dist/index.js` would try to import .ts files
-  // at runtime and crash.
+  // Bundle workspace packages because most of them ship raw TypeScript source.
   noExternal: [/^@applyai\//],
-  // Keep heavy/native deps external — they must be real node_modules
-  // installed in the deploy image, not bundled.
+  // Keep heavy/native dependencies external so deployment resolves them from
+  // node_modules instead of trying to embed native binaries into the bundle.
   external: [
     "playwright",
     "pg",
@@ -25,5 +22,8 @@ export default defineConfig({
     "pino-pretty",
     "bullmq",
     "ioredis",
+    "@sentry/node",
+    "@sentry/core",
+    "@sentry/profiling-node",
   ],
 });

@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+﻿import * as Sentry from "@sentry/node";
 import type { Integration } from "@sentry/core";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
@@ -18,7 +18,7 @@ export interface SentryNodeConfig {
  */
 export function initSentryNode(config: SentryNodeConfig): void {
   if (!config.dsn) {
-    console.warn("⚠️  Sentry DSN not provided. Error reporting disabled.");
+    console.warn("âš ï¸  Sentry DSN not provided. Error reporting disabled.");
     return;
   }
 
@@ -82,7 +82,7 @@ export function initSentryNode(config: SentryNodeConfig): void {
     ],
   });
 
-  console.log(`✅ Sentry initialized for Node.js in ${config.environment} environment`);
+  console.log(`âœ… Sentry initialized for Node.js in ${config.environment} environment`);
 }
 
 /**
@@ -323,4 +323,18 @@ export function captureHandledError(
   });
 }
 
-export default Sentry;
+export default Sentry;export { trackApiRequest, trackJob, trackCronJob, trackDatabase, trackTransaction, addTraceBreadcrumb } from "./utils.js";
+
+export function getSentryDSN(): string {
+  return process.env.SENTRY_DSN ?? "";
+}
+
+export function getEnvironment(): string {
+  return process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? "development";
+}
+
+export function isSentryEnabled(): boolean {
+  const dsn = getSentryDSN();
+  const explicitFlag = process.env.ENABLE_SENTRY ?? process.env.SENTRY_ENABLED;
+  return Boolean(dsn) && (explicitFlag === undefined || explicitFlag === "true");
+}

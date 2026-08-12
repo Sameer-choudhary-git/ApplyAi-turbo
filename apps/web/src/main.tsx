@@ -10,67 +10,43 @@ import {
 import App from "@/App";
 import "@/index.css";
 
-// Initialize Sentry FIRST before rendering
+const environment = getEnvironment();
+const isProduction = environment === "production";
+
+// Initialize Sentry before React renders so bootstrap and routing failures are captured.
 if (isSentryEnabled()) {
   initSentryBrowser({
     dsn: getSentryDSN(),
-    environment: getEnvironment(),
-    debug: process.env.NODE_ENV === "development",
-    tracesSampleRate: 1.0,
-    replaysSessionSampleRate: 0.1, // 10% of sessions
-    replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
+    environment,
+    debug: !isProduction,
+    tracesSampleRate: isProduction ? 0.1 : 1.0,
+    replaysSessionSampleRate: isProduction ? 0.05 : 0.1,
+    replaysOnErrorSampleRate: 1.0,
   });
-  console.log(`✅ Sentry initialized for Web (${getEnvironment()})`);
-} else {
-  console.warn("⚠️  Sentry DSN not configured - error reporting disabled");
+  if (!isProduction) {
+    console.info(`[Apply AI] Sentry initialized for Web (${environment})`);
+  }
+} else if (!isProduction) {
+  console.info("[Apply AI] Sentry is disabled. Set VITE_ENABLE_SENTRY=true and VITE_SENTRY_DSN to enable it.");
 }
 
-// Force dark mode globally
 document.documentElement.classList.add("dark");
 
-// The '!' tells TypeScript that this element will definitely not be null
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary
       fallback={
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100vh",
-            backgroundColor: "#0f0f0f",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            color: "#fff",
-          }}
-        >
-          <div style={{ textAlign: "center", padding: "20px" }}>
-            <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
-              Something went wrong
-            </h1>
-            <p style={{ color: "#aaa", marginBottom: "20px" }}>
-              We've been notified about the issue and are looking into it.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "16px",
-              }}
-            >
-              Reload Page
-            </button>
+        <div className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">!</div>
+            <h1 className="mt-5 font-heading text-2xl font-extrabold tracking-tight">Something went wrong</h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">We&apos;ve captured the issue and are working on it. Reload to return to your workspace.</p>
+            <button type="button" onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5">Reload workspace</button>
           </div>
         </div>
       }
     >
       <App />
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

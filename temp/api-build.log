@@ -1,0 +1,54 @@
+
+> @applyai/api@1.0.0 build D:\Shinchan\Coding\ApplyAi-turbo\apps\api
+> tsup
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Using tsup config: D:\Shinchan\Coding\ApplyAi-turbo\apps\api\tsup.config.ts
+[34mCLI[39m Target: node18
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+X [ERROR] No matching export in "../../packages/sentry/dist/node.js" for import "trackJob"
+
+    ../../packages/queue/src/sentryWorkerFactory.ts:3:9:
+      3 │ import { trackJob } from "@applyai/sentry";
+        ╵          ~~~~~~~~
+
+X [ERROR] No matching export in "../../packages/sentry/dist/node.js" for import "getSentryDSN"
+
+    src/index.ts:5:2:
+      5 │   getSentryDSN, 
+        ╵   ~~~~~~~~~~~~
+
+X [ERROR] No matching export in "../../packages/sentry/dist/node.js" for import "getEnvironment"
+
+    src/index.ts:6:2:
+      6 │   getEnvironment,
+        ╵   ~~~~~~~~~~~~~~
+
+X [ERROR] No matching export in "../../packages/sentry/dist/node.js" for import "isSentryEnabled"
+
+    src/index.ts:7:2:
+      7 │   isSentryEnabled 
+        ╵   ~~~~~~~~~~~~~~~
+
+[31mESM[39m [31mBuild failed[39m
+[31mError: Build failed with 4 errors:
+src/index.ts:5:2: ERROR: No matching export in "../../packages/sentry/dist/node.js" for import "getSentryDSN"
+src/index.ts:6:2: ERROR: No matching export in "../../packages/sentry/dist/node.js" for import "getEnvironment"
+src/index.ts:7:2: ERROR: No matching export in "../../packages/sentry/dist/node.js" for import "isSentryEnabled"
+../../packages/queue/src/sentryWorkerFactory.ts:3:9: ERROR: No matching export in "../../packages/sentry/dist/node.js" for import "trackJob"
+    at failureErrorWithLog (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:1467:15)
+    at D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:926:25
+    at runOnEndCallbacks (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:1307:45)
+    at buildResponseToResult (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:924:7)
+    at D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:951:16
+    at responseCallbacks.<computed> (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:658:12)
+    at Socket.readFromStdout (D:\Shinchan\Coding\ApplyAi-turbo\node_modules\.pnpm\esbuild@0.27.3\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)[39m
+D:\Shinchan\Coding\ApplyAi-turbo\apps\api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @applyai/api@1.0.0 build: `tsup`
+Exit status 1
