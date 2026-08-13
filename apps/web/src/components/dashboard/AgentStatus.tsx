@@ -29,7 +29,7 @@ export default function AgentStatus({ profile }) {
                 isActive ? { scale: [1, 1.3, 1], opacity: [1, 0.6, 1] } : {}
               }
               transition={{ duration: 2, repeat: Infinity }}
-              className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-background ${isActive ? "bg-emerald-400" : "bg-muted-foreground"}`}
+              className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-background ${isActive ? "bg-sky-300" : "bg-muted-foreground"}`}
             />
           </div>
 
@@ -42,11 +42,11 @@ export default function AgentStatus({ profile }) {
               variant="outline"
               className={`w-fit px-2 py-0.5 text-[10px] font-bold tracking-wider ${
                 isActive
-                  ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                  ? "text-sky-300 border-sky-400/30 bg-sky-400/10"
                   : "text-muted-foreground border-border bg-muted/50"
               }`}
             >
-              {isActive ? "● SCANNING" : "○ IDLE"}
+              {isActive ? "â— SCANNING" : "â—‹ IDLE"}
             </Badge>
           </div>
         </div>

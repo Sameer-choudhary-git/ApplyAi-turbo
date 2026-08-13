@@ -41,7 +41,7 @@ const groups: Array<{ label: string; items: NavItem[] }> = [
     ],
   },
   {
-    label: "Execution",
+    label: "Planning",
     items: [
       { path: "/schedule", icon: CalendarDays, label: "Schedule" },
       { path: "/tasks", icon: ListTodo, label: "Tasks" },
@@ -49,173 +49,95 @@ const groups: Array<{ label: string; items: NavItem[] }> = [
   },
   {
     label: "Insights",
+    items: [{ path: "/analytics", icon: BarChart3, label: "Analytics" }],
+  },
+  {
+    label: "System",
     items: [
-      { path: "/analytics", icon: BarChart3, label: "Analytics" },
       { path: "/preferences", icon: Settings2, label: "Preferences" },
+      { path: "/admin/jobs", icon: ClipboardCheck, label: "Job admin" },
     ],
   },
 ];
 
 function LogoMark() {
   return (
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[13px] bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]">
-      <div className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white/30 blur-md" />
-      <Sparkles className="relative h-[18px] w-[18px]" strokeWidth={2.5} />
+    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-primary/30 bg-primary/12 shadow-[0_12px_30px_-18px_hsl(var(--primary)/.75)]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/.34),transparent_55%)]" />
+      <Sparkles className="relative h-[18px] w-[18px] text-primary" strokeWidth={2.2} />
     </div>
   );
 }
 
-export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
+function SidebarItem({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const location = useLocation();
-  const isActive = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const isActive = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
+  const Icon = item.icon;
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: collapsed ? 88 : 288 }}
-      transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-sidebar-border/80 bg-sidebar/95 px-3 py-4 backdrop-blur-2xl md:flex"
+    <Link
+      to={item.path}
+      title={collapsed ? item.label : undefined}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold",
+        collapsed ? "justify-center px-0" : "",
+        isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/58 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+      )}
     >
-      <div className={cn("flex items-center gap-3 px-2", collapsed ? "justify-center" : "justify-between")}>
-        <Link to="/" aria-label="Apply AI home" className="group flex min-w-0 items-center gap-3">
-          <LogoMark />
-          <AnimatePresence initial={false}>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0, x: -6 }}
-                animate={{ opacity: 1, width: "auto", x: 0 }}
-                exit={{ opacity: 0, width: 0, x: -6 }}
-                transition={{ duration: 0.2 }}
-                className="min-w-0 overflow-hidden whitespace-nowrap"
-              >
-                <p className="font-heading text-[15px] font-extrabold tracking-tight text-sidebar-accent-foreground">Apply AI</p>
-                <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/45">Career OS</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Link>
+      {isActive && (
+        <motion.span layoutId="sidebar-active-pill" className="absolute inset-0 rounded-xl bg-sidebar-accent shadow-[inset_0_1px_0_hsl(var(--foreground)/.04)]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />
+      )}
+      <Icon className={cn("relative z-10 h-[18px] w-[18px] shrink-0", isActive ? "text-primary" : "text-sidebar-foreground/42 group-hover:text-sidebar-foreground/75")} strokeWidth={isActive ? 2.2 : 1.8} />
+      <AnimatePresence initial={false}>
         {!collapsed && (
-          <button
-            type="button"
-            onClick={() => setCollapsed(true)}
-            aria-label="Collapse navigation"
-            className="rounded-lg p-2 text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          <motion.span initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -5 }} transition={{ duration: 0.16 }} className="relative z-10 truncate">{item.label}</motion.span>
         )}
+      </AnimatePresence>
+      {isActive && !collapsed && <span className="relative z-10 ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+    </Link>
+  );
+}
+
+export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
+  return (
+    <motion.aside initial={false} animate={{ width: collapsed ? 84 : 264 }} transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }} className="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-sidebar-border bg-sidebar/92 px-3 py-4 shadow-[18px_0_70px_-52px_hsl(222_35%_3%/.95)] backdrop-blur-2xl">
+      <div className={cn("flex items-center gap-3 px-2", collapsed ? "justify-center" : "")}>
+        <LogoMark />
+        <AnimatePresence initial={false}>
+          {!collapsed && (
+            <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.16 }} className="min-w-0">
+              <p className="font-heading text-[15px] font-extrabold tracking-[-0.03em] text-sidebar-foreground">Apply AI</p>
+              <p className="mt-0.5 truncate text-[11px] font-medium text-sidebar-foreground/42">Career command center</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="my-6 h-px bg-sidebar-border/80" />
-
-      <nav className="min-h-0 flex-1 space-y-6 overflow-y-auto px-1" aria-label="Primary navigation">
+      <div className={cn("mt-8 flex-1 overflow-y-auto pb-4", collapsed ? "px-0" : "px-1", "scrollbar-subtle")}>
         {groups.map((group) => (
-          <div key={group.label}>
-            <AnimatePresence initial={false}>
-              {!collapsed && (
-                <motion.p
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/35"
-                >
-                  {group.label}
-                </motion.p>
-              )}
-            </AnimatePresence>
+          <div key={group.label} className="mb-6 last:mb-0">
+            {!collapsed && <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/32">{group.label}</p>}
             <div className="space-y-1">
-              {group.items.map((item) => {
-                const active = isActive(item.path);
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    title={collapsed ? item.label : undefined}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors",
-                      collapsed && "justify-center px-0",
-                      active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/62 hover:text-sidebar-foreground",
-                    )}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="sidebar-active"
-                        className="absolute inset-0 rounded-xl bg-sidebar-accent shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.04)]"
-                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      />
-                    )}
-                    <span className={cn("relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all", active ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-12px_hsl(var(--primary))]" : "bg-transparent text-sidebar-foreground/55 group-hover:bg-sidebar-accent group-hover:text-sidebar-foreground")}>
-                      <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.4 : 2} />
-                    </span>
-                    <AnimatePresence initial={false}>
-                      {!collapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, width: 0, x: -4 }}
-                          animate={{ opacity: 1, width: "auto", x: 0 }}
-                          exit={{ opacity: 0, width: 0, x: -4 }}
-                          transition={{ duration: 0.18 }}
-                          className="relative z-10 min-w-0 flex-1 overflow-hidden whitespace-nowrap"
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    {!collapsed && active && <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary))]" />}
-                  </Link>
-                );
-              })}
+              {group.items.map((item) => <SidebarItem key={item.path} item={item} collapsed={collapsed} />)}
             </div>
           </div>
         ))}
-      </nav>
+      </div>
 
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            className="mb-3 mt-5 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-sidebar-accent/30 to-accent/10 p-3.5"
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-50" /><span className="relative inline-flex h-2 w-2 rounded-full bg-primary" /></span>
-                Live agent
-              </span>
-              <Activity className="h-4 w-4 text-primary/60" />
-            </div>
-            <p className="text-sm font-semibold text-sidebar-accent-foreground">Career copilot is online</p>
-            <p className="mt-1 text-xs leading-relaxed text-sidebar-foreground/55">Matching roles and keeping your next move organized.</p>
-            <Link to="/preferences" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary transition-colors hover:text-primary/80">
-              Tune your strategy <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="border-t border-sidebar-border/80 pt-3">
-        {collapsed ? (
-          <button
-            type="button"
-            onClick={() => setCollapsed(false)}
-            aria-label="Expand navigation"
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        ) : (
-          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary text-xs font-bold text-primary-foreground">AI</div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-sidebar-accent-foreground">Your workspace</p>
-              <p className="truncate text-[11px] text-sidebar-foreground/45">Personal career hub</p>
-            </div>
-            <ClipboardCheck className="h-4 w-4 text-sidebar-foreground/35" />
-          </div>
-        )}
+      <div className={cn("border-t border-sidebar-border pt-3", collapsed ? "px-0" : "px-1")}>
+        <AnimatePresence initial={false}>
+          {!collapsed && (
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} className="mb-3 rounded-2xl border border-primary/15 bg-primary/[0.07] p-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-sidebar-foreground"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><Activity className="h-3.5 w-3.5" /></span>Workspace ready</div>
+              <p className="mt-2 text-[11px] leading-5 text-sidebar-foreground/45">Your applications, follow-ups, and next steps in one place.</p>
+              <Link to="/analytics" className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-sidebar-foreground">View insights <ArrowUpRight className="h-3.5 w-3.5" /></Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button type="button" onClick={() => setCollapsed((value) => !value)} aria-label={collapsed ? "Expand navigation" : "Collapse navigation"} className={cn("flex h-10 w-full items-center rounded-xl text-xs font-semibold text-sidebar-foreground/45 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground", collapsed ? "justify-center" : "gap-2 px-3")}>
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /><span>Collapse sidebar</span></>}
+        </button>
       </div>
     </motion.aside>
   );

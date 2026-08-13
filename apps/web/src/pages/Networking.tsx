@@ -65,13 +65,13 @@ const RELATIONSHIP_COLORS: Record<string, string> = {
   recruiter: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   peer: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   mentor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  alumni: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  alumni: "bg-sky-400/10 text-sky-300 border-sky-400/20",
   referral: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   other: "bg-slate-500/10 text-slate-400 border-slate-500/20",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  connected: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  connected: "bg-sky-400/10 text-sky-300 border-sky-400/20",
   pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   following: "bg-sky-500/10 text-sky-400 border-sky-500/20",
   met: "bg-violet-500/10 text-violet-400 border-violet-500/20",
@@ -547,7 +547,7 @@ export default function Networking() {
             label: "Recruiters",
             value: stats.recruiters,
             icon: UserCheck,
-            color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+            color: "text-sky-300 bg-sky-400/10 border-sky-400/20",
           },
           {
             label: "Referral Potential",

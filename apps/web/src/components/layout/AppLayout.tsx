@@ -7,17 +7,15 @@ import Sidebar from "./Sidebar";
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const sidebarWidth = collapsed ? 88 : 288;
+  const sidebarWidth = collapsed ? 84 : 264;
 
   return (
-    <div className="noise-overlay relative min-h-screen overflow-x-clip bg-background font-body">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-        <div className="absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute left-[17%] top-0 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
-        <div className="grid-surface absolute inset-x-0 top-0 h-[32rem] opacity-40" />
-      </div>
+    <div className="noise-overlay relative min-h-screen overflow-x-clip bg-background">
+      <div className="grid-surface pointer-events-none absolute inset-x-0 top-0 h-[34rem] opacity-60" />
+      <div className="pointer-events-none absolute -left-40 top-12 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-10rem] top-64 h-96 w-96 rounded-full bg-sky-300/5 blur-3xl" />
 
-      <div className="hidden md:block">
+      <div className="relative z-20 hidden md:block">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       </div>
       <MobileNav />
@@ -25,17 +23,17 @@ export default function AppLayout() {
       <motion.main
         initial={false}
         animate={{ marginLeft: sidebarWidth }}
-        transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden min-h-screen md:block"
+        transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
+        className="relative z-10 hidden min-h-screen md:block"
       >
-        <div className="mx-auto max-w-[1540px] px-8 py-8 lg:px-10 lg:py-10">
+        <div className="mx-auto max-w-[1480px] px-6 py-7 lg:px-9 lg:py-9">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
             >
               <Outlet />
             </motion.div>
@@ -43,15 +41,15 @@ export default function AppLayout() {
         </div>
       </motion.main>
 
-      <main className="min-h-screen pb-24 md:hidden">
+      <main className="relative z-10 min-h-screen pb-24 md:hidden">
         <div className="px-4 pb-4 pt-5">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.24, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             >
               <Outlet />
             </motion.div>

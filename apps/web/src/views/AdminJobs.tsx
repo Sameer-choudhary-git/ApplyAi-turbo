@@ -16,6 +16,9 @@ const JOB_LABELS: Record<string, string> = {
   "apply-queue-eligible-user": "Queue Eligible Users for Apply",
 };
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : 'Request failed';
+
 export default function AdminJobs() {
   const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<{ key: string; success: boolean; message: string } | null>(null);
@@ -37,8 +40,8 @@ export default function AdminJobs() {
     onSuccess: (res, key) => {
       setLastResult({ key, success: res.success, message: res.message || res.error || "Done" });
     },
-    onError: (err: any, key) => {
-      setLastResult({ key, success: false, message: err.message || "Request failed" });
+    onError: (err: unknown, key) => {
+      setLastResult({ key, success: false, message: getErrorMessage(err) });
     },
   });
 
@@ -50,8 +53,8 @@ export default function AdminJobs() {
     onSuccess: (res) => {
       setLastResult({ key: "all", success: res.success, message: res.message || res.error || "Done" });
     },
-    onError: (err: any) => {
-      setLastResult({ key: "all", success: false, message: err.message || "Request failed" });
+    onError: (err: unknown) => {
+      setLastResult({ key: "all", success: false, message: getErrorMessage(err) });
     },
   });
 
@@ -61,7 +64,7 @@ export default function AdminJobs() {
         <ShieldAlert className="w-10 h-10 text-rose-400 mx-auto mb-4" />
         <h1 className="text-xl font-heading font-bold text-foreground">Access denied</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Your account isn't in the admin allowlist, or you're not signed in.
+          Your account isn&apos;t in the admin allowlist, or you&apos;re not signed in.
         </p>
       </div>
     );
@@ -85,7 +88,7 @@ export default function AdminJobs() {
         <div
           className={`flex items-start gap-3 p-4 rounded-xl border text-sm ${
             lastResult.success
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              ? "bg-sky-400/10 border-sky-400/20 text-sky-300"
               : "bg-rose-500/10 border-rose-500/20 text-rose-400"
           }`}
         >

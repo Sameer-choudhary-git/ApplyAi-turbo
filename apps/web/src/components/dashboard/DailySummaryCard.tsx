@@ -53,8 +53,8 @@ export default function DailySummaryCard({ summary }) {
                 icon: MessageSquare,
                 value: summary?.responses_received || 0,
                 label: "Replies",
-                color: "text-emerald-400",
-                bg: "bg-emerald-500/10 border-emerald-500/20",
+                color: "text-sky-300",
+                bg: "bg-sky-400/10 border-sky-400/20",
               },
               {
                 icon: Calendar,

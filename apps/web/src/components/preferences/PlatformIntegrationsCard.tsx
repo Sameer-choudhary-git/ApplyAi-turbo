@@ -11,9 +11,9 @@ import {
   EXTRA_COMPONENTS,
 } from "@/registry/platformRegistry";
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Premium Accent Themes (Imported from your toggles component)
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type AccentTheme = {
   gradient: string;
@@ -36,7 +36,7 @@ const PLATFORM_ACCENT: Record<string, AccentTheme> = {
     text: "text-blue-400",
     iconBg: "bg-blue-500/20",
     switchOn: "data-[state=checked]:bg-blue-500",
-    badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
     badgeInactive: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   },
   commudle: {
@@ -47,7 +47,7 @@ const PLATFORM_ACCENT: Record<string, AccentTheme> = {
     text: "text-violet-400",
     iconBg: "bg-violet-500/20",
     switchOn: "data-[state=checked]:bg-violet-500",
-    badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
     badgeInactive: "bg-violet-500/10 border-violet-500/20 text-violet-400",
   },
 };
@@ -60,13 +60,13 @@ const DEFAULT_ACCENT: AccentTheme = {
   text: "text-primary",
   iconBg: "bg-primary/20",
   switchOn: "data-[state=checked]:bg-primary",
-  badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+  badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
   badgeInactive: "bg-primary/10 border-primary/20 text-primary",
 };
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Component
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function PlatformIntegrationsCard({
   preferredPlatforms,
@@ -203,7 +203,7 @@ export function PlatformIntegrationsCard({
                                   {platform.displayName}.
                                   {!sessionActive && (
                                     <span className="block mt-1 text-amber-400/80">
-                                      ⚠ Requires an active session.
+                                      âš  Requires an active session.
                                     </span>
                                   )}
                                 </p>

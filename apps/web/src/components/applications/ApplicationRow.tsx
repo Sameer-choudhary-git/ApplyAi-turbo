@@ -16,7 +16,7 @@
 //   under_review: { label: "Under Review", class: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
 //   shortlisted: { label: "Shortlisted", class: "bg-primary/10 text-primary border-primary/20" },
 //   interview_scheduled: { label: "Interview", class: "bg-accent/10 text-accent border-accent/20" },
-//   accepted: { label: "Accepted", class: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+//   accepted: { label: "Accepted", class: "bg-sky-400/10 text-sky-300 border-sky-400/20" },
 //   rejected: { label: "Rejected", class: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
 //   withdrawn: { label: "Withdrawn", class: "bg-muted text-muted-foreground border-border" },
 // };
@@ -84,8 +84,8 @@
 //           </div>
 
 //           {app.stipend && (
-//             <p className="text-xs text-emerald-400/90 font-medium mt-2">
-//               💰 {app.stipend}
+//             <p className="text-xs text-sky-300/90 font-medium mt-2">
+//               ðŸ’° {app.stipend}
 //             </p>
 //           )}
 //         </div>
@@ -139,7 +139,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import ScheduleActionMenu from "./ScheduleActionMenu";
 
-// ✅ Canonical status config, keyed by NORMALIZED status (lowercase, underscores).
+// âœ… Canonical status config, keyed by NORMALIZED status (lowercase, underscores).
 // This now covers both the user-facing lifecycle AND the raw statuses the
 // apply agent actually writes (APPLIED, ACTION_REQUIRED, ALREADY_APPLIED, ERROR),
 // so nothing falls through to a silently-wrong default anymore.
@@ -150,7 +150,7 @@ const statusConfig: Record<string, { label: string; class: string }> = {
   action_required: { label: "Action Required", class: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   shortlisted: { label: "Shortlisted", class: "bg-primary/10 text-primary border-primary/20" },
   interview_scheduled: { label: "Interview", class: "bg-accent/10 text-accent border-accent/20" },
-  accepted: { label: "Accepted", class: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  accepted: { label: "Accepted", class: "bg-sky-400/10 text-sky-300 border-sky-400/20" },
   rejected: { label: "Rejected", class: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
   error: { label: "Error", class: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
   withdrawn: { label: "Withdrawn", class: "bg-muted text-muted-foreground border-border" },
@@ -178,7 +178,7 @@ function getStatusDisplay(status?: string) {
   const key = normalizeStatus(status);
   if (statusConfig[key]) return statusConfig[key];
 
-  // ✅ Unmapped statuses now surface AS-IS (instead of silently becoming
+  // âœ… Unmapped statuses now surface AS-IS (instead of silently becoming
   // "Applied"), so a mismatch like this is visible and debuggable in the UI.
   return {
     label: status || "Unknown",
@@ -204,7 +204,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
 
   const status = getStatusDisplay(app.status);
 
-  // ✅ Manual status correction — assumes PATCH /applications/:id/status.
+  // âœ… Manual status correction â€” assumes PATCH /applications/:id/status.
   // Adjust the path/body shape if your actual API route differs.
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: string) =>
@@ -255,8 +255,8 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
           </div>
 
           {app.stipend && (
-            <p className="text-xs text-emerald-400/90 font-medium mt-2">
-              💰 {app.stipend}
+            <p className="text-xs text-sky-300/90 font-medium mt-2">
+              ðŸ’° {app.stipend}
             </p>
           )}
         </div>
@@ -275,7 +275,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
             </Badge>
           )}
 
-          {/* Status badge — click the pencil to correct it manually */}
+          {/* Status badge â€” click the pencil to correct it manually */}
           {isEditingStatus ? (
             <div className="flex items-center gap-1">
               <select
@@ -320,8 +320,8 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
 
           {/* Dropdown lives outside the badges, as its own control */}
           <ScheduleActionMenu app={app} onScheduled={onInterviewScheduled} />
-          {/* ✅ Always-visible open-link action (previously only appeared next
-              to the title, and only on row hover — easy to miss) */}
+          {/* âœ… Always-visible open-link action (previously only appeared next
+              to the title, and only on row hover â€” easy to miss) */}
           {app.jobLink && (
             <a
               href={app.jobLink}

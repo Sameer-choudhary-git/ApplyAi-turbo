@@ -120,8 +120,8 @@ export function RoleSpecificationsCard({
               <Label className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
                 Min. Stipend/Salary
               </Label>
-              <span className="text-sm font-bold text-emerald-400">
-                ₹{minStipend.toLocaleString()}/mo
+              <span className="text-sm font-bold text-sky-300">
+                â‚¹{minStipend.toLocaleString()}/mo
               </span>
             </div>
             <Slider
@@ -142,7 +142,7 @@ export function RoleSpecificationsCard({
               <Input
                 value={newLocation}
                 onChange={(e) => setNewLocation(e.target.value)}
-                placeholder="e.g. Bangalore, Remote…"
+                placeholder="e.g. Bangalore, Remoteâ€¦"
                 className="bg-background/50 border-border/50"
                 onKeyDown={(e) => e.key === "Enter" && handleAddLocation()}
               />

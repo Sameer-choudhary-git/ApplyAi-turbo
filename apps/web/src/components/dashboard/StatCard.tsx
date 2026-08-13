@@ -9,8 +9,8 @@ const styles = {
     value: "text-foreground", // Keeping value white/foreground for better readability
   },
   accent: {
-    wrap: "border-teal-400/20 bg-teal-400/5",
-    icon: "bg-teal-400/15 text-teal-400",
+    wrap: "border-sky-300/20 bg-sky-300/5",
+    icon: "bg-sky-300/15 text-sky-300",
     value: "text-foreground",
   },
   warning: {

@@ -278,7 +278,7 @@ export default function Tasks() {
                         handleToggle(task.id, checked as boolean)
                       }
                       disabled={toggleMutation.isPending}
-                      className="w-5 h-5 rounded-md data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                      className="w-5 h-5 rounded-md data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                     />
                     <div className="flex-1 min-w-0">
                       <p

@@ -36,7 +36,7 @@ const tooltipContentStyle = {
 };
 
 export default function Analytics({ applications = [], isLoading = false }) {
-  // ── Derived stats ──────────────────────────────────────────────────────────
+  // â”€â”€ Derived stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const totalApplied = applications.length;
 
@@ -55,7 +55,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
         )
       : 0;
 
-  // ── Status pie ─────────────────────────────────────────────────────────────
+  // â”€â”€ Status pie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const statusCounts = applications.reduce((acc, app) => {
     acc[app.status] = (acc[app.status] || 0) + 1;
@@ -67,7 +67,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
     value,
   }));
 
-  // ── Type bar ───────────────────────────────────────────────────────────────
+  // â”€â”€ Type bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const typeLabelMap = {
     job: "Full-Time",
@@ -86,7 +86,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
     count,
   }));
 
-  // ── Platform bars ──────────────────────────────────────────────────────────
+  // â”€â”€ Platform bars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const platformCounts = applications.reduce((acc, app) => {
     acc[app.platform ?? "Direct"] = (acc[app.platform ?? "Direct"] || 0) + 1;
@@ -98,7 +98,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
-  // ── Daily trend — derived by grouping appliedAt ────────────────────────────
+  // â”€â”€ Daily trend â€” derived by grouping appliedAt â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Groups applications by date (YYYY-MM-DD) and counts applied vs those that
   // got a positive response (shortlisted / interview_scheduled / accepted).
   // Shows the last 14 days with data, sorted ascending.
@@ -125,7 +125,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
       ...counts,
     }));
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (isLoading) {
     return (
@@ -165,7 +165,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
             icon: Award,
             label: "Accepted",
             value: accepted,
-            color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+            color: "text-sky-300 bg-sky-400/10 border-sky-400/20",
           },
           {
             icon: TrendingUp,

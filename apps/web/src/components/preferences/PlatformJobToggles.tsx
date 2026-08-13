@@ -22,9 +22,9 @@
  * To add a new platform or job: update enableJobsConfig only.
  * Nothing in this file changes.
  *
- * - Platform key  → card heading + accent colour (humanised automatically)
- * - Job key       → human-readable row label   (humanised automatically)
- * - Job value     → flagId used for state + DB PATCH payload
+ * - Platform key  â†’ card heading + accent colour (humanised automatically)
+ * - Job key       â†’ human-readable row label   (humanised automatically)
+ * - Job value     â†’ flagId used for state + DB PATCH payload
  */
 
 import React from "react";
@@ -36,7 +36,7 @@ import { motion } from "framer-motion";
 import { enableJobsConfig } from "@applyai/config";
 import { Zap } from "lucide-react";
 
-// ─── Accent colours per platform ─────────────────────────────────────────────
+// â”€â”€â”€ Accent colours per platform â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Add an entry when you add a new platform to the config.
 
 type AccentTheme = {
@@ -60,7 +60,7 @@ const PLATFORM_ACCENT: Record<string, AccentTheme> = {
     text: "text-blue-400",
     iconBg: "bg-blue-500/20",
     switchOn: "data-[state=checked]:bg-blue-500",
-    badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
     badgeInactive: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   },
   commudle: {
@@ -71,7 +71,7 @@ const PLATFORM_ACCENT: Record<string, AccentTheme> = {
     text: "text-violet-400",
     iconBg: "bg-violet-500/20",
     switchOn: "data-[state=checked]:bg-violet-500",
-    badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
     badgeInactive: "bg-violet-500/10 border-violet-500/20 text-violet-400",
   },
 };
@@ -84,16 +84,16 @@ const DEFAULT_ACCENT: AccentTheme = {
   text: "text-primary",
   iconBg: "bg-primary/20",
   switchOn: "data-[state=checked]:bg-primary",
-  badgeActive: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+  badgeActive: "bg-sky-400/10 border-sky-400/30 text-sky-300",
   badgeInactive: "bg-primary/10 border-primary/20 text-primary",
 };
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-/** { isUnstopInternshipEnabled: true, isCommudleEventEnabled: false, … } */
+/** { isUnstopInternshipEnabled: true, isCommudleEventEnabled: false, â€¦ } */
 export type PlatformFlagState = Record<string, boolean>;
 
-/** { unstop: true, commudle: false } — whether a live session exists */
+/** { unstop: true, commudle: false } â€” whether a live session exists */
 export type PlatformSessionState = Record<string, boolean>;
 
 interface PlatformJobTogglesProps {
@@ -103,12 +103,12 @@ interface PlatformJobTogglesProps {
   onFlagToggle: (flagId: string, value: boolean) => void;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Turns a camelCase / lowercase key into a readable label.
- * "internship" → "Internship"
- * "myLongJobKey" → "My Long Job Key"
+ * "internship" â†’ "Internship"
+ * "myLongJobKey" â†’ "My Long Job Key"
  */
 function humanise(key: string): string {
   return key
@@ -119,13 +119,13 @@ function humanise(key: string): string {
 
 /**
  * Derive the action verb from the job key so the label reads naturally.
- * "events" → "Register"   everything else → "Apply"
+ * "events" â†’ "Register"   everything else â†’ "Apply"
  */
 function actionVerb(jobKey: string): string {
   return jobKey === "events" ? "Register" : "Apply";
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function PlatformJobToggles({
   flagState,
@@ -212,7 +212,7 @@ export function PlatformJobToggles({
                               filters.
                               {!sessionActive && (
                                 <span className="block mt-1 text-amber-400/80">
-                                  ⚠ Requires an active {humanise(platform.name)}{" "}
+                                  âš  Requires an active {humanise(platform.name)}{" "}
                                   session.
                                 </span>
                               )}

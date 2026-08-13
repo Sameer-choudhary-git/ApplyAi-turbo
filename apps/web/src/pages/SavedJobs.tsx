@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -42,7 +41,7 @@ const TYPE_COLORS = {
 };
 const STATUS_COLORS = {
   saved: "bg-slate-500/10 text-slate-400 border-slate-500/20",
-  applied: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  applied: "bg-sky-400/10 text-sky-300 border-sky-400/20",
   ignored: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
@@ -248,9 +247,9 @@ export default function SavedJobs() {
           {
             label: "Applied",
             value: applied,
-            color: "text-emerald-400",
-            bg: "from-emerald-500/10 to-teal-500/5",
-            border: "border-emerald-500/20",
+            color: "text-sky-300",
+            bg: "from-sky-400/10 to-sky-400/5",
+            border: "border-sky-400/20",
           },
         ].map((s, i) => (
           <motion.div
@@ -346,7 +345,7 @@ export default function SavedJobs() {
                     <span>{job.company}</span>
                     {job.source_site && (
                       <>
-                        <span className="text-border mx-1">•</span>
+                        <span className="text-border mx-1">Ã¢â‚¬Â¢</span>
                         <Globe className="w-3.5 h-3.5" />
                         <span>{job.source_site}</span>
                       </>
@@ -384,8 +383,8 @@ export default function SavedJobs() {
                       </span>
                     )}
                     {job.stipend && (
-                      <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                        ₹{job.stipend}
+                      <span className="flex items-center gap-1.5 text-sky-300 font-bold">
+                        Ã¢â€šÂ¹{job.stipend}
                       </span>
                     )}
                     {job.deadline && (
@@ -410,7 +409,7 @@ export default function SavedJobs() {
                     </Button>
                   )}
                   {job.status === "applied" && (
-                    <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md h-9 flex-1">
+                    <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-sky-300 bg-sky-400/10 border border-sky-400/20 rounded-md h-9 flex-1">
                       <CheckCircle2 className="w-4 h-4" /> Applied
                     </div>
                   )}

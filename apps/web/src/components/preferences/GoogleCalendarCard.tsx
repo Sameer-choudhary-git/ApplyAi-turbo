@@ -51,7 +51,7 @@ export default function GoogleCalendarCard() {
               you get notifications on your phone.
             </p>
             {data?.connected && data.email && (
-              <p className="text-xs text-emerald-400 font-medium mt-2">
+              <p className="text-xs text-sky-300 font-medium mt-2">
                 Connected as {data.email}
               </p>
             )}
@@ -91,7 +91,7 @@ export default function GoogleCalendarCard() {
       </div>
 
       {banner === "connected" && (
-        <div className="mt-4 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+        <div className="mt-4 text-xs text-sky-300 bg-sky-400/10 border border-sky-400/20 rounded-lg px-3 py-2">
           Google Calendar connected successfully.
         </div>
       )}
