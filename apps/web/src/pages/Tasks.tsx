@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,7 @@ export default function Tasks() {
   const queryClient = useQueryClient();
   const [newTask, setNewTask] = useState("");
   const [newPriority, setNewPriority] = useState("medium");
+  const newTaskInputRef = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState("all");
 
   // Fetch tasks
@@ -109,7 +110,11 @@ export default function Tasks() {
   });
 
   const handleAdd = () => {
-    if (!newTask.trim() || addMutation.isPending) return;
+    if (addMutation.isPending) return;
+    if (!newTask.trim()) {
+      newTaskInputRef.current?.focus();
+      return;
+    }
     addMutation.mutate({
       title: newTask.trim(),
       priority: newPriority,
@@ -173,6 +178,7 @@ export default function Tasks() {
       >
         <Card className="border-border/50 bg-card/60 backdrop-blur-md p-2 flex flex-col sm:flex-row gap-2 shadow-sm">
           <Input
+            ref={newTaskInputRef}
             placeholder="What needs to be done?"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
@@ -192,8 +198,9 @@ export default function Tasks() {
               </SelectContent>
             </Select>
             <Button
+              type="button"
               onClick={handleAdd}
-              disabled={!newTask.trim() || addMutation.isPending}
+              disabled={addMutation.isPending}
               className="h-11 px-5 gradient-primary text-white border-0 shadow-md hover:opacity-90 transition-opacity"
             >
               {addMutation.isPending ? (
