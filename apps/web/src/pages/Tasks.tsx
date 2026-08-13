@@ -81,9 +81,9 @@ export default function Tasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setNewTask("");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Mutation failed:", error);
-      alert(`Failed to add task: ${error.message || "Check console"}`);
+      alert(`Failed to add task: ${error instanceof Error ? error.message : "Check console"}`);
     }
   });
 

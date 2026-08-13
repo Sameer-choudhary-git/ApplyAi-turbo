@@ -104,7 +104,7 @@ export default function UpcomingInterviews({
                       <span className="font-medium text-primary">
                         {format(
                           new Date(interview.interviewAt),
-                          "MMM d, yyyy â€¢ h:mm a",
+                          "MMM d, yyyy ??? h:mm a",
                         )}
                       </span>
                     </div>

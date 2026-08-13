@@ -46,7 +46,7 @@ export default function AgentStatus({ profile }) {
                   : "text-muted-foreground border-border bg-muted/50"
               }`}
             >
-              {isActive ? "â— SCANNING" : "â—‹ IDLE"}
+              {isActive ? "?-? SCANNING" : "?-< IDLE"}
             </Badge>
           </div>
         </div>

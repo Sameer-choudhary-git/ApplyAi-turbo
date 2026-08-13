@@ -38,6 +38,8 @@ import {
 import type { Application } from "@/types/application";
 
 type ScheduleKind = "interview" | "reminder" | "task";
+type SchedulePayload = { kind: ScheduleKind; title: string; description?: string; interviewAt?: string; durationMinutes?: number; round?: string; meetingUrl?: string; remindAt?: string; endAt?: string; allDay?: boolean; location?: string; dueDate?: string; priority?: "LOW" | "MEDIUM" | "HIGH"; };
+
 
 interface Props {
   app: Application;
@@ -115,15 +117,15 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
     reset();
     setDialogKind(kind);
     const defaults: Record<ScheduleKind, string> = {
-      interview: `Interview — ${app.jobTitle}`,
-      reminder: `${app.jobTitle} — reminder`,
-      task: `Follow up — ${app.jobTitle}`,
+      interview: `Interview ?f????s???,?? ${app.jobTitle}`,
+      reminder: `${app.jobTitle} ?f????s???,?? reminder`,
+      task: `Follow up ?f????s???,?? ${app.jobTitle}`,
     };
     setTitle(defaults[kind]);
   };
 
   const mutation = useMutation({
-    mutationFn: (payload: any) =>
+    mutationFn: (payload: SchedulePayload) =>
       api(`/applications/${app.id}/schedule`, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -141,7 +143,7 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
   const handleSubmit = () => {
     if (!dialogKind) return;
 
-    const basePayload: any = { kind: dialogKind, title, description: description || undefined };
+    const basePayload: SchedulePayload = { kind: dialogKind, title, description: description || undefined };
 
     if (dialogKind === "interview") {
       if (!interviewDate || !interviewTime) return;
@@ -215,7 +217,7 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
       </DropdownMenu>
 
       <Dialog open={!!dialogKind} onOpenChange={(o) => !o && setDialogKind(null)}>
-        <DialogContent className="max-w-md bg-background/95 backdrop-blur-xl border-border/50">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading flex items-center gap-2">
               {kindMeta && <kindMeta.icon className="w-4.5 h-4.5 text-primary" />}
@@ -225,21 +227,21 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
 
           <div className="space-y-4 pt-2 max-h-[70vh] overflow-y-auto pr-1">
             <div>
-              <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+              <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Title
               </Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5 bg-background border-border/50"
+                className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
               />
             </div>
 
-            {/* ── Interview fields ─────────────────────────────── */}
+            {/* ?f???,?????s??f???,?????s? Interview fields ?f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s? */}
             {dialogKind === "interview" && (
               <>
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     {kindMeta?.dateLabel}
                   </Label>
                   <div className="grid grid-cols-2 gap-2 mt-1.5">
@@ -247,26 +249,26 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
                       type="date"
                       value={interviewDate}
                       onChange={(e) => setInterviewDate(e.target.value)}
-                      className="bg-background border-border/50"
+                      className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                     />
                     <Input
                       type="time"
                       value={interviewTime}
                       onChange={(e) => setInterviewTime(e.target.value)}
-                      className="bg-background border-border/50"
+                      className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                     <Timer className="w-3 h-3" /> Duration
                   </Label>
                   <Select
                     value={String(durationMinutes)}
                     onValueChange={(v) => setDurationMinutes(Number(v))}
                   >
-                    <SelectTrigger className="mt-1.5 bg-background border-border/50">
+                    <SelectTrigger className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-background/95 backdrop-blur-xl border-border/50">
@@ -280,32 +282,32 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     Round (optional)
                   </Label>
                   <Input
                     value={round}
                     onChange={(e) => setRound(e.target.value)}
                     placeholder="e.g. Technical Round 1"
-                    className="mt-1.5 bg-background border-border/50"
+                    className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                     <MapPin className="w-3 h-3" /> Meeting URL (optional)
                   </Label>
                   <Input
                     value={meetingUrl}
                     onChange={(e) => setMeetingUrl(e.target.value)}
                     placeholder="https://meet.google.com/..."
-                    className="mt-1.5 bg-background border-border/50"
+                    className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
               </>
             )}
 
-            {/* ── Reminder fields ──────────────────────────────── */}
+            {/* ?f???,?????s??f???,?????s? Reminder fields ?f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s? */}
             {dialogKind === "reminder" && (
               <>
                 <div className="flex items-center gap-2.5">
@@ -322,7 +324,7 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     {kindMeta?.dateLabel}
                   </Label>
                   <div className={`grid ${allDay ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-1.5`}>
@@ -330,21 +332,21 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
                       type="date"
                       value={remindDate}
                       onChange={(e) => setRemindDate(e.target.value)}
-                      className="bg-background border-border/50"
+                      className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                     />
                     {!allDay && (
                       <Input
                         type="time"
                         value={remindTime}
                         onChange={(e) => setRemindTime(e.target.value)}
-                        className="bg-background border-border/50"
+                        className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                       />
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     Ends <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
                   </Label>
                   <div className={`grid ${allDay ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-1.5`}>
@@ -352,54 +354,54 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="bg-background border-border/50"
+                      className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                     />
                     {!allDay && (
                       <Input
                         type="time"
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
-                        className="bg-background border-border/50"
+                        className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                       />
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                     <MapPin className="w-3 h-3" /> Location (optional)
                   </Label>
                   <Input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Add location or link"
-                    className="mt-1.5 bg-background border-border/50"
+                    className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
               </>
             )}
 
-            {/* ── Task fields ───────────────────────────────────── */}
+            {/* ?f???,?????s??f???,?????s? Task fields ?f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s? */}
             {dialogKind === "task" && (
               <>
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     {kindMeta?.dateLabel}
                   </Label>
                   <Input
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="mt-1.5 bg-background border-border/50"
+                    className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     Priority
                   </Label>
-                  <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
-                    <SelectTrigger className="mt-1.5 bg-background border-border/50">
+                  <Select value={priority} onValueChange={(v) => setPriority(v as "LOW" | "MEDIUM" | "HIGH")}>
+                    <SelectTrigger className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-background/95 backdrop-blur-xl border-border/50">
@@ -412,21 +414,21 @@ export default function ScheduleActionMenu({ app, onScheduled }: Props) {
               </>
             )}
 
-            {/* ── Shared description field ─────────────────────── */}
+            {/* ?f???,?????s??f???,?????s? Shared description field ?f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s??f???,?????s? */}
             <div>
-              <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <AlignLeft className="w-3 h-3" /> Notes (optional)
               </Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add any details..."
-                className="mt-1.5 h-20 bg-background border-border/50 resize-none"
+                className="mt-1.5 h-20 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 resize-none"
               />
             </div>
 
             <Button
-              className="w-full gradient-primary text-white border-0 h-10"
+              className="w-full gradient-primary text-white border-0 h-10 shadow-lg shadow-primary/15 hover:shadow-primary/25 transition-shadow"
               onClick={handleSubmit}
               disabled={!canSubmit || mutation.isPending}
             >

@@ -345,7 +345,7 @@ export default function SavedJobs() {
                     <span>{job.company}</span>
                     {job.source_site && (
                       <>
-                        <span className="text-border mx-1">Ã¢â‚¬Â¢</span>
+                        <span className="text-border mx-1">ï¿½?,?ï¿½</span>
                         <Globe className="w-3.5 h-3.5" />
                         <span>{job.source_site}</span>
                       </>
@@ -384,7 +384,7 @@ export default function SavedJobs() {
                     )}
                     {job.stipend && (
                       <span className="flex items-center gap-1.5 text-sky-300 font-bold">
-                        Ã¢â€šÂ¹{job.stipend}
+                        ï¿½??sï¿½{job.stipend}
                       </span>
                     )}
                     {job.deadline && (
@@ -436,7 +436,7 @@ export default function SavedJobs() {
 
       {/* Add Job Dialog remains the same functionally, just styled... */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg border-border/50 bg-background/95 backdrop-blur-xl">
+        <DialogContent className="max-w-lg">
           {/* ... Dialog contents ... */}
           <DialogHeader>
             <DialogTitle className="font-heading text-xl">

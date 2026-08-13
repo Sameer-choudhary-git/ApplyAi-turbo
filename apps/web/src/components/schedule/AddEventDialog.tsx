@@ -82,7 +82,7 @@ export default function AddEventDialog() {
           <Plus className="w-4 h-4 mr-1.5" /> Add Event
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-background/95 backdrop-blur-xl border-border/50">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-heading">Add Event</DialogTitle>
         </DialogHeader>
@@ -93,7 +93,7 @@ export default function AddEventDialog() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Add title"
-              className="bg-background border-border/50 text-base font-medium h-11"
+              className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 text-base font-medium h-11"
             />
           </div>
 
@@ -113,7 +113,7 @@ export default function AddEventDialog() {
 
           {/* Start */}
           <div>
-            <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Starts
             </Label>
             <div className={`grid ${allDay ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-1.5`}>
@@ -121,14 +121,14 @@ export default function AddEventDialog() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-background border-border/50"
+                className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
               />
               {!allDay && (
                 <Input
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="bg-background border-border/50"
+                  className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                 />
               )}
             </div>
@@ -136,7 +136,7 @@ export default function AddEventDialog() {
 
           {/* End (optional) */}
           <div>
-            <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Ends <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
             </Label>
             <div className={`grid ${allDay ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-1.5`}>
@@ -144,14 +144,14 @@ export default function AddEventDialog() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-background border-border/50"
+                className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
               />
               {!allDay && (
                 <Input
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="bg-background border-border/50"
+                  className="bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
                 />
               )}
             </div>
@@ -159,27 +159,27 @@ export default function AddEventDialog() {
 
           {/* Location */}
           <div>
-            <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+            <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
               <MapPin className="w-3 h-3" /> Location
             </Label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Add location or meeting link"
-              className="mt-1.5 bg-background border-border/50"
+              className="mt-1.5 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
 
           {/* Description */}
           <div>
-            <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5">
+            <Label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
               <AlignLeft className="w-3 h-3" /> Description
             </Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add notes or details"
-              className="mt-1.5 h-20 bg-background border-border/50 resize-none"
+              className="mt-1.5 h-20 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 resize-none"
             />
           </div>
 

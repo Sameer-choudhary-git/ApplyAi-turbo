@@ -85,7 +85,7 @@
 
 //           {app.stipend && (
 //             <p className="text-xs text-sky-300/90 font-medium mt-2">
-//               ðŸ’° {app.stipend}
+//               ?Y'? {app.stipend}
 //             </p>
 //           )}
 //         </div>
@@ -139,7 +139,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import ScheduleActionMenu from "./ScheduleActionMenu";
 
-// âœ… Canonical status config, keyed by NORMALIZED status (lowercase, underscores).
+// ?o. Canonical status config, keyed by NORMALIZED status (lowercase, underscores).
 // This now covers both the user-facing lifecycle AND the raw statuses the
 // apply agent actually writes (APPLIED, ACTION_REQUIRED, ALREADY_APPLIED, ERROR),
 // so nothing falls through to a silently-wrong default anymore.
@@ -178,7 +178,7 @@ function getStatusDisplay(status?: string) {
   const key = normalizeStatus(status);
   if (statusConfig[key]) return statusConfig[key];
 
-  // âœ… Unmapped statuses now surface AS-IS (instead of silently becoming
+  // ?o. Unmapped statuses now surface AS-IS (instead of silently becoming
   // "Applied"), so a mismatch like this is visible and debuggable in the UI.
   return {
     label: status || "Unknown",
@@ -204,7 +204,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
 
   const status = getStatusDisplay(app.status);
 
-  // âœ… Manual status correction â€” assumes PATCH /applications/:id/status.
+  // ?o. Manual status correction ??" assumes PATCH /applications/:id/status.
   // Adjust the path/body shape if your actual API route differs.
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: string) =>
@@ -256,7 +256,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
 
           {app.stipend && (
             <p className="text-xs text-sky-300/90 font-medium mt-2">
-              ðŸ’° {app.stipend}
+              ?Y'? {app.stipend}
             </p>
           )}
         </div>
@@ -275,7 +275,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
             </Badge>
           )}
 
-          {/* Status badge â€” click the pencil to correct it manually */}
+          {/* Status badge ??" click the pencil to correct it manually */}
           {isEditingStatus ? (
             <div className="flex items-center gap-1">
               <select
@@ -320,8 +320,8 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
 
           {/* Dropdown lives outside the badges, as its own control */}
           <ScheduleActionMenu app={app} onScheduled={onInterviewScheduled} />
-          {/* âœ… Always-visible open-link action (previously only appeared next
-              to the title, and only on row hover â€” easy to miss) */}
+          {/* ?o. Always-visible open-link action (previously only appeared next
+              to the title, and only on row hover ??" easy to miss) */}
           {app.jobLink && (
             <a
               href={app.jobLink}

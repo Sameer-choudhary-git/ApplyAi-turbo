@@ -248,7 +248,7 @@ export default function Networking() {
             </Button>
           </DialogTrigger>
 
-          <DialogContent className="max-w-xl p-0 border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden [&>button]:hidden fixed left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2">
+          <DialogContent className="max-w-lg">
             <DialogHeader className="flex flex-row items-center justify-between px-6 py-4 border-b border-border/50 space-y-0 bg-background/50">
               <DialogTitle className="font-heading text-xl">
                 Add New Contact
