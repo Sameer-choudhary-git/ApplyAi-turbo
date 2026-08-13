@@ -1,4 +1,4 @@
-import type { Context, Next } from "hono";
+﻿import type { Context, Next } from "hono";
 import * as Sentry from "@sentry/node";
 import { trackApiRequest } from "@applyai/sentry";
 
@@ -10,7 +10,7 @@ export async function sentryContextMiddleware(c: Context, next: Next) {
   const startTime = Date.now();
   const method = c.req.method;
   const path = c.req.path;
-  const requestId = c.get?.("requestId") || c.req.headers.get?.("x-request-id");
+  const requestId = c.get?.("requestId") || c.req.header("x-request-id");
   const userId = c.get?.("userId");
 
   return Sentry.withScope(async () => {
@@ -40,14 +40,14 @@ export async function sentryContextMiddleware(c: Context, next: Next) {
           "x-csrf-token",
         ];
 
-        if (c.req.headers instanceof Headers) {
-          c.req.headers.forEach((value: string, key: string) => {
+        if (c.req.raw.headers instanceof Headers) {
+          c.req.raw.headers.forEach((value: string, key: string) => {
             if (!sensitiveHeaders.includes(key.toLowerCase())) {
               headers[key] = value;
             }
           });
-        } else if (typeof c.req.headers === "object") {
-          Object.entries(c.req.headers).forEach(([key, value]) => {
+        } else if (typeof c.req.raw.headers === "object") {
+          Object.entries(c.req.raw.headers).forEach(([key, value]) => {
             if (!sensitiveHeaders.includes(key.toLowerCase())) {
               headers[key] = String(value);
             }
@@ -59,9 +59,9 @@ export async function sentryContextMiddleware(c: Context, next: Next) {
           path,
           url: c.req.url,
           headers,
-          user_agent: c.req.headers.get?.("user-agent") || "unknown",
-          ip: c.req.headers.get?.("x-forwarded-for") ||
-              c.req.headers.get?.("cf-connecting-ip") ||
+          user_agent: c.req.header("user-agent") || "unknown",
+          ip: c.req.header("x-forwarded-for") ||
+              c.req.header("cf-connecting-ip") ||
               "unknown",
         });
       } catch (e) {
@@ -145,3 +145,6 @@ export function withSentryTransaction(transactionName: string) {
     );
   };
 }
+
+
+

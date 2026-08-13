@@ -1,4 +1,4 @@
-import { Worker } from "bullmq";
+﻿import { Worker } from "bullmq";
 
 import { connection } from "./connection";
 import { QueueName } from "./queueNames";
@@ -24,7 +24,10 @@ export function createWorker({
   concurrency = 5,
   lockDuration = 30000,
 }: WorkerFactoryOptions) {
-  const worker = new Worker(
+
+  if (!connection) {
+    throw new Error('Redis is disabled; queue operations are unavailable in this environment.');
+  }  const worker = new Worker(
     queue,
 
     async (job) => {
@@ -58,3 +61,4 @@ export function createWorker({
 
   return worker;
 }
+

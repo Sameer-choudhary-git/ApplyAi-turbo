@@ -1,10 +1,12 @@
-import { Redis, type RedisOptions } from "ioredis";
+﻿import { Redis, type RedisOptions } from "ioredis";
 
 const connectionOptions: RedisOptions = {
   maxRetriesPerRequest: null,
 };
 
-export const connection = process.env.REDIS_QUEUE_URL
+export const connection = process.env.DISABLE_REDIS === "true"
+  ? undefined
+  : process.env.REDIS_QUEUE_URL
   ? new Redis(process.env.REDIS_QUEUE_URL, connectionOptions)
   : new Redis({
       ...connectionOptions,
@@ -13,3 +15,4 @@ export const connection = process.env.REDIS_QUEUE_URL
         ? Number.parseInt(process.env.REDIS_PORT, 10)
         : undefined,
     });
+

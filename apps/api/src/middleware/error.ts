@@ -6,7 +6,7 @@ import { captureHandledError } from "@applyai/sentry/node";
 export function errorHandler(err: Error, c: Context) {
   const method = c.req.method;
   const path = c.req.path;
-  const requestId = c.get?.("requestId") || c.req.headers.get?.("x-request-id");
+  const requestId = c.get?.("requestId") || c.req.header("x-request-id");
   const userId = c.get?.("userId");
 
   console.error(`[ERROR] ${method} ${path}`, err);
@@ -80,3 +80,8 @@ export function errorHandler(err: Error, c: Context) {
     statusCode,
   );
 }
+
+
+
+
+

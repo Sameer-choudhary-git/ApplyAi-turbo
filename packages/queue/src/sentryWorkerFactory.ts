@@ -1,4 +1,4 @@
-import { Worker, Job } from "bullmq";
+﻿import { Worker, Job } from "bullmq";
 import * as Sentry from "@sentry/node";
 import { trackJob } from "@applyai/sentry";
 import { connection } from "./connection";
@@ -26,7 +26,10 @@ export function createSentryWorker({
   concurrency = 5,
   lockDuration = 30000,
 }: SentryWorkerFactoryOptions) {
-  const worker = new Worker(
+
+  if (!connection) {
+    throw new Error('Redis is disabled; queue operations are unavailable in this environment.');
+  }  const worker = new Worker(
     queue,
     async (job: Job) => {
       const jobId = job.id;
@@ -119,7 +122,7 @@ export function createSentryWorker({
             });
 
             console.log(
-              `✅ [${queue}] Job completed: ${jobName} (${jobId}) - ${duration}ms`
+              `âœ… [${queue}] Job completed: ${jobName} (${jobId}) - ${duration}ms`
             );
           } catch (executionError) {
             const duration = Date.now() - startTime;
@@ -179,13 +182,13 @@ export function createSentryWorker({
             });
 
             console.warn(
-              `⚠️  [${queue}] Job will retry: ${jobName} (${jobId}) - Attempt ${
+              `âš ï¸  [${queue}] Job will retry: ${jobName} (${jobId}) - Attempt ${
                 job.attemptsMade + 1
               }`
             );
           } else {
             console.error(
-              `❌ [${queue}] Job failed: ${jobName} (${jobId}) - ${duration}ms`
+              `âŒ [${queue}] Job failed: ${jobName} (${jobId}) - ${duration}ms`
             );
           }
 
@@ -283,10 +286,11 @@ export function createSentryWorker({
   });
 
   console.log(
-    `🚀 Created Sentry-enabled worker for queue: ${queue} (concurrency: ${concurrency})`
+    `ðŸš€ Created Sentry-enabled worker for queue: ${queue} (concurrency: ${concurrency})`
   );
 
   return worker;
 }
 
 export default createSentryWorker;
+

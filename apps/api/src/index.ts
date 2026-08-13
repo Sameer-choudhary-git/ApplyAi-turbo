@@ -1,4 +1,4 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import * as Sentry from "@sentry/node";
 import { 
   initSentryNode, 
@@ -22,14 +22,14 @@ if (isSentryEnabled()) {
     tracesSampleRate: isDev ? 1.0 : 0.1,
     profilesSampleRate: isDev ? 1.0 : 0.1,
   });
-  console.log(`✅ Sentry initialized for API (${getEnvironment()})`);
+  console.log(`âœ… Sentry initialized for API (${getEnvironment()})`);
 } else {
-  console.warn("⚠️  Sentry DSN not configured - error reporting disabled");
+  console.warn("âš ï¸  Sentry DSN not configured - error reporting disabled");
 }
 
 // Capture unhandled exceptions and rejections
 process.on("uncaughtException", (error) => {
-  console.error("❌ Uncaught Exception:", error);
+  console.error("âŒ Uncaught Exception:", error);
   Sentry.captureException(error, {
     tags: {
       error_type: "uncaught_exception",
@@ -39,7 +39,7 @@ process.on("uncaughtException", (error) => {
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("❌ Unhandled Rejection:", reason);
+  console.error("âŒ Unhandled Rejection:", reason);
   Sentry.captureException(reason, {
     contexts: {
       unhandled_rejection: {
@@ -53,24 +53,26 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 // Initialize Redis before starting the server
-initializeRedis()
+(process.env.DISABLE_REDIS === "true" || isDev ? Promise.resolve(null) : initializeRedis())
   .then(() => {
-    console.log("✅ Redis initialized");
+    console.log("âœ… Redis initialized");
   })
   .catch((err) => {
-    console.error("❌ Failed to initialize Redis:", err);
+    console.error("âŒ Failed to initialize Redis:", err);
     Sentry.captureException(err, {
       tags: {
         service: "redis",
         initialization: "true",
       },
     });
-    console.log("⚠️  Continuing without Redis cache...");
+    console.log("âš ï¸  Continuing without Redis cache...");
   });
 
 // Start server
 serve({ fetch: app.fetch, port: PORT }, () => {
-  console.log(`🚀 API listening on port ${PORT}`);
-  console.log(`📊 Environment: ${getEnvironment()}`);
-  console.log(`🔗 Sentry DSN: ${isSentryEnabled() ? "configured" : "not configured"}`);
+  console.log(`ðŸš€ API listening on port ${PORT}`);
+  console.log(`ðŸ“Š Environment: ${getEnvironment()}`);
+  console.log(`ðŸ”— Sentry DSN: ${isSentryEnabled() ? "configured" : "not configured"}`);
 });
+
+

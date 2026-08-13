@@ -3,6 +3,10 @@ import { createClient, RedisClientType } from "redis";
 let redisClient: RedisClientType | null = null;
 
 export async function initializeRedis() {
+  if (process.env.DISABLE_REDIS === 'true' || process.env.NODE_ENV === 'development') {
+    console.warn('Redis disabled; continuing without cache.');
+    return null;
+  }
   if (redisClient) return redisClient;
 
   const redisUrl = process.env.REDIS_URL || buildRedisUrl();
@@ -19,7 +23,7 @@ export async function initializeRedis() {
   });
 
   await redisClient.connect();
-  console.log("✅ Redis connected successfully");
+  console.log("Γ£à Redis connected successfully");
 
   return redisClient;
 }

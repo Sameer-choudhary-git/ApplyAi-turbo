@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 import { execSync, spawn } from 'child_process';
 import path from 'path';
@@ -21,14 +21,14 @@ function isContainerRunning(name) {
 }
 
 async function waitForHealthy(name, label) {
-  console.log(`⏳ Waiting for ${label} to be ready...`);
+  console.log(`Ã¢ÂÂ³ Waiting for ${label} to be ready...`);
   let attempts = 0;
   const maxAttempts = 30;
 
   while (attempts < maxAttempts) {
     try {
       execSync(`docker exec ${name} redis-cli ping`, { stdio: 'ignore' });
-      console.log(`✅ ${label} is ready!`);
+      console.log(`Ã¢Å“â€¦ ${label} is ready!`);
       return true;
     } catch {
       attempts++;
@@ -38,7 +38,7 @@ async function waitForHealthy(name, label) {
     }
   }
 
-  console.warn(`⚠️  ${label} health check timed out, but it may still be starting...`);
+  console.warn(`Ã¢Å¡Â Ã¯Â¸Â  ${label} health check timed out, but it may still be starting...`);
   return false;
 }
 
@@ -48,7 +48,7 @@ async function checkAndStartRedis() {
     try {
       execSync('docker --version', { stdio: 'ignore' });
     } catch {
-      console.warn('⚠️  Docker is not installed. Redis will not start automatically.');
+      console.warn('Ã¢Å¡Â Ã¯Â¸Â  Docker is not installed. Redis will not start automatically.');
       console.warn('   Please start Redis manually: cd infra/docker && docker-compose -f docker-compose.redis.yml up');
       return false;
     }
@@ -58,13 +58,13 @@ async function checkAndStartRedis() {
     const queueRunning = isContainerRunning(queueContainerName);
 
     if (cacheRunning && queueRunning) {
-      console.log('✅ Redis (cache + queue) is already running');
+      console.log('Ã¢Å“â€¦ Redis (cache + queue) is already running');
       redisStartedByScript = false;
       return true;
     }
 
     // Try to start the Redis containers
-    console.log('🚀 Starting Redis containers...');
+    console.log('Ã°Å¸Å¡â‚¬ Starting Redis containers...');
     const dockerComposePath = path.resolve(__dirname, '../../..', 'infra/docker');
 
     try {
@@ -72,7 +72,7 @@ async function checkAndStartRedis() {
       execSync(`cd "${dockerComposePath}" && docker compose -f docker-compose.redis.yml up -d`, {
         stdio: 'inherit',
       });
-      console.log('✅ Redis containers started successfully');
+      console.log('Ã¢Å“â€¦ Redis containers started successfully');
       redisStartedByScript = true;
 
       const cacheReady = await waitForHealthy(containerName, 'Redis cache');
@@ -80,7 +80,7 @@ async function checkAndStartRedis() {
 
       return cacheReady && queueReady;
     } catch (error) {
-      console.warn('⚠️  Could not start Redis containers automatically');
+      console.warn('Ã¢Å¡Â Ã¯Â¸Â  Could not start Redis containers automatically');
       console.warn('   You can start them manually with:');
       console.warn('   cd infra/docker && docker compose -f docker-compose.redis.yml up');
       return false;
@@ -97,14 +97,14 @@ async function stopRedis() {
   }
 
   try {
-    console.log('\n🛑 Stopping Redis containers...');
+    console.log('\nÃ°Å¸â€ºâ€˜ Stopping Redis containers...');
     const dockerComposePath = path.resolve(__dirname, '../../..', 'infra/docker');
     execSync(`cd "${dockerComposePath}" && docker compose -f docker-compose.redis.yml down`, {
       stdio: 'inherit',
     });
-    console.log('✅ Redis containers stopped successfully');
+    console.log('Ã¢Å“â€¦ Redis containers stopped successfully');
   } catch (error) {
-    console.warn('⚠️  Could not stop Redis containers');
+    console.warn('Ã¢Å¡Â Ã¯Â¸Â  Could not stop Redis containers');
   }
 }
 
@@ -116,7 +116,7 @@ async function startDevServer() {
   });
 
   const handleTermination = async (signal) => {
-    console.log(`\n📍 Received ${signal}, cleaning up...`);
+    console.log(`\nÃ°Å¸â€œÂ Received ${signal}, cleaning up...`);
     await stopRedis();
     process.exit(0);
   };
@@ -125,7 +125,7 @@ async function startDevServer() {
   process.on('SIGTERM', () => handleTermination('SIGTERM'));
 
   devProcess.on('exit', async (code) => {
-    console.log(`\n📍 Dev server exited with code ${code}`);
+    console.log(`\nÃ°Å¸â€œÂ Dev server exited with code ${code}`);
     await stopRedis();
     process.exit(code || 0);
   });
@@ -138,14 +138,15 @@ async function startDevServer() {
 }
 
 async function main() {
-  console.log('🔧 Setting up API development environment...\n');
+  console.log('Ã°Å¸â€Â§ Setting up API development environment...\n');
   const redisReady = await checkAndStartRedis();
 
   if (!redisReady) {
-    console.log('⚠️  Redis is not fully available, but continuing with API startup...\n');
+    process.env.DISABLE_REDIS = 'true';
+    console.log('Ã¢Å¡Â Ã¯Â¸Â  Redis is not fully available, but continuing with API startup...\n');
   }
 
-  console.log('📦 Starting API dev server...\n');
+  console.log('Ã°Å¸â€œÂ¦ Starting API dev server...\n');
   await startDevServer();
 }
 
@@ -153,3 +154,4 @@ main().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
+
