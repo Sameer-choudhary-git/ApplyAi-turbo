@@ -25,8 +25,11 @@ import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
 
 const allowedOrigins = [
+  "https://applyai.studio",
+  "https://www.applyai.studio",
   "https://apply-ai-turbo-web.vercel.app",
   "chrome-extension://jnaodcfhebmjmkahjkanclegonmlkmhn",
+  
   ...(process.env.FRONTEND_URL || "")
     .split(",")
     .map((origin) => origin.trim().replace(/\/+$/, ""))
