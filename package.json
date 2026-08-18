@@ -9,9 +9,7 @@
     "check-types": "turbo run check-types",
     "check-all": "turbo run generate build lint check-types",
     "test": "turbo run test",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "linkedin:export": "node tools/linkedin-feed-exporter/index.mjs",
-    "linkedin:test": "node --test tools/linkedin-feed-exporter/normalize.test.mjs"
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
