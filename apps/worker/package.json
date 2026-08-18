@@ -16,6 +16,7 @@
     "@applyai/apply": "workspace:*",
     "@applyai/db": "workspace:*",
     "@applyai/extractor": "workspace:*",
+    "@applyai/greenhouse": "workspace:*",
     "@applyai/jobs": "workspace:*",
     "@applyai/queue": "workspace:*",
     "@applyai/sentry": "workspace:*",

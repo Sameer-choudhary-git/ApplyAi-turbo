@@ -26,13 +26,15 @@ export function createSentryWorker({
   concurrency = 5,
   lockDuration = 30000,
 }: SentryWorkerFactoryOptions) {
-
   if (!connection) {
-    throw new Error('Redis is disabled; queue operations are unavailable in this environment.');
-  }  const worker = new Worker(
+    throw new Error(
+      "Redis is disabled; queue operations are unavailable in this environment.",
+    );
+  }
+  const worker = new Worker(
     queue,
     async (job: Job) => {
-      const jobId = job.id;
+      const jobId = String(job.id ?? "unknown");
       const jobName = job.name;
       const startTime = Date.now();
 
@@ -122,7 +124,7 @@ export function createSentryWorker({
             });
 
             console.log(
-              `âœ… [${queue}] Job completed: ${jobName} (${jobId}) - ${duration}ms`
+              `âœ… [${queue}] Job completed: ${jobName} (${jobId}) - ${duration}ms`,
             );
           } catch (executionError) {
             const duration = Date.now() - startTime;
@@ -150,8 +152,8 @@ export function createSentryWorker({
               metadata: {
                 queue: queue,
                 attempt: job.attemptsMade + 1,
-                will_retry: job.opts.attempts 
-                  ? job.attemptsMade < job.opts.attempts 
+                will_retry: job.opts.attempts
+                  ? job.attemptsMade < job.opts.attempts
                   : false,
               },
             });
@@ -184,11 +186,11 @@ export function createSentryWorker({
             console.warn(
               `âš ï¸  [${queue}] Job will retry: ${jobName} (${jobId}) - Attempt ${
                 job.attemptsMade + 1
-              }`
+              }`,
             );
           } else {
             console.error(
-              `âŒ [${queue}] Job failed: ${jobName} (${jobId}) - ${duration}ms`
+              `âŒ [${queue}] Job failed: ${jobName} (${jobId}) - ${duration}ms`,
             );
           }
 
@@ -200,7 +202,7 @@ export function createSentryWorker({
       connection,
       concurrency,
       lockDuration,
-    }
+    },
   );
 
   // Job event listeners with Sentry
@@ -286,11 +288,10 @@ export function createSentryWorker({
   });
 
   console.log(
-    `ðŸš€ Created Sentry-enabled worker for queue: ${queue} (concurrency: ${concurrency})`
+    `ðŸš€ Created Sentry-enabled worker for queue: ${queue} (concurrency: ${concurrency})`,
   );
 
   return worker;
 }
 
 export default createSentryWorker;
-

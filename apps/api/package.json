@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@applyai/config": "workspace:*",
+    "@applyai/greenhouse": "workspace:*",
     "@applyai/db": "workspace:*",
     "@applyai/jobs": "workspace:*",
     "@applyai/logger": "workspace:*",

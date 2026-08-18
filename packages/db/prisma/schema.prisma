@@ -66,6 +66,7 @@ model users {
   isUnstopJobEnabled        Boolean @default(false) // was missing — now added
   isCommudleEventEnabled    Boolean @default(false)
   isLinkedinEnabled         Boolean @default(false)
+  isGreenhouseApplyEnabled  Boolean @default(false)
 
   // Scheduling
   lastQueuedAt    DateTime?
@@ -142,13 +143,15 @@ model user_preferences {
 
   // ── Automation ───────────────────────────────────────────────────────────
   autoApply       Boolean @default(false)
-  dailyApplyLimit Int     @default(10)
+  dailyApplyLimit    Int     @default(10)
+  platformDailyLimits Json   @default("{}")
 
   // ── Platform-specific settings (stored as JSONB blobs) ────────────────────
   // Shape for unstopPreferences:
   //   { competition_types: string[], prize_minimum: number }
   unstopPreferences   Json?
-  commudlePreferences Json? // ✅ ADD THIS
+  commudlePreferences  Json? // ✅ ADD THIS
+  greenhousePreferences Json?
 
   // Add more platform-specific blobs as needed:
   // commudlePreferences Json @default("{}")
@@ -196,9 +199,11 @@ model user_job_applications {
   userId String
   user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  platform String
+    platform       String
+  externalJobKey String?
 
   jobTitle String
+
   company  String
   jobLink  String
 
@@ -440,7 +445,77 @@ model user_reminders {
   @@index([sourceType, sourceId])
 }
 
+model greenhouse_boards {
+  id              String   @id @default(cuid())
+  boardToken      String   @unique
+  company         String
+  boardUrl        String
+  source          String   @default("hybrid")
+  status          String   @default("active")
+  lastCheckedAt   DateTime?
+  lastSuccessAt   DateTime?
+  lastStatus      Int?
+  lastError       String?
+  activeJobCount  Int      @default(0)
+  discoveredAt    DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  jobs            greenhouse_jobs[]
+
+  @@index([status])
+  @@index([company])
+}
+
+model greenhouse_jobs {
+  id                 String            @id @default(cuid())
+  externalKey        String            @unique
+  boardId            String
+  board              greenhouse_boards  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardToken         String
+  greenhouseJobId    String
+  title              String
+  company            String
+  jobLink            String
+  location           String?
+  departments        Json?
+  offices            Json?
+  firstPublished     DateTime?
+  sourceUpdatedAt    DateTime?
+  applicationDeadline DateTime?
+  descriptionHtml    String?           @db.Text
+  descriptionText    String?           @db.Text
+  metadata           Json?
+  raw                Json?
+  isActive           Boolean           @default(true)
+  firstSeenAt        DateTime          @default(now())
+  lastSeenAt         DateTime          @default(now())
+  lastDiscoveryRunId String?
+
+  @@index([isActive])
+  @@index([boardId])
+  @@index([company])
+  @@index([lastSeenAt])
+}
+
+model greenhouse_discovery_runs {
+  id              String    @id @default(cuid())
+  status          String    @default("running")
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  candidateBoards Int       @default(0)
+  validBoards     Int       @default(0)
+  failedBoards    Int       @default(0)
+  jobsSeen        Int       @default(0)
+  newJobs         Int       @default(0)
+  updatedJobs     Int       @default(0)
+  sources         Json?
+  error           String?   @db.Text
+
+  @@index([startedAt])
+  @@index([status])
+}
+
 enum ReminderStatus {
+
   PENDING
   DONE
   DISMISSED

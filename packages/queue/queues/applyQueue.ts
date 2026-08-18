@@ -2,7 +2,8 @@ import { Queue } from "bullmq";
 import { connection } from "../src/connection";
 
 export const applyQueue = new Queue("apply", {
-  connection,
+  connection: connection as any,
+
   defaultJobOptions: {
     attempts: 3,
     backoff: {

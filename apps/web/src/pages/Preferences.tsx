@@ -25,6 +25,7 @@ type PreferencesState = {
   industries: string[];
   auto_apply: boolean;
   daily_apply_limit: number;
+  platform_daily_limits: Record<string, number>;
   preferred_platforms: string[];
 };
 
@@ -75,6 +76,12 @@ export default function Preferences() {
     industries: [],
     auto_apply: false,
     daily_apply_limit: 10,
+    platform_daily_limits: {
+      greenhouse: 0,
+      unstop: 0,
+      commudle: 0,
+      linkedin: 0,
+    },
     preferred_platforms: [],
   });
 
@@ -117,6 +124,12 @@ export default function Preferences() {
           industries: preferences.industries ?? [],
           auto_apply: preferences.autoApply ?? false,
           daily_apply_limit: preferences.dailyApplyLimit ?? 10,
+          platform_daily_limits: preferences.platformDailyLimits ?? {
+            greenhouse: 0,
+            unstop: 0,
+            commudle: 0,
+            linkedin: 0,
+          },
           preferred_platforms: preferences.platforms ?? [],
         });
 
@@ -160,6 +173,7 @@ export default function Preferences() {
           rolesOfInterest: prefs.roles_of_interest,
           autoApply: prefs.auto_apply,
           dailyApplyLimit: prefs.daily_apply_limit,
+          platformDailyLimits: prefs.platform_daily_limits,
           ...Object.fromEntries(
             Object.entries(platformPrefs).map(([k, v]) => [
               `${k}Preferences`,
@@ -176,12 +190,28 @@ export default function Preferences() {
     }
   };
 
+  const handlePlatformLimitChange = (platformId: string, value: number) => {
+    setPrefs((previous) => {
+      const nextLimits = {
+        ...previous.platform_daily_limits,
+        [platformId]: Math.min(12, Math.max(0, value)),
+      };
+      const total = Object.values(nextLimits).reduce(
+        (sum, limit) => sum + limit,
+        0,
+      );
+      if (total > previous.daily_apply_limit) return previous;
+      return { ...previous, platform_daily_limits: nextLimits };
+    });
+  };
+
   const handleFlagToggle = async (flagId: string, value: boolean) => {
     const owningPlatform = Object.values(enableJobsConfig).find((p) =>
       Object.values(p.jobs).some((j) => j.flag === flagId),
     );
 
-    if (value && !sessionState[owningPlatform?.id ?? ""]) {
+    const isPublicPlatform = owningPlatform?.session?.type === "public";
+    if (value && !isPublicPlatform && !sessionState[owningPlatform?.id ?? ""]) {
       toast.warning("Set up session first.");
       return;
     }
@@ -323,10 +353,16 @@ export default function Preferences() {
       <AutomationControlCard
         autoApply={prefs.auto_apply}
         dailyApplyLimit={prefs.daily_apply_limit}
+        platformLimits={prefs.platform_daily_limits}
         onAutoApplyChange={(v) => setPrefs((p) => ({ ...p, auto_apply: v }))}
-        onDailyLimitChange={(v) =>
-          setPrefs((p) => ({ ...p, daily_apply_limit: v }))
-        }
+        onDailyLimitChange={(v) => {
+          const minimum = Object.values(prefs.platform_daily_limits).reduce(
+            (sum, limit) => sum + limit,
+            0,
+          );
+          setPrefs((p) => ({ ...p, daily_apply_limit: Math.max(v, minimum) }));
+        }}
+        onPlatformLimitChange={handlePlatformLimitChange}
       />
 
       <div className="grid md:grid-cols-2 gap-6">

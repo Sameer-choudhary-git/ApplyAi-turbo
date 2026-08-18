@@ -2,11 +2,14 @@ export const JobNames = {
   APPLY: {
     APPLY_UNSTOP_INTERNSHIPS: "ApplyUnstopInternships",
     QUEUE_ELIGIBLE_USERS: "QueueEligibleUsers",
+    GREENHOUSE_SELECTION: "GreenhouseApplicationSelection",
+    GREENHOUSE_AUTOFILL: "GreenhouseApplicationAutofill",
   },
 
   EXTRACT: {
     UNSTOP_INTERNSHIPS: "ExtractUnstopInternships",
     COMMUDLE: "ExtractCommudle",
+    GREENHOUSE_DISCOVERY: "GreenhouseDiscovery",
   },
 
   VALIDATION: {

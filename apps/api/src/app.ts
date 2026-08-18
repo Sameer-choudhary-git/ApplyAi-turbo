@@ -23,13 +23,14 @@ import scheduleRouter from "./routes/schedule.js";
 import { networking } from "./routes/networking.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
+import { greenhouseRouter } from "./routes/greenhouse";
 
 const allowedOrigins = [
   "https://applyai.studio",
   "https://www.applyai.studio",
   "https://apply-ai-turbo-web.vercel.app",
   "chrome-extension://jnaodcfhebmjmkahjkanclegonmlkmhn",
-  
+
   ...(process.env.FRONTEND_URL || "")
     .split(",")
     .map((origin) => origin.trim().replace(/\/+$/, ""))
@@ -61,29 +62,17 @@ app.use(
         return normalizedOrigin;
       }
 
-      console.warn(
-        `[CORS] Rejected origin: ${origin}`
-      );
+      console.warn(`[CORS] Rejected origin: ${origin}`);
 
       return undefined;
     },
 
     credentials: true,
 
-    allowMethods: [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "OPTIONS",
-    ],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
-    allowHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
-  })
+    allowHeaders: ["Content-Type", "Authorization"],
+  }),
 );
 
 // Log startup info
@@ -109,7 +98,7 @@ app.route("/api/interviews", interviews);
 app.route("/api/networking", networking);
 app.route("/api/google-calendar", googleCalendar);
 app.route("/api/admin/jobs", adminJobsRouter);
-
+app.route("/api/greenhouse", greenhouseRouter);
 
 // â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.notFound((c) => {

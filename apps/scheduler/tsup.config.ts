@@ -8,6 +8,18 @@ export default defineConfig({
   outDir: "dist",
   clean: true,
   sourcemap: true,
-  noExternal: [/^@applyai\//, "ioredis", "bullmq", "pg", "dotenv", "@aws-sdk/client-s3"],
-  external: ["playwright", "@prisma/client", "@prisma/adapter-pg"],
+  noExternal: [
+    /^@applyai\//,
+    "ioredis",
+    "bullmq",
+    "pg",
+    "dotenv",
+    "@aws-sdk/client-s3",
+  ],
+  external: [
+    "playwright",
+    "@prisma/client",
+    "@prisma/adapter-pg",
+    "@sentry/profiling-node",
+  ],
 });

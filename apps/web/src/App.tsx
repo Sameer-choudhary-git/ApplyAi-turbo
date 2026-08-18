@@ -16,6 +16,8 @@ import Networking from "./pages/Networking";
 import SavedJobs from "./pages/SavedJobs";
 import Login from "./pages/Login";
 import AdminJobs from "@/views/AdminJobs";
+import Greenhouse from "./pages/Greenhouse";
+
 import { SentryRouteTracker } from "@/components/SentryRouteTracker";
 import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
 
@@ -49,6 +51,14 @@ const AuthenticatedApp = () => {
           element={
             <ErrorBoundaryWrapper componentName="Dashboard">
               <Dashboard />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/greenhouse"
+          element={
+            <ErrorBoundaryWrapper componentName="Greenhouse">
+              <Greenhouse />
             </ErrorBoundaryWrapper>
           }
         />
