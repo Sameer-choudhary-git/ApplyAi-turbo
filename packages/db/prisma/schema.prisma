@@ -58,6 +58,7 @@ model users {
   platformSessions   user_platform_sessions[]
   jobApplications    user_job_applications[]
   networkingContacts user_networking_contacts[]
+  savedJobs          user_saved_jobs[]
 
   // ── Job-enable flags ────────────────────────────────────────────────────
   // One boolean per flag in enableJobsConfig.
@@ -76,7 +77,7 @@ model users {
   tasks          user_tasks[]
   interviews     user_interviews[]
   googleCalendar user_google_calendar?
-  reminders user_reminders[]
+  reminders      user_reminders[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,7 +135,7 @@ model user_preferences {
 
   // ── Location & compensation ─────────────────────────────────────────────
   preferredLocations Json @default("[]") // ["Bangalore", "Remote", ...]
-  minStipend         Int  @default(0)    // monthly in INR
+  minStipend         Int  @default(0) // monthly in INR
 
   // ── Role keywords ───────────────────────────────────────────────────────
   rolesOfInterest Json @default("[]") // ["Frontend Developer", ...]
@@ -209,10 +210,10 @@ model user_job_applications {
   notes              String?
 
   type                String? // "job" | "internship" | "hackathon" | "event"
-  success_probability Int?    // 0–100, agent-assigned
+  success_probability Int? // 0–100, agent-assigned
   location            String?
 
-  appliedAt DateTime @default(now())
+  appliedAt DateTime  @default(now())
   deadline  DateTime?
 
   interviewScheduled Boolean @default(false)
@@ -257,7 +258,7 @@ model user_tasks {
   dueDate     DateTime?
   completedAt DateTime?
 
-  reminders task_reminders[]
+  reminders        task_reminders[]
   googleEventId    String?
   syncedToGoogleAt DateTime?
 
@@ -284,14 +285,14 @@ model user_interviews {
   interviewAt DateTime
   duration    Int?
   meetingUrl  String?
-  timezone    String @default("Asia/Kolkata")
+  timezone    String   @default("Asia/Kolkata")
 
   notes  String?
   status InterviewStatus @default(SCHEDULED)
 
-googleEventId    String?
+  googleEventId    String?
   syncedToGoogleAt DateTime?
-  reminders task_reminders[]
+  reminders        task_reminders[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -327,14 +328,42 @@ model user_google_calendar {
   userId String @unique
   user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  accessToken  String @db.Text
-  refreshToken String @db.Text
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
   expiryDate   DateTime
 
   email String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─── Saved jobs ───────────────────────────────────────────────────────────────
+
+model user_saved_jobs {
+  id     String @id @default(cuid())
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  company     String
+  url         String?
+  location    String?
+  workMode    String?
+  stipend     String?
+  type        String    @default("job")
+  sourceSite  String?
+  notes       String?
+  status      String    @default("saved")
+  description String?
+  deadline    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, url])
+  @@index([userId])
+  @@index([userId, status])
 }
 
 // ─── Networking ───────────────────────────────────────────────────────────────
@@ -418,7 +447,7 @@ model user_reminders {
   description String?
   location    String?
 
-  remindAt    DateTime //start
+  remindAt DateTime //start
   endAt    DateTime? // optional end — if null, treated as a 30-min default duration
   allDay   Boolean   @default(false)
 
@@ -429,7 +458,7 @@ model user_reminders {
   status ReminderStatus @default(PENDING)
 
   // Google Calendar sync
-  googleEventId String?
+  googleEventId    String?
   syncedToGoogleAt DateTime?
 
   createdAt DateTime @default(now())

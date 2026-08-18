@@ -1,14 +1,22 @@
 import { Hono } from "hono";
-import {prisma} from "@applyai/db"
+import { prisma } from "@applyai/db";
 import { authMiddleware } from "../middleware/auth";
 import { getCached, setCached, deleteCachedPattern } from "../lib/cache";
 
 export const networking = new Hono();
 
+const RELATIONSHIP_VALUES = ["recruiter", "peer", "mentor", "alumni", "referral", "other"] as const;
+const STATUS_VALUES = ["connected", "pending", "following", "met"] as const;
+const PLATFORM_VALUES = ["LinkedIn", "Unstop", "GitHub", "Twitter", "Email", "Event", "Other"] as const;
 
-const RELATIONSHIP_VALUES = ["recruiter", "peer", "mentor", "alumni", "referral", "other"];
-const STATUS_VALUES = ["connected", "pending", "following", "met"];
-const PLATFORM_VALUES = ["LinkedIn", "Unstop", "GitHub", "Twitter", "Email", "Event", "Other"];
+// Every networking operation is user-scoped. In particular, this prevents a
+// write from reaching Prisma without the userId populated by authMiddleware.
+networking.use("*", authMiddleware);
+
+function getUserId(c: Parameters<typeof authMiddleware>[0]): string | null {
+  const userId = c.get("userId");
+  return typeof userId === "string" && userId.length > 0 ? userId : null;
+}
 
 function serialize(contact: any) {
   return {
@@ -18,23 +26,28 @@ function serialize(contact: any) {
   };
 }
 
+function normalizedString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const result = value.trim();
+  return result.length > 0 ? result : null;
+}
+
 // GET /api/networking — list contacts (with search + filter)
-networking.get("/", authMiddleware, async (c) => {
-  const userId = (c as any).get("userId") as string;
+networking.get("/", async (c) => {
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
+
   const search = c.req.query("search")?.trim();
   const relationship = c.req.query("relationship");
   const status = c.req.query("status");
-
   const cacheKey = `networking:${userId}:${search ?? ""}:${relationship ?? ""}:${status ?? ""}`;
   const cached = await getCached<any[]>(cacheKey);
   if (cached) return c.json(cached);
 
   const where: any = { userId };
-
-  if (status && STATUS_VALUES.includes(status)) {
+  if (status && STATUS_VALUES.includes(status as (typeof STATUS_VALUES)[number])) {
     where.status = status;
   }
-
   if (search) {
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
@@ -48,11 +61,9 @@ networking.get("/", authMiddleware, async (c) => {
     orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
   });
 
-  // relationships is JSON array — filter in app layer since Postgres JSON "array contains" 
-  // needs raw query; fine at this scale, swap for a jsonb @> query if the table grows large.
-  if (relationship && relationship !== "all" && RELATIONSHIP_VALUES.includes(relationship)) {
-    contacts = contacts.filter((ct) =>
-      Array.isArray(ct.relationships) && (ct.relationships as string[]).includes(relationship)
+  if (relationship && relationship !== "all" && RELATIONSHIP_VALUES.includes(relationship as (typeof RELATIONSHIP_VALUES)[number])) {
+    contacts = contacts.filter((contact) =>
+      Array.isArray(contact.relationships) && (contact.relationships as string[]).includes(relationship),
     );
   }
 
@@ -62,8 +73,10 @@ networking.get("/", authMiddleware, async (c) => {
 });
 
 // GET /api/networking/stats — dashboard counters
-networking.get("/stats", authMiddleware, async (c) => {
-  const userId = (c as any).get("userId") as string;
+networking.get("/stats", async (c) => {
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
+
   const cacheKey = `networking:${userId}:stats`;
   const cached = await getCached(cacheKey);
   if (cached) return c.json(cached);
@@ -76,10 +89,10 @@ networking.get("/stats", authMiddleware, async (c) => {
   const stats = {
     total: contacts.length,
     recruiters: contacts.filter(
-      (ct) => Array.isArray(ct.relationships) && (ct.relationships as string[]).includes("recruiter")
+      (contact) => Array.isArray(contact.relationships) && (contact.relationships as string[]).includes("recruiter"),
     ).length,
-    referralPotential: contacts.filter((ct) => ct.referralPotential).length,
-    pending: contacts.filter((ct) => ct.status === "pending").length,
+    referralPotential: contacts.filter((contact) => contact.referralPotential).length,
+    pending: contacts.filter((contact) => contact.status === "pending").length,
   };
 
   await setCached(cacheKey, stats, 60);
@@ -87,53 +100,52 @@ networking.get("/stats", authMiddleware, async (c) => {
 });
 
 // GET /api/networking/:id — single contact
-networking.get("/:id", authMiddleware, async (c) => {
-  const userId = (c as any).get("userId") as string;
-  const id = c.req.param("id");
+networking.get("/:id", async (c) => {
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
 
   const contact = await prisma.user_networking_contacts.findFirst({
-    where: { id, userId },
+    where: { id: c.req.param("id"), userId },
   });
-
   if (!contact) return c.json({ error: "Contact not found" }, 404);
   return c.json(serialize(contact));
 });
 
 // POST /api/networking — create contact
 networking.post("/", async (c) => {
-  const userId = (c as any).get("userId");
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
+
   const body = await c.req.json();
-
-  if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
-    return c.json({ error: "Name is required" }, 400);
-  }
-
+  const name = normalizedString(body.name);
+  if (!name) return c.json({ error: "Name is required" }, 400);
   if (body.platform && !PLATFORM_VALUES.includes(body.platform)) {
     return c.json({ error: "Invalid platform" }, 400);
   }
-
   if (body.status && !STATUS_VALUES.includes(body.status)) {
     return c.json({ error: "Invalid status" }, 400);
   }
 
   const relationships = Array.isArray(body.relationships)
-    ? body.relationships.filter((r: string) => RELATIONSHIP_VALUES.includes(r))
+    ? body.relationships.filter((value: unknown): value is string =>
+        typeof value === "string" && RELATIONSHIP_VALUES.includes(value as (typeof RELATIONSHIP_VALUES)[number]),
+      )
     : [];
 
   const contact = await prisma.user_networking_contacts.create({
     data: {
       userId,
-      name: body.name.trim(),
-      title: body.title || null,
-      company: body.company || null,
-      email: body.email || null,
-      profileUrl: body.profile_url || body.profileUrl || null,
+      name,
+      title: normalizedString(body.title),
+      company: normalizedString(body.company),
+      email: normalizedString(body.email),
+      profileUrl: normalizedString(body.profile_url ?? body.profileUrl),
       platform: body.platform || "LinkedIn",
       relationships,
       status: body.status || "connected",
-      notes: body.notes || null,
-      referralPotential: !!body.referral_potential || !!body.referralPotential,
-      tags: Array.isArray(body.tags) ? body.tags : [],
+      notes: normalizedString(body.notes),
+      referralPotential: Boolean(body.referral_potential ?? body.referralPotential),
+      tags: Array.isArray(body.tags) ? body.tags.filter((tag: unknown) => typeof tag === "string") : [],
     },
   });
 
@@ -141,12 +153,12 @@ networking.post("/", async (c) => {
   return c.json(serialize(contact), 201);
 });
 
-
 // PATCH /api/networking/:id/pin — toggle pin
 networking.patch("/:id/pin", async (c) => {
-  const userId = c.get("userId");
-  const id = c.req.param("id");
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
 
+  const id = c.req.param("id");
   const existing = await prisma.user_networking_contacts.findFirst({ where: { id, userId } });
   if (!existing) return c.json({ error: "Contact not found" }, 404);
 
@@ -154,71 +166,71 @@ networking.patch("/:id/pin", async (c) => {
     where: { id },
     data: { pinned: !existing.pinned },
   });
-
   await deleteCachedPattern(`networking:${userId}:*`);
   return c.json(serialize(contact));
 });
 
 // PATCH /api/networking/:id — update contact
 networking.patch("/:id", async (c) => {
-  const userId = (c as any).get("userId");
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
+
   const id = c.req.param("id");
   const body = await c.req.json();
-
   const existing = await prisma.user_networking_contacts.findFirst({ where: { id, userId } });
   if (!existing) return c.json({ error: "Contact not found" }, 404);
 
-  if (body.platform && !PLATFORM_VALUES.includes(body.platform)) {
-    return c.json({ error: "Invalid platform" }, 400);
-  }
-  if (body.status && !STATUS_VALUES.includes(body.status)) {
-    return c.json({ error: "Invalid status" }, 400);
-  }
+  if (body.platform && !PLATFORM_VALUES.includes(body.platform)) return c.json({ error: "Invalid platform" }, 400);
+  if (body.status && !STATUS_VALUES.includes(body.status)) return c.json({ error: "Invalid status" }, 400);
 
-  const data: any = {};
-  if (body.name !== undefined) data.name = body.name.trim();
-  if (body.title !== undefined) data.title = body.title || null;
-  if (body.company !== undefined) data.company = body.company || null;
-  if (body.email !== undefined) data.email = body.email || null;
-  if (body.profile_url !== undefined || body.profileUrl !== undefined) {
-    data.profileUrl = body.profile_url ?? body.profileUrl ?? null;
+  const data: Record<string, unknown> = {};
+  if (body.name !== undefined) {
+    const name = normalizedString(body.name);
+    if (!name) return c.json({ error: "Name is required" }, 400);
+    data.name = name;
   }
+  if (body.title !== undefined) data.title = normalizedString(body.title);
+  if (body.company !== undefined) data.company = normalizedString(body.company);
+  if (body.email !== undefined) data.email = normalizedString(body.email);
+  if (body.profile_url !== undefined || body.profileUrl !== undefined) data.profileUrl = normalizedString(body.profile_url ?? body.profileUrl);
   if (body.platform !== undefined) data.platform = body.platform;
   if (body.status !== undefined) data.status = body.status;
-  if (body.notes !== undefined) data.notes = body.notes || null;
-  if (body.referral_potential !== undefined || body.referralPotential !== undefined) {
-    data.referralPotential = !!(body.referral_potential ?? body.referralPotential);
-  }
+  if (body.notes !== undefined) data.notes = normalizedString(body.notes);
+  if (body.referral_potential !== undefined || body.referralPotential !== undefined) data.referralPotential = Boolean(body.referral_potential ?? body.referralPotential);
   if (body.relationships !== undefined) {
     data.relationships = Array.isArray(body.relationships)
-      ? body.relationships.filter((r: string) => RELATIONSHIP_VALUES.includes(r))
+      ? body.relationships.filter((value: unknown): value is string => typeof value === "string" && RELATIONSHIP_VALUES.includes(value as (typeof RELATIONSHIP_VALUES)[number]))
       : [];
   }
-  if (body.tags !== undefined) {
-    data.tags = Array.isArray(body.tags) ? body.tags : [];
-  }
-  if (body.pinned !== undefined) data.pinned = !!body.pinned;
+  if (body.tags !== undefined) data.tags = Array.isArray(body.tags) ? body.tags.filter((tag: unknown) => typeof tag === "string") : [];
+  if (body.pinned !== undefined) data.pinned = Boolean(body.pinned);
 
-  const contact = await prisma.user_networking_contacts.update({
-    where: { id },
-    data,
-  });
-
+  const contact = await prisma.user_networking_contacts.update({ where: { id }, data });
   await deleteCachedPattern(`networking:${userId}:*`);
   return c.json(serialize(contact));
 });
 
 // DELETE /api/networking/:id
 networking.delete("/:id", async (c) => {
-  const userId = (c as any).get("userId");
-  const id = c.req.param("id");
+  const userId = getUserId(c);
+  if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
 
+  const id = c.req.param("id");
   const existing = await prisma.user_networking_contacts.findFirst({ where: { id, userId } });
   if (!existing) return c.json({ error: "Contact not found" }, 404);
 
   await prisma.user_networking_contacts.delete({ where: { id } });
   await deleteCachedPattern(`networking:${userId}:*`);
-
   return c.json({ success: true });
 });
+
+export default networking;
+
+// Keep this function exported for route-level tests and integrations that need
+// to verify the accepted values without duplicating them.
+export const networkingOptions = {
+  relationships: [...RELATIONSHIP_VALUES],
+  statuses: [...STATUS_VALUES],
+  platforms: [...PLATFORM_VALUES],
+};
 

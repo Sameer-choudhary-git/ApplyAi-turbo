@@ -21,6 +21,7 @@ import tasks from "./routes/tasks";
 import interviews from "./routes/interviews.js";
 import scheduleRouter from "./routes/schedule.js";
 import { networking } from "./routes/networking.js";
+import { savedJobsRouter } from "./routes/saved-jobs.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
 
@@ -107,6 +108,7 @@ app.route("/api/tasks", tasks);
 app.route("/api/schedule", scheduleRouter);
 app.route("/api/interviews", interviews);
 app.route("/api/networking", networking);
+app.route("/api/saved-jobs", savedJobsRouter);
 app.route("/api/google-calendar", googleCalendar);
 app.route("/api/admin/jobs", adminJobsRouter);
 
