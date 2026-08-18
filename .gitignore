@@ -39,3 +39,11 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# LinkedIn feed exporter: never commit authenticated browser state or collected member data
+.local/
+data/linkedin-feed/
+tools/linkedin-feed-exporter/.local/
+tools/linkedin-feed-exporter/data/
+linkedin-session.json
+**/linkedin-session.json
