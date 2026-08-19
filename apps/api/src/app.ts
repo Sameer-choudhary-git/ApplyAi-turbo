@@ -24,6 +24,8 @@ import { networking } from "./routes/networking.js";
 import { savedJobsRouter } from "./routes/saved-jobs.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
+import { subscriptionRouter, adminSubscriptionRouter } from "./routes/subscriptions";
+import { jobSkillRouter } from "./routes/job-skill";
 
 const allowedOrigins = [
   "https://applyai.studio",
@@ -111,6 +113,9 @@ app.route("/api/networking", networking);
 app.route("/api/saved-jobs", savedJobsRouter);
 app.route("/api/google-calendar", googleCalendar);
 app.route("/api/admin/jobs", adminJobsRouter);
+app.route("/api/entitlements", subscriptionRouter);
+app.route("/api/admin/subscription-codes", adminSubscriptionRouter);
+app.route("/api/job-skill", jobSkillRouter);
 
 
 // â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

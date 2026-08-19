@@ -4,4 +4,5 @@ export enum QueueName {
   VALIDATION = "validation",
   CLEANUP = "cleanup",
   NOTIFICATION = "notification",
+  JOB_SKILL = "job-skill",
 }

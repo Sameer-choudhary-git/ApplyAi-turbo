@@ -51,14 +51,21 @@ model users {
   onboardedAt DateTime?
 
   // Relations
-  education          user_education[]
-  experience         user_experience[]
-  skills             user_skills[]
-  preferences        user_preferences?
-  platformSessions   user_platform_sessions[]
-  jobApplications    user_job_applications[]
-  networkingContacts user_networking_contacts[]
-  savedJobs          user_saved_jobs[]
+  education                user_education[]
+  experience               user_experience[]
+  skills                   user_skills[]
+  preferences              user_preferences?
+  platformSessions         user_platform_sessions[]
+  jobApplications          user_job_applications[]
+  networkingContacts       user_networking_contacts[]
+  savedJobs                user_saved_jobs[]
+  entitlements             user_entitlements[]
+  subscriptionRedemptions  subscription_redemptions[]
+  createdSubscriptionCodes subscription_access_codes[] @relation("subscriptionCodeCreator")
+  jobSkillRuns             job_skill_runs[]
+  jobSkillSchedules        job_skill_schedules[]
+  jobSkillOpportunities    job_skill_opportunities[]
+  jobSkillArtifacts        job_skill_artifacts[]
 
   // ── Job-enable flags ────────────────────────────────────────────────────
   // One boolean per flag in enableJobsConfig.
@@ -336,6 +343,198 @@ model user_google_calendar {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─── Job skill automation ──────────────────────────────────────────────────────
+
+model job_skill_runs {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  triggerType         String    @default("manual")
+  status              String    @default("queued")
+  idempotencyKey      String
+  configurationHash   String
+  profileSnapshot     Json      @default("{}")
+  preferencesSnapshot Json      @default("{}")
+  entitlementSnapshot Json      @default("{}")
+  providerCount       Int       @default(0)
+  foundCount          Int       @default(0)
+  generatedCount      Int       @default(0)
+  errorSummary        String?
+  startedAt           DateTime?
+  completedAt         DateTime?
+
+  opportunities job_skill_opportunities[]
+  artifacts     job_skill_artifacts[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+model job_skill_schedules {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  user           users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled        Boolean   @default(false)
+  cronExpression String    @default("30 18 * * *")
+  timezone       String    @default("Asia/Kolkata")
+  providerKeys   Json      @default("[]")
+  roles          Json      @default("[]")
+  locations      Json      @default("[]")
+  companyTypes   Json      @default("[]")
+  seniority      String?
+  salaryMin      Int?
+  salaryMax      Int?
+  maxResults     Int       @default(50)
+  materialLimit  Int       @default(10)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, nextRunAt])
+}
+
+model job_skill_opportunities {
+  id            String          @id @default(cuid())
+  userId        String
+  user          users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId         String?
+  run           job_skill_runs? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  provider      String
+  externalId    String?
+  canonicalUrl  String
+  sourceUrl     String
+  title         String
+  company       String
+  location      String?
+  jobType       String?
+  salary        String?
+  description   String?
+  postedAt      DateTime?
+  rawData       Json            @default("{}")
+  fitnessScore  Int?
+  scoreReason   String?
+  status        String          @default("found")
+  savedJobId    String?
+  applicationId String?
+
+  artifacts job_skill_artifacts[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, canonicalUrl])
+  @@index([userId, fitnessScore])
+  @@index([userId, status])
+  @@index([provider, externalId])
+}
+
+model job_skill_artifacts {
+  id            String                   @id @default(cuid())
+  userId        String
+  user          users                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId         String
+  run           job_skill_runs           @relation(fields: [runId], references: [id], onDelete: Cascade)
+  opportunityId String?
+  opportunity   job_skill_opportunities? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  kind          String
+  status        String                   @default("ready")
+  fileName      String
+  contentType   String
+  storageKey    String?
+  publicUrl     String?
+  checksum      String?
+  errorMessage  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, runId])
+  @@index([opportunityId, kind])
+}
+
+// ─── Subscription entitlements ────────────────────────────────────────────────
+
+model subscription_tiers {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  name        String
+  description String?
+  features    Json    @default("{}")
+  limits      Json    @default("{}")
+  isActive    Boolean @default(true)
+
+  accessCodes  subscription_access_codes[]
+  entitlements user_entitlements[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model subscription_access_codes {
+  id              String             @id @default(cuid())
+  tierId          String
+  tier            subscription_tiers @relation(fields: [tierId], references: [id])
+  codeHash        String             @unique
+  codePrefix      String
+  maxRedemptions  Int                @default(1)
+  redemptionCount Int                @default(0)
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  note            String?
+  createdByUserId String
+  createdByUser   users              @relation("subscriptionCodeCreator", fields: [createdByUserId], references: [id])
+
+  redemptions subscription_redemptions[]
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  @@index([tierId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model subscription_redemptions {
+  id         String                    @id @default(cuid())
+  codeId     String
+  code       subscription_access_codes @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  userId     String
+  user       users                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierKey    String
+  redeemedAt DateTime                  @default(now())
+
+  entitlement user_entitlements?
+
+  @@unique([codeId, userId])
+  @@index([userId, redeemedAt])
+}
+
+model user_entitlements {
+  id                 String                    @id @default(cuid())
+  userId             String
+  user               users                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierId             String
+  tier               subscription_tiers        @relation(fields: [tierId], references: [id])
+  sourceRedemptionId String?                   @unique
+  sourceRedemption   subscription_redemptions? @relation(fields: [sourceRedemptionId], references: [id])
+  status             String                    @default("active")
+  startsAt           DateTime                  @default(now())
+  endsAt             DateTime?
+  featuresSnapshot   Json                      @default("{}")
+  limitsSnapshot     Json                      @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, endsAt])
 }
 
 // ─── Saved jobs ───────────────────────────────────────────────────────────────

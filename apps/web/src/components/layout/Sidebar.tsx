@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  KeyRound,
   LayoutDashboard,
   ListTodo,
   Settings2,
@@ -37,6 +38,7 @@ const groups: Array<{ label: string; items: NavItem[] }> = [
       { path: "/", icon: LayoutDashboard, label: "Dashboard" },
       { path: "/applications", icon: BriefcaseBusiness, label: "Applications" },
       { path: "/saved-jobs", icon: Bookmark, label: "Saved jobs" },
+      { path: "/job-skill", icon: Sparkles, label: "Job Skill" },
       { path: "/networking", icon: Users, label: "Networking" },
     ],
   },
@@ -56,6 +58,7 @@ const groups: Array<{ label: string; items: NavItem[] }> = [
     items: [
       { path: "/preferences", icon: Settings2, label: "Preferences" },
       { path: "/admin/jobs", icon: ClipboardCheck, label: "Job admin" },
+      { path: "/admin/subscriptions", icon: KeyRound, label: "Access codes" },
     ],
   },
 ];

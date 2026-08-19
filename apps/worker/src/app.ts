@@ -55,6 +55,7 @@ export * from "./workers/extract.worker";
 export * from "./workers/validation.worker";
 export * from "./workers/cleanup.worker";
 export * from "./workers/notification.worker";
+export * from "./workers/job-skill.worker";
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {

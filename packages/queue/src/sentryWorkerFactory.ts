@@ -32,7 +32,7 @@ export function createSentryWorker({
   }  const worker = new Worker(
     queue,
     async (job: Job) => {
-      const jobId = job.id;
+      const jobId = String(job.id ?? "unknown");
       const jobName = job.name;
       const startTime = Date.now();
 

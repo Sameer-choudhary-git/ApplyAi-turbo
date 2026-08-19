@@ -14,7 +14,7 @@ export interface ScheduledTaskConfig {
 /**
  * Wrapper to track cron jobs with Sentry
  */
-export function scheduleWithSentry(config: ScheduledTaskConfig): cron.ScheduledTask {
+export function scheduleWithSentry(config: ScheduledTaskConfig): ReturnType<typeof cron.schedule> {
   const { name, schedule, task } = config;
 
   console.log(`⏰ Scheduling cron job: ${name} (${schedule})`);
@@ -138,7 +138,7 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): cron.ScheduledT
  */
 export function scheduleMultipleWithSentry(
   configs: ScheduledTaskConfig[]
-): cron.ScheduledTask[] {
+): Array<ReturnType<typeof cron.schedule>> {
   return configs.map((config) => scheduleWithSentry(config));
 }
 

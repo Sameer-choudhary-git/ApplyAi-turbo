@@ -8,3 +8,4 @@ export {
   sentryErrorHandler,
   captureHandledError,
 } from "./node.js";
+export { trackApiRequest, trackJob, trackCronJob, trackDatabase, trackTransaction, addTraceBreadcrumb } from "./utils.js";

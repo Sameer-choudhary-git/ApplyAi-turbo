@@ -14,8 +14,10 @@ import Analytics from "./pages/Analytics";
 import Preferences from "./pages/Preferences";
 import Networking from "./pages/Networking";
 import SavedJobs from "./pages/SavedJobs";
+import JobSkill from "./pages/JobSkill";
 import Login from "./pages/Login";
 import AdminJobs from "@/views/AdminJobs";
+import AdminSubscriptions from "@/views/AdminSubscriptions";
 import { SentryRouteTracker } from "@/components/SentryRouteTracker";
 import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
 
@@ -109,10 +111,26 @@ const AuthenticatedApp = () => {
           }
         />
         <Route
+          path="/job-skill"
+          element={
+            <ErrorBoundaryWrapper componentName="Job Skill">
+              <JobSkill />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
           path="/admin/jobs"
           element={
             <ErrorBoundaryWrapper componentName="Admin Jobs">
               <AdminJobs />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/admin/subscriptions"
+          element={
+            <ErrorBoundaryWrapper componentName="Admin Subscriptions">
+              <AdminSubscriptions />
             </ErrorBoundaryWrapper>
           }
         />

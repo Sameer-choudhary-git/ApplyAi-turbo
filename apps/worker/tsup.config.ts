@@ -19,5 +19,5 @@ export default defineConfig({
     "@bull-board/express",
     "express",
   ],
-  external: ["playwright", "@prisma/client", "@prisma/adapter-pg"],
+  external: ["playwright", "@prisma/client", "@prisma/adapter-pg", "@sentry/node", "@sentry/node-cpu-profiler"],
 });

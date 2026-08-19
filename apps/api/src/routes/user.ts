@@ -128,6 +128,31 @@ user.post("/onboard", authMiddleware, async (c) => {
         },
       });
 
+      // Every onboarded user has a safe default entitlement. This does not
+      // replace an active admin-granted tier redeemed earlier.
+      const freeTier = await tx.subscription_tiers.findUnique({ where: { key: "free" } });
+      if (freeTier) {
+        const now = new Date();
+        const activeEntitlement = await tx.user_entitlements.findFirst({
+          where: {
+            userId: u.id,
+            status: "active",
+            startsAt: { lte: now },
+            OR: [{ endsAt: null }, { endsAt: { gt: now } }],
+          },
+        });
+        if (!activeEntitlement) {
+          await tx.user_entitlements.create({
+            data: {
+              userId: u.id,
+              tierId: freeTier.id,
+              featuresSnapshot: (freeTier.features ?? {}) as any,
+              limitsSnapshot: (freeTier.limits ?? {}) as any,
+            },
+          });
+        }
+      }
+
       return u;
     });
 

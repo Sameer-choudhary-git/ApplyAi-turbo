@@ -9,5 +9,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   noExternal: [/^@applyai\//, "ioredis", "bullmq", "pg", "dotenv", "@aws-sdk/client-s3"],
-  external: ["playwright", "@prisma/client", "@prisma/adapter-pg"],
+  external: ["playwright", "@prisma/client", "@prisma/adapter-pg", "@sentry/node", "@sentry/node-cpu-profiler"],
 });

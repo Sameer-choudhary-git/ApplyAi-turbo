@@ -16,9 +16,18 @@ export const JobNames = {
   CLEANUP: {
     EXPIRED_SESSIONS: "CleanupExpiredSessions",
   },
+
+  JOB_SKILL: {
+    COORDINATE: "JobSkillCoordinate",
+    SEARCH: "JobSkillSearch",
+    MATERIALS: "JobSkillMaterials",
+    REPORT: "JobSkillReport",
+  },
 } as const;
 
 export type ExtractJobNames =
   (typeof JobNames.EXTRACT)[keyof typeof JobNames.EXTRACT];
 export type ApplyJobNames =
   (typeof JobNames.APPLY)[keyof typeof JobNames.APPLY];
+export type JobSkillJobNames =
+  (typeof JobNames.JOB_SKILL)[keyof typeof JobNames.JOB_SKILL];
