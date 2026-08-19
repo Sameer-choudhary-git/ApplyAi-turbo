@@ -55,7 +55,11 @@ If a deployment issue is detected, first disable Job Skill schedules in the UI o
 | --- | --- |
 | Existing saved jobs list/create/update/delete | Continues to work with user isolation |
 | Existing networking create/list/update/delete | Uses the authenticated Supabase user ID; no `undefined` Prisma user context |
-| Free onboarding with no code | Completes successfully and receives a free entitlement |
+| Free onboarding with no code | Completes successfully and receives a frontend-only Free entitlement |
+| Free service access | Service mutations are denied with a plan-upgrade response |
+| Pro service access | Saved jobs, networking, applications, and Job Skill are available within configured limits |
+| Max service access | Available plan features and usage limits resolve as unlimited (`-1`) |
+| Admin customer assignment | Customer receives the selected plan, expiry, overrides, and an audit event |
 | Valid one-time code redemption | Creates one redemption and one active entitlement |
 | Repeated redemption by same user | Returns the existing entitlement idempotently |
 | Concurrent redemptions beyond max usage | Only the configured number succeed |

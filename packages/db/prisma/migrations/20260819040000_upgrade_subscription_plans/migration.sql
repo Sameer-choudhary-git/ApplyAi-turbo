@@ -95,8 +95,8 @@ WHERE "key" = 'job_skill';
 
 UPDATE "subscription_tiers"
 SET "displayOrder" = 1, "isPublic" = true,
-    "features" = '{"saved_jobs":true,"application_tracking":true,"networking":true}',
-    "limits" = '{"manual_runs_per_month":3,"scheduled_runs_per_day":0,"results_per_run":0,"materials_per_run":0,"saved_jobs":25,"networking_contacts":25,"applications_per_month":10,"resume_generations_per_month":0,"cover_letter_generations_per_month":0}'
+    "features" = '{"frontend_access":true}',
+    "limits" = '{"manual_runs_per_month":0,"scheduled_runs_per_day":0,"results_per_run":0,"materials_per_run":0,"saved_jobs":0,"networking_contacts":0,"applications_per_month":0,"resume_generations_per_month":0,"cover_letter_generations_per_month":0}'
 WHERE "key" = 'free';
 
 INSERT INTO "subscription_tiers" ("id", "key", "name", "description", "features", "limits", "displayOrder", "isPublic", "isActive", "createdAt", "updatedAt")

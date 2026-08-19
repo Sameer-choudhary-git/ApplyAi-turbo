@@ -29,7 +29,7 @@ export type EntitlementRecord = {
 export const FREE_TIER_KEY = "free";
 export const PRO_TIER_KEY = "pro";
 export const MAX_TIER_KEY = "max";
-export const JOB_SKILL_TIER_KEY = "job_skill";
+export const JOB_SKILL_TIER_KEY = PRO_TIER_KEY;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
