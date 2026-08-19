@@ -62,6 +62,10 @@ model users {
   entitlements             user_entitlements[]
   subscriptionRedemptions  subscription_redemptions[]
   createdSubscriptionCodes subscription_access_codes[] @relation("subscriptionCodeCreator")
+  grantedEntitlements      user_entitlements[]         @relation("entitlementGranter")
+  subscriptionUsage        subscription_usage[]
+  subscriptionAuditActor   subscription_audit_events[] @relation("subscriptionAuditActor")
+  subscriptionAuditUser    subscription_audit_events[] @relation("subscriptionAuditUser")
   jobSkillRuns             job_skill_runs[]
   jobSkillSchedules        job_skill_schedules[]
   jobSkillOpportunities    job_skill_opportunities[]
@@ -463,13 +467,15 @@ model job_skill_artifacts {
 // ─── Subscription entitlements ────────────────────────────────────────────────
 
 model subscription_tiers {
-  id          String  @id @default(cuid())
-  key         String  @unique
-  name        String
-  description String?
-  features    Json    @default("{}")
-  limits      Json    @default("{}")
-  isActive    Boolean @default(true)
+  id           String  @id @default(cuid())
+  key          String  @unique
+  name         String
+  description  String?
+  features     Json    @default("{}")
+  limits       Json    @default("{}")
+  displayOrder Int     @default(0)
+  isPublic     Boolean @default(true)
+  isActive     Boolean @default(true)
 
   accessCodes  subscription_access_codes[]
   entitlements user_entitlements[]
@@ -479,22 +485,25 @@ model subscription_tiers {
 }
 
 model subscription_access_codes {
-  id              String             @id @default(cuid())
-  tierId          String
-  tier            subscription_tiers @relation(fields: [tierId], references: [id])
-  codeHash        String             @unique
-  codePrefix      String
-  maxRedemptions  Int                @default(1)
-  redemptionCount Int                @default(0)
-  expiresAt       DateTime?
-  revokedAt       DateTime?
-  note            String?
-  createdByUserId String
-  createdByUser   users              @relation("subscriptionCodeCreator", fields: [createdByUserId], references: [id])
+  id               String             @id @default(cuid())
+  tierId           String
+  tier             subscription_tiers @relation(fields: [tierId], references: [id])
+  codeHash         String             @unique
+  codePrefix       String
+  maxRedemptions   Int                @default(1)
+  redemptionCount  Int                @default(0)
+  expiresAt        DateTime?
+  revokedAt        DateTime?
+  note             String?
+  featureOverrides Json?
+  limitOverrides   Json?
+  createdByUserId  String
+  createdByUser    users              @relation("subscriptionCodeCreator", fields: [createdByUserId], references: [id])
 
   redemptions subscription_redemptions[]
-  createdAt   DateTime                   @default(now())
-  updatedAt   DateTime                   @updatedAt
+  auditEvents subscription_audit_events[]
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
 
   @@index([tierId])
   @@index([expiresAt])
@@ -525,16 +534,65 @@ model user_entitlements {
   sourceRedemptionId String?                   @unique
   sourceRedemption   subscription_redemptions? @relation(fields: [sourceRedemptionId], references: [id])
   status             String                    @default("active")
+  sourceType         String                    @default("code")
   startsAt           DateTime                  @default(now())
   endsAt             DateTime?
   featuresSnapshot   Json                      @default("{}")
   limitsSnapshot     Json                      @default("{}")
+  featureOverrides   Json?
+  limitOverrides     Json?
+  note               String?
+  grantedByUserId    String?
+  grantedByUser      users?                    @relation("entitlementGranter", fields: [grantedByUserId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
+  usage       subscription_usage[]
+  auditEvents subscription_audit_events[]
+  createdAt   DateTime                    @default(now())
+
   updatedAt DateTime @updatedAt
 
   @@index([userId, status])
   @@index([userId, endsAt])
+  @@index([tierId, status])
+}
+
+model subscription_usage {
+  id            String            @id @default(cuid())
+  userId        String
+  user          users             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entitlementId String
+  entitlement   user_entitlements @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  metric        String
+  periodKey     String
+  used          Int               @default(0)
+  periodStart   DateTime
+  periodEnd     DateTime
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([entitlementId, metric, periodKey])
+  @@index([userId, metric, periodEnd])
+}
+
+model subscription_audit_events {
+  id             String                     @id @default(cuid())
+  actorUserId    String?
+  actorUser      users?                     @relation("subscriptionAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  userId         String?
+  user           users?                     @relation("subscriptionAuditUser", fields: [userId], references: [id], onDelete: SetNull)
+  entitlementId  String?
+  entitlement    user_entitlements?         @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+  codeId         String?
+  code           subscription_access_codes? @relation(fields: [codeId], references: [id], onDelete: SetNull)
+  action         String
+  beforeSnapshot Json?
+  afterSnapshot  Json?
+  metadata       Json?
+  createdAt      DateTime                   @default(now())
+
+  @@index([userId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([codeId, createdAt])
 }
 
 // ─── Saved jobs ───────────────────────────────────────────────────────────────

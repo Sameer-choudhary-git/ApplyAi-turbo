@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { prisma } from "@applyai/db";
 import { authMiddleware } from "../middleware/auth";
 import { deleteCachedPattern, getCached, setCached } from "../lib/cache";
+import { hasFeature, reserveUsage } from "../lib/entitlements";
 
 export const savedJobsRouter = new Hono();
 
@@ -96,6 +97,7 @@ savedJobsRouter.post("/", async (c) => {
   const userId = getUserId(c);
   if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
 
+  if (!(await hasFeature(userId, "saved_jobs"))) return c.json({ success: false, error: "Saved jobs are not available on your current plan" }, 403);
   const body = await c.req.json();
   const title = stringValue(body.title);
   const company = stringValue(body.company);
@@ -112,6 +114,12 @@ savedJobsRouter.post("/", async (c) => {
 
   const deadline = parseDeadline(body.deadline);
   if (body.deadline !== undefined && deadline === undefined) return c.json({ success: false, error: "Invalid deadline" }, 400);
+
+  try {
+    await reserveUsage(userId, "saved_jobs");
+  } catch {
+    return c.json({ success: false, error: "Your saved-job limit has been reached" }, 429);
+  }
 
   const job = await prisma.user_saved_jobs.create({
     data: {

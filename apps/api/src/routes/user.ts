@@ -146,6 +146,7 @@ user.post("/onboard", authMiddleware, async (c) => {
             data: {
               userId: u.id,
               tierId: freeTier.id,
+              sourceType: "default",
               featuresSnapshot: (freeTier.features ?? {}) as any,
               limitsSnapshot: (freeTier.limits ?? {}) as any,
             },

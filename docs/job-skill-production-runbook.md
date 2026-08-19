@@ -31,13 +31,15 @@
 
 ## Access-code administration
 
-Open the existing authenticated admin area at `/admin/subscriptions`. Generate a code by selecting `job_skill`, setting a redemption limit, and optionally setting an expiration date. The plaintext code is returned only in the creation response and is not stored in the database; the database stores a SHA-256 hash and a short display prefix.
+Open the existing authenticated admin area at `/admin/subscriptions`. Generate a code by selecting `free`, `pro`, or `max`, setting a redemption limit, and optionally setting an expiration date. You can also provide JSON feature and limit overrides, such as `{\"analytics\":true}` or `{\"manual_runs_per_month\":100}`. The plaintext code is returned only in the creation response and is not stored in the database; the database stores a SHA-256 hash and a short display prefix.
 
-Share the code with the intended user through a secure channel. The user may enter it during onboarding. A free-tier user can continue without a code. Redemption is atomic, user-scoped, idempotent for the same code and user, and protected against concurrent over-redemption through a conditional database update.
+The same screen lists customers. An administrator can assign Free, Pro, or Max directly to an existing customer, set an expiry date, add custom feature or limit overrides, revoke access, and inspect subscription audit history. This is the supported payment-free customer onboarding workflow until a payment provider is connected.
+
+Share the code with the intended user through a secure channel. The user may enter it during onboarding. A Free-tier user can continue without a code. Redemption is atomic, user-scoped, idempotent for the same code and user, and protected against concurrent over-redemption through a conditional database update. The effective plan combines the base tier with any code or admin overrides. `-1` limits mean unlimited, while the worker still applies safe per-run processing caps to protect infrastructure.
 
 ## Job Skill operations
 
-Open `/job-skill` after the user has an active `job_skill` entitlement. Select target roles and locations, verify the active provider badges, and run a manual search. The initial production provider is the existing Unstop dataset already maintained by ApplyAi. The adapter registry reports unsupported upstream providers explicitly rather than silently pretending they are active.
+Open `/plans` to review the active Free, Pro, or Max plan and current usage. Open `/job-skill` after the user has an active Pro or Max entitlement. Select target roles and locations, verify the active provider badges, and run a manual search. The initial production provider is the existing Unstop dataset already maintained by ApplyAi. The adapter registry reports unsupported upstream providers explicitly rather than silently pretending they are active.
 
 Enable nightly automation only after the manual run is stable. The scheduler polls due schedules every five minutes, snapshots the user profile and entitlement, creates an idempotent nightly run, and enqueues the search stage. The worker then executes search, normalization, deduplication, scoring, optional material generation, and report stages. A failed provider is recorded in the run rather than stopping other providers or users.
 

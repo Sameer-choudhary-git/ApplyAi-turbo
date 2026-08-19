@@ -14,7 +14,8 @@ export class JobSkillMaterialsHandler implements JobHandler<{ runId: string; use
     await prisma.job_skill_runs.update({ where: { id: run.id }, data: { status: "generating_materials" } });
 
     const configuration = record(run.preferencesSnapshot);
-    const materialLimit = Math.max(0, Number(configuration.materialLimit || 0));
+    const requestedMaterialLimit = Number(configuration.materialLimit || 0);
+    const materialLimit = requestedMaterialLimit === Number.POSITIVE_INFINITY ? 1000 : Math.min(Math.max(0, requestedMaterialLimit), 1000);
     const opportunities = await prisma.job_skill_opportunities.findMany({ where: { userId: payload.userId, runId: run.id, fitnessScore: { gte: 60 } }, orderBy: { fitnessScore: "desc" }, take: materialLimit });
     const profile = record(run.profileSnapshot);
     let generatedCount = 0;

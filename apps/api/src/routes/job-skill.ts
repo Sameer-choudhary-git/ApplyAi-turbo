@@ -4,7 +4,7 @@ import { prisma } from "@applyai/db";
 import { JobSkillSearchJob } from "@applyai/jobs";
 import { authMiddleware } from "../middleware/auth";
 import { deleteCachedPattern } from "../lib/cache";
-import { getEffectiveEntitlement, getEntitlementLimit, hasFeature } from "../lib/entitlements";
+import { getEffectiveEntitlement, getEntitlementLimit, hasFeature, reserveUsage, resolvedFeatures, resolvedLimits } from "../lib/entitlements";
 
 export const jobSkillRouter = new Hono();
 
@@ -112,11 +112,6 @@ jobSkillRouter.post("/runs", async (c) => {
   if (!(await requireFeature(userId, "job_skill_search"))) return c.json({ success: false, error: "Job Skill access requires an active entitlement" }, 403);
   const body = await c.req.json().catch(() => ({}));
   const entitlement = await getEffectiveEntitlement(userId);
-  const limit = getEntitlementLimit(entitlement, "manual_runs_per_day", 0);
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const runsToday = await prisma.job_skill_runs.count({ where: { userId, triggerType: "manual", createdAt: { gte: startOfDay } } });
-  if (limit >= 0 && runsToday >= limit) return c.json({ success: false, error: "Your daily manual Job Skill run limit has been reached" }, 429);
 
   const roles = stringArray(body.roles).length ? stringArray(body.roles) : stringArray((entitlement as any)?.preferences?.rolesOfInterest);
   const locations = stringArray(body.locations).length ? stringArray(body.locations) : [];
@@ -141,6 +136,14 @@ jobSkillRouter.post("/runs", async (c) => {
   const idempotencyKey = text(body.idempotencyKey) || `manual:${new Date().toISOString().slice(0, 10)}:${randomUUID()}`;
   const user = await prisma.users.findUnique({ where: { id: userId }, include: { preferences: true, education: true, experience: true, skills: true } });
   if (!user) return c.json({ success: false, error: "Complete onboarding before starting a Job Skill run" }, 400);
+  const existingRun = await prisma.job_skill_runs.findFirst({ where: { userId, idempotencyKey } });
+  if (existingRun) return c.json({ success: true, run: { id: existingRun.id, status: existingRun.status, triggerType: existingRun.triggerType, createdAt: existingRun.createdAt }, idempotent: true }, 200);
+  let usage;
+  try {
+    usage = await reserveUsage(userId, "manual_runs_per_month");
+  } catch {
+    return c.json({ success: false, error: "Your plan limit for manual Job Skill runs has been reached" }, 429);
+  }
 
   const run = await prisma.job_skill_runs.create({
     data: {
@@ -151,7 +154,7 @@ jobSkillRouter.post("/runs", async (c) => {
       configurationHash,
       profileSnapshot: { fullName: user.fullName, location: user.location, bio: user.bio, linkedinUrl: user.linkedinUrl, githubUrl: user.githubUrl, education: user.education, experience: user.experience, skills: user.skills.map((skill) => skill.skill), resumeUrl: user.resumeUrl },
       preferencesSnapshot: { ...(user.preferences ?? {}), ...configuration },
-      entitlementSnapshot: (entitlement ? { tierKey: entitlement.tier.key, features: entitlement.featuresSnapshot, limits: entitlement.limitsSnapshot } : {}) as any,
+      entitlementSnapshot: (entitlement ? { tierKey: entitlement.tier.key, features: resolvedFeatures(entitlement), limits: resolvedLimits(entitlement), usage } : {}) as any,
     },
   });
 

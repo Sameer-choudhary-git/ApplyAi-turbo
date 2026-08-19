@@ -974,7 +974,7 @@ export default function Onboarding() {
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm mt-6">
               <div>
                 <p className="font-semibold text-foreground">Have an access code?</p>
-                <p className="text-xs text-muted-foreground mt-1">Redeem an admin-issued code to unlock Job Skill automation. You can leave this blank and continue with the free tier.</p>
+                <p className="text-xs text-muted-foreground mt-1">Redeem an admin-issued code to activate your assigned plan. You can leave this blank and continue on the Free plan.</p>
               </div>
               <input
                 value={accessCode}

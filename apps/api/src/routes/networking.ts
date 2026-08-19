@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { prisma } from "@applyai/db";
 import { authMiddleware } from "../middleware/auth";
 import { getCached, setCached, deleteCachedPattern } from "../lib/cache";
+import { hasFeature, reserveUsage } from "../lib/entitlements";
 
 export const networking = new Hono();
 
@@ -116,6 +117,7 @@ networking.post("/", async (c) => {
   const userId = getUserId(c);
   if (!userId) return c.json({ success: false, error: "Unauthorized" }, 401);
 
+  if (!(await hasFeature(userId, "networking"))) return c.json({ success: false, error: "Networking is not available on your current plan" }, 403);
   const body = await c.req.json();
   const name = normalizedString(body.name);
   if (!name) return c.json({ error: "Name is required" }, 400);
@@ -131,6 +133,12 @@ networking.post("/", async (c) => {
         typeof value === "string" && RELATIONSHIP_VALUES.includes(value as (typeof RELATIONSHIP_VALUES)[number]),
       )
     : [];
+
+  try {
+    await reserveUsage(userId, "networking_contacts");
+  } catch {
+    return c.json({ success: false, error: "Your networking-contact limit has been reached" }, 429);
+  }
 
   const contact = await prisma.user_networking_contacts.create({
     data: {

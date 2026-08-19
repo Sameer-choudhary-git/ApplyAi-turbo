@@ -29,12 +29,21 @@ export async function enqueueDueJobSkillRuns(): Promise<void> {
       include: { tier: true },
       orderBy: { startsAt: "desc" },
     });
-    const features = record(entitlement?.featuresSnapshot ?? entitlement?.tier.features);
+    const features = { ...record(entitlement?.tier.features), ...record(entitlement?.featuresSnapshot), ...record((entitlement as any)?.featureOverrides) };
+    const limits = { ...record(entitlement?.tier.limits), ...record(entitlement?.limitsSnapshot), ...record((entitlement as any)?.limitOverrides) };
     if (!entitlement || features.job_skill_schedule !== true) {
       await prisma.job_skill_schedules.update({ where: { id: schedule.id }, data: { nextRunAt: nextRun(schedule.cronExpression, schedule.timezone) } });
       continue;
     }
 
+    const scheduledLimit = limits.scheduled_runs_per_day === -1 ? Number.POSITIVE_INFINITY : typeof limits.scheduled_runs_per_day === "number" ? limits.scheduled_runs_per_day : 0;
+    const startOfDay = new Date(now);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const scheduledToday = await prisma.job_skill_runs.count({ where: { userId: schedule.userId, triggerType: "nightly", createdAt: { gte: startOfDay } } });
+    if (scheduledLimit !== Number.POSITIVE_INFINITY && (scheduledLimit <= 0 || scheduledToday >= scheduledLimit)) {
+      await prisma.job_skill_schedules.update({ where: { id: schedule.id }, data: { nextRunAt: nextRun(schedule.cronExpression, schedule.timezone) } });
+      continue;
+    }
     const dateKey = now.toISOString().slice(0, 10);
     const idempotencyKey = `nightly:${schedule.id}:${dateKey}`;
     const configuration = { roles: schedule.roles, locations: schedule.locations, providerKeys: schedule.providerKeys, companyTypes: schedule.companyTypes, seniority: schedule.seniority, salaryMin: schedule.salaryMin, salaryMax: schedule.salaryMax, maxResults: schedule.maxResults, materialLimit: schedule.materialLimit };
@@ -48,7 +57,7 @@ export async function enqueueDueJobSkillRuns(): Promise<void> {
           configurationHash: JSON.stringify(configuration),
           profileSnapshot: { fullName: schedule.user.fullName, location: schedule.user.location, bio: schedule.user.bio, linkedinUrl: schedule.user.linkedinUrl, githubUrl: schedule.user.githubUrl, resumeUrl: schedule.user.resumeUrl, education: schedule.user.education, experience: schedule.user.experience, skills: schedule.user.skills.map((skill) => skill.skill) },
           preferencesSnapshot: { ...record(schedule.user.preferences), ...configuration },
-          entitlementSnapshot: { tierKey: entitlement.tier.key, features: entitlement.featuresSnapshot, limits: entitlement.limitsSnapshot },
+          entitlementSnapshot: { tierKey: entitlement.tier.key, features, limits },
         },
       });
       await new JobSkillSearchJob({ runId: run.id, userId: schedule.userId }).enqueue({ attempts: 3, backoff: { type: "exponential", delay: 5000 }, removeOnComplete: 100, removeOnFail: 100 });

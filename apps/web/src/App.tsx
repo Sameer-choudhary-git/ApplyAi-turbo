@@ -15,6 +15,7 @@ import Preferences from "./pages/Preferences";
 import Networking from "./pages/Networking";
 import SavedJobs from "./pages/SavedJobs";
 import JobSkill from "./pages/JobSkill";
+import Plans from "./pages/Plans";
 import Login from "./pages/Login";
 import AdminJobs from "@/views/AdminJobs";
 import AdminSubscriptions from "@/views/AdminSubscriptions";
@@ -115,6 +116,14 @@ const AuthenticatedApp = () => {
           element={
             <ErrorBoundaryWrapper componentName="Job Skill">
               <JobSkill />
+            </ErrorBoundaryWrapper>
+          }
+        />
+        <Route
+          path="/plans"
+          element={
+            <ErrorBoundaryWrapper componentName="Plans">
+              <Plans />
             </ErrorBoundaryWrapper>
           }
         />
