@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { TableSkeleton } from "@/components/ui/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { Loader2, PlayCircle, Zap, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
@@ -71,10 +72,10 @@ export default function AdminJobs() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pt-10 pb-20 px-6">
+    <div className="mx-auto max-w-2xl space-y-6 px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-          <Zap className="w-6 h-6 text-white" />
+          <Zap className="w-6 h-6 text-primary-foreground" />
         </div>
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground">Job Runner</h1>
@@ -108,9 +109,7 @@ export default function AdminJobs() {
 
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm p-2 divide-y divide-border/40">
         {isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-          </div>
+          <TableSkeleton label="Loading job controls" rows={4} />
         ) : (
           data?.map((job) => (
             <div key={job.key} className="flex items-center justify-between px-4 py-4">
@@ -140,7 +139,7 @@ export default function AdminJobs() {
       </Card>
 
       <Button
-        className="w-full gradient-primary text-white border-0 h-11"
+        className="h-11 w-full border-0 gradient-primary text-primary-foreground"
         onClick={() => triggerAllMutation.mutate()}
         disabled={triggerAllMutation.isPending}
       >

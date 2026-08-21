@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { SearchResultsSkeleton } from "@/components/ui/loading-skeletons";
 
 type GreenhouseJob = {
   id: string;
@@ -359,9 +360,7 @@ export default function Greenhouse() {
       )}
 
       {loading ? (
-        <div className="rounded-2xl border border-border/60 bg-card/50 p-8 text-sm text-muted-foreground">
-          Loading newly discovered jobs…
-        </div>
+        <SearchResultsSkeleton label="Loading Greenhouse opportunities" rows={4} />
       ) : jobs.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
           No active Greenhouse jobs match these filters yet. The next discovery

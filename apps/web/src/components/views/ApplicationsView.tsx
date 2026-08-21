@@ -6,6 +6,7 @@ import ApplicationFilters from "../applications/ApplicationFilters";
 import ApplicationRow from "../applications/ApplicationRow";
 import type { Application as ApplicationData } from "@/types/application";
 import { useQueryClient } from "@tanstack/react-query";
+import { ListSkeleton } from "@/components/ui/loading-skeletons";
 
 interface ApplicationsProps {
   applications?: ApplicationData[];
@@ -78,9 +79,7 @@ export default function Applications({
       >
         <Card className="overflow-hidden rounded-[28px] border-border/70 bg-card/60 shadow-[0_22px_60px_-42px_hsl(222_45%_2%_/_0.9)] backdrop-blur-xl">
           {isLoading ? (
-            <div className="p-16 text-center">
-              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
-            </div>
+            <ListSkeleton label="Loading applications" rows={5} />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
               <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4 border border-border/50 shadow-sm">

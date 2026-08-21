@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CardGridSkeleton } from "@/components/ui/loading-skeletons";
 import {
   AlertCircle,
   Bookmark,
@@ -160,22 +161,22 @@ export default function SavedJobs() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="page-enter space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-            <Bookmark className="w-6 h-6 text-white" />
+            <Bookmark className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Saved Jobs</h1>
             <p className="text-muted-foreground text-sm mt-1">Keep a personal, user-scoped pipeline of opportunities.</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Button variant="outline" className="border-border/50 bg-card/50 gap-2 h-10" onClick={() => window.open("https://chrome.google.com/webstore", "_blank")}>
             <Puzzle className="w-4 h-4 text-primary" /> Get Extension
           </Button>
-          <Button className="gradient-primary text-white border-0 glow-primary h-10 px-5" onClick={() => setOpen(true)}>
+          <Button className="gradient-primary text-primary-foreground border-0 glow-primary h-10 px-5" onClick={() => setOpen(true)}>
             <Plus className="w-4 h-4 mr-2" /> Save Job
           </Button>
         </div>
@@ -187,7 +188,7 @@ export default function SavedJobs() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         {[
           ["Total Saved", counts.total, "text-violet-400"],
           ["To Apply", counts.saved, "text-amber-400"],
@@ -217,7 +218,7 @@ export default function SavedJobs() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+        <CardGridSkeleton label="Loading saved jobs" cards={6} />
       ) : jobs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-6 text-center border border-dashed border-border rounded-2xl bg-card/30">
           <Bookmark className="w-10 h-10 text-muted-foreground/70 mb-4" />
@@ -225,7 +226,7 @@ export default function SavedJobs() {
           <p className="text-sm text-muted-foreground mt-2 max-w-[320px]">Save a job manually or from the browser extension to start building your pipeline.</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <AnimatePresence>
             {jobs.map((job, index) => (
               <motion.div key={job.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.04 }} className="group relative bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 flex flex-col justify-between">
@@ -248,7 +249,7 @@ export default function SavedJobs() {
                   {job.notes && <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed mb-4">{job.notes}</p>}
                 </div>
                 <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                  {job.status === "saved" ? <Button size="sm" className="h-9 font-semibold gradient-primary text-white border-0 flex-1" onClick={() => void handleUpdateStatus(job, "applied")}><Send className="w-3.5 h-3.5 mr-1.5" /> Mark Applied</Button> : job.status === "applied" ? <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-sky-300 bg-sky-400/10 border border-sky-400/20 rounded-md h-9 flex-1"><CheckCircle2 className="w-4 h-4" /> Applied</div> : <Button size="sm" variant="outline" className="h-9 flex-1" onClick={() => void handleUpdateStatus(job, "saved")}>Restore</Button>}
+                  {job.status === "saved" ? <Button size="sm" className="h-9 font-semibold gradient-primary text-primary-foreground border-0 flex-1" onClick={() => void handleUpdateStatus(job, "applied")}><Send className="w-3.5 h-3.5 mr-1.5" /> Mark Applied</Button> : job.status === "applied" ? <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-sky-300 bg-sky-400/10 border border-sky-400/20 rounded-md h-9 flex-1"><CheckCircle2 className="w-4 h-4" /> Applied</div> : <Button size="sm" variant="outline" className="h-9 flex-1" onClick={() => void handleUpdateStatus(job, "saved")}>Restore</Button>}
                   {job.url && <a href={job.url.startsWith("http") ? job.url : `https://${job.url}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-9 h-9 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-primary border border-border/50" title="Open job"><ExternalLink className="w-4 h-4" /></a>}
                 </div>
               </motion.div>
@@ -261,19 +262,19 @@ export default function SavedJobs() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="font-heading text-xl">Save a Job Posting</DialogTitle></DialogHeader>
           <div className="space-y-4 mt-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2"><Label>Job Title *</Label><Input value={form.title} onChange={handleInputChange("title")} placeholder="Frontend Developer Intern" className="mt-1.5" /></div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2"><Label>Job Title *</Label><Input value={form.title} onChange={handleInputChange("title")} placeholder="Frontend Developer Intern" className="mt-1.5" /></div>
               <div><Label>Company *</Label><Input value={form.company} onChange={handleInputChange("company")} placeholder="Google" className="mt-1.5" /></div>
               <div><Label>Type</Label><Select value={form.type} onValueChange={(value) => updateForm("type", value)}><SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger><SelectContent>{(["internship", "job", "hackathon", "competition"] as SavedJobType[]).map((type) => <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>)}</SelectContent></Select></div>
-              <div className="col-span-2"><Label>Job URL</Label><Input value={form.url} onChange={handleInputChange("url")} placeholder="https://..." className="mt-1.5" /></div>
+              <div className="sm:col-span-2"><Label>Job URL</Label><Input value={form.url} onChange={handleInputChange("url")} placeholder="https://..." className="mt-1.5" /></div>
               <div><Label>Location</Label><Input value={form.location} onChange={handleInputChange("location")} placeholder="Remote" className="mt-1.5" /></div>
               <div><Label>Work mode</Label><Input value={form.work_mode} onChange={handleInputChange("work_mode")} placeholder="Hybrid" className="mt-1.5" /></div>
               <div><Label>Stipend / salary</Label><Input value={form.stipend} onChange={handleInputChange("stipend")} placeholder="₹50,000 / month" className="mt-1.5" /></div>
               <div><Label>Source site</Label><Input value={form.source_site} onChange={handleInputChange("source_site")} placeholder="LinkedIn" className="mt-1.5" /></div>
-              <div className="col-span-2"><Label>Deadline</Label><Input type="date" value={form.deadline} onChange={handleInputChange("deadline")} className="mt-1.5" /></div>
-              <div className="col-span-2"><Label>Notes</Label><Textarea value={form.notes} onChange={handleInputChange("notes")} placeholder="Why this role is a good fit..." className="mt-1.5" /></div>
+              <div className="sm:col-span-2"><Label>Deadline</Label><Input type="date" value={form.deadline} onChange={handleInputChange("deadline")} className="mt-1.5" /></div>
+              <div className="sm:col-span-2"><Label>Notes</Label><Textarea value={form.notes} onChange={handleInputChange("notes")} placeholder="Why this role is a good fit..." className="mt-1.5" /></div>
             </div>
-            <Button className="w-full gradient-primary text-white border-0 h-10" onClick={() => void handleAddJob()} disabled={!form.title.trim() || !form.company.trim() || submitting}>{submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Job"}</Button>
+            <Button className="h-10 w-full border-0 gradient-primary text-primary-foreground" onClick={() => void handleAddJob()} disabled={!form.title.trim() || !form.company.trim() || submitting}>{submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Job"}</Button>
           </div>
         </DialogContent>
       </Dialog>

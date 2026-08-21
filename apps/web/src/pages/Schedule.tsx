@@ -11,7 +11,7 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Loader2,
+  
   Bell,
   AlarmClock,
   MapPin,
@@ -33,6 +33,7 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import AddEventDialog from "@/components/schedule/AddEventDialog";
+import { ScheduleSkeleton } from "@/components/ui/loading-skeletons";
 
 type ScheduleEvent = {
   id: string;
@@ -128,20 +129,16 @@ export default function Schedule() {
     .slice(0, 8);
 
   if (isLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <ScheduleSkeleton label="Loading schedule" />;
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="page-enter space-y-6 pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-            <CalendarIcon className="w-6 h-6 text-white" />
+            <CalendarIcon className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -197,7 +194,7 @@ export default function Schedule() {
               </div>
             </div>
 
-            <CardContent className="p-6">
+            <CardContent className="overflow-x-auto p-3 sm:p-6">
               <div className="grid grid-cols-7 gap-1">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
                   <div
@@ -221,7 +218,7 @@ export default function Schedule() {
                     <div
                       key={i}
                       className={cn(
-                        "min-h-[80px] p-2 rounded-xl transition-all border border-transparent flex flex-col",
+                        "min-h-[64px] rounded-lg border border-transparent p-1 transition-all flex flex-col sm:min-h-[80px] sm:rounded-xl sm:p-2",
                         !isCurrentMonth && "opacity-20",
                         isCurrentMonth &&
                           "hover:bg-muted/30 hover:border-border/50",
@@ -232,9 +229,9 @@ export default function Schedule() {
                     >
                       <span
                         className={cn(
-                          "text-sm font-semibold w-6 h-6 flex items-center justify-center rounded-full mb-1",
+                          "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold mb-1 sm:text-sm",
                           isDayToday
-                            ? "bg-primary text-white shadow-md"
+                            ? "bg-primary text-primary-foreground shadow-md"
                             : "text-foreground/80",
                         )}
                       >
@@ -257,7 +254,7 @@ export default function Schedule() {
                 })}
               </div>
 
-              <div className="flex items-center justify-center gap-6 mt-8 pt-4 border-t border-border/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 border-t border-border/50 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:gap-6 sm:text-xs">
                 <span className="flex items-center gap-2">
                   <span className={cn("w-4 h-1.5 rounded-full", EVENT_VISUALS.INTERVIEW.dotClass)} />
                   Interview

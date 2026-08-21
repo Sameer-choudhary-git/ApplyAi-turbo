@@ -11,7 +11,8 @@ export default function Analytics() {
   useEffect(() => {
     const getSession = async () => {
       const session = await supabase.auth.getSession();
-      setUser(session.data.session?.user);
+      const sessionUser = session.data.session?.user;
+      setUser(sessionUser ? { id: sessionUser.id } : null);
       setIsSessionLoading(false);
     };
 

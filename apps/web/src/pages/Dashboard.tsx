@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, CalendarClock, CheckCircle2, Clock3, Loader2, Send, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
+import { ArrowUpRight, CalendarClock, CheckCircle2, Clock3, Send, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/api";
 import StatCard from "../components/dashboard/StatCard";
@@ -9,6 +9,7 @@ import DailySummaryCard from "../components/dashboard/DailySummaryCard";
 import RecentApplications from "../components/dashboard/RecentApplications";
 import UpcomingInterviews from "../components/dashboard/UpcomingInterviews";
 import AgentStatus from "../components/dashboard/AgentStatus";
+import { DashboardSkeleton } from "../components/ui/loading-skeletons";
 
 type Profile = {
   fullName?: string;
@@ -97,17 +98,7 @@ export default function Dashboard() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[65vh] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-          <p className="mt-4 text-sm font-semibold text-foreground">Preparing your career cockpit</p>
-          <p className="mt-1 text-xs text-muted-foreground">Syncing your latest applications and activity.</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton label="Preparing your career cockpit" />;
   }
 
   return (

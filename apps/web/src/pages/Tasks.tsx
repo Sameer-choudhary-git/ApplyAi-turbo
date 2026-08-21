@@ -18,7 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // Adjust this import path to wherever you saved the api utility
-import { api } from "@/lib/api"; 
+import { api } from "@/lib/api";
+import { ListSkeleton } from "@/components/ui/loading-skeletons";
 
 const priorityConfig: Record<string, { label: string; class: string }> = {
   low: {
@@ -141,12 +142,12 @@ export default function Tasks() {
     tasks.length === 0 ? 0 : Math.round((completedCount / tasks.length) * 100);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="mx-auto max-w-4xl space-y-6 page-enter pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-2">
+      <div className="mb-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-            <CheckSquare className="w-6 h-6 text-white" />
+            <CheckSquare className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -201,7 +202,7 @@ export default function Tasks() {
               type="button"
               onClick={handleAdd}
               disabled={addMutation.isPending}
-              className="h-11 px-5 gradient-primary text-white border-0 shadow-md hover:opacity-90 transition-opacity"
+              className="h-11 w-full border-0 gradient-primary px-5 text-primary-foreground shadow-md transition-opacity hover:opacity-90 sm:w-auto"
             >
               {addMutation.isPending ? (
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -215,7 +216,7 @@ export default function Tasks() {
       </motion.div>
 
       {/* Filters */}
-      <div className="flex items-center gap-2 p-1.5 rounded-lg bg-card/50 backdrop-blur-sm border border-border/50 w-fit">
+      <div className="flex w-full items-center gap-1 overflow-x-auto rounded-lg border border-border/50 bg-card/50 p-1.5 backdrop-blur-sm sm:w-fit">
         {["all", "active", "completed"].map((f) => (
           <Button
             key={f}
@@ -241,9 +242,7 @@ export default function Tasks() {
       >
         <Card className="border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden min-h-[300px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-[300px]">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
+            <ListSkeleton label="Loading tasks" rows={5} />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center h-full">
               <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mb-4 border border-border/50">
@@ -275,7 +274,7 @@ export default function Tasks() {
                     exit={{ opacity: 0, height: 0, overflow: "hidden" }}
                     transition={{ duration: 0.2 }}
                     className={cn(
-                      "px-6 py-4 flex items-center gap-4 group hover:bg-muted/20 transition-colors",
+                      "group flex items-start gap-3 px-4 py-4 transition-colors hover:bg-muted/20 sm:items-center sm:gap-4 sm:px-6",
                       task.completed && "bg-muted/10 opacity-70",
                     )}
                   >
@@ -324,7 +323,7 @@ export default function Tasks() {
                       variant="ghost"
                       size="icon"
                       disabled={deleteMutation.isPending}
-                      className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+                      className="h-8 w-8 shrink-0 text-muted-foreground transition-opacity hover:bg-rose-500/10 hover:text-rose-400 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
                       onClick={() => handleDelete(task.id)}
                     >
                       {deleteMutation.isPending ? (

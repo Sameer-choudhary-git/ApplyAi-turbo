@@ -22,6 +22,7 @@ import AdminSubscriptions from "@/views/AdminSubscriptions";
 import Greenhouse from "./pages/Greenhouse";
 import { SentryRouteTracker } from "@/components/SentryRouteTracker";
 import ErrorBoundaryWrapper from "@/components/ErrorBoundaryWrapper";
+import { AppLoadingSkeleton } from "@/components/ui/loading-skeletons";
 
 import { Navigate } from "react-router-dom"; // Make sure Navigate is imported!
 
@@ -29,11 +30,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, authError, user } = useAuth(); // Removed navigateToLogin
 
   if (isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
-      </div>
-    );
+    return <AppLoadingSkeleton label="Checking your Apply AI session" />;
   }
 
   // Gracefully route to login using React Router, preventing token destruction

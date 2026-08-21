@@ -17,6 +17,7 @@ import {
   Line,
 } from "recharts";
 import { TrendingUp, Target, Award, Zap, Activity } from "lucide-react";
+import { AnalyticsSkeleton } from "@/components/ui/loading-skeletons";
 
 const chartColors = [
   "#8b5cf6",
@@ -128,19 +129,15 @@ export default function Analytics({ applications = [], isLoading = false }) {
   // ?"??"? Render ?"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"?
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+    return <AnalyticsSkeleton label="Loading analytics" />;
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="page-enter space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-          <Activity className="w-6 h-6 text-white" />
+          <Activity className="w-6 h-6 text-primary-foreground" />
         </div>
         <div>
           <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -153,7 +150,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {[
           {
             icon: Target,
@@ -186,7 +183,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5 border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:bg-card/80">
+            <Card className="border-border/50 bg-card/50 p-4 backdrop-blur-sm transition-all hover:bg-card/80 sm:p-5">
               <div className="flex items-center gap-3.5">
                 <div className={`p-2.5 rounded-xl border ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
@@ -206,7 +203,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
       </div>
 
       {/* Charts */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
         {/* Trend */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -219,7 +216,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
                 Application Trend
               </h3>
             </div>
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               {trendData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
                   <AreaChart
@@ -303,7 +300,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
                 Status Breakdown
               </h3>
             </div>
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               {pieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
                   <PieChart>
@@ -351,7 +348,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
                 Opportunity Types
               </h3>
             </div>
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               {typeData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart
@@ -413,7 +410,7 @@ export default function Analytics({ applications = [], isLoading = false }) {
                 Top Platforms
               </h3>
             </div>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="space-y-5 p-4 sm:p-6">
               {platformData.length > 0 ? (
                 platformData.map((p, i) => (
                   <div key={p.name} className="flex items-center gap-4">
