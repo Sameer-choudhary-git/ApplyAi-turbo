@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ExternalLink,
-  Loader2,
+  
   Play,
   RefreshCw,
   Save,
@@ -14,6 +14,7 @@ import type {
   InputHTMLAttributes,
   LabelHTMLAttributes,
 } from "react";
+import { SearchResultsSkeleton } from "@/components/ui/loading-skeletons";
 
 type JobSkillButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: string;
@@ -303,7 +304,7 @@ export default function JobSkill() {
         <>
           <div className="grid xl:grid-cols-[1.2fr_.8fr] gap-6">
             <div className="rounded-[24px] border border-border/70 bg-card/60 p-6 space-y-5 backdrop-blur-xl">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="font-heading font-semibold text-lg">
                     Start a search
@@ -318,7 +319,7 @@ export default function JobSkill() {
                   {running ? "Queueing…" : "Run now"}
                 </Button>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label>Target roles</Label>
                   <Input
@@ -370,7 +371,7 @@ export default function JobSkill() {
                     />
                     Enable per-user nightly search
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <Label>Cron</Label>
                       <Input
@@ -401,6 +402,7 @@ export default function JobSkill() {
                     />
                   </div>
                   <Button
+                    className="w-full sm:w-auto"
                     variant="outline"
                     onClick={() => void saveSchedule()}
                     disabled={savingSchedule}
@@ -434,13 +436,13 @@ export default function JobSkill() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <div className="relative">
+                <div className="relative w-full sm:w-56">
                   <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                   <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     placeholder="Search roles or companies"
-                    className="pl-9 w-56"
+                    className="w-full pl-9"
                   />
                 </div>
                 <Input
@@ -449,15 +451,13 @@ export default function JobSkill() {
                   max={100}
                   value={minScore}
                   onChange={(event) => setMinScore(event.target.value)}
-                  className="w-20"
+                  className="w-full sm:w-20"
                   title="Minimum score"
                 />
               </div>
             </div>
             {loading ? (
-              <div className="p-10 flex justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
+              <SearchResultsSkeleton label="Loading Job Skill matches" rows={5} />
             ) : opportunities.length === 0 ? (
               <div className="p-10 text-center text-sm text-muted-foreground">
                 No matches yet. Start a run to populate this list.

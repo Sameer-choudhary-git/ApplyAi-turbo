@@ -1,5 +1,5 @@
 import { useEffect, useState, type ButtonHTMLAttributes } from "react";
-import { Check, Loader2, RefreshCw, TicketPercent } from "lucide-react";
+import { Check, RefreshCw, TicketPercent } from "lucide-react";
 import {
   getMyEntitlement,
   getMyUsage,
@@ -7,6 +7,7 @@ import {
   type Entitlement,
   type PublicPlan,
 } from "@/api/entitlements";
+import { CardGridSkeleton } from "@/components/ui/loading-skeletons";
 
 type PlanButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "outline" | "solid";
@@ -109,9 +110,7 @@ export default function Plans() {
       )}
 
       {loading ? (
-        <div className="glass flex min-h-48 items-center justify-center rounded-[28px]">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <CardGridSkeleton label="Loading plans" cards={3} />
       ) : (
         <div className="space-y-6">
           <section className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-primary/[0.07] p-6 shadow-[0_24px_60px_-42px_hsl(var(--primary))] lg:p-8">

@@ -4,6 +4,7 @@ import AppLayout from "./layout/AppLayout";
 import Onboarding from "../pages/Onboarding";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/api";
+import { AppLoadingSkeleton } from "@/components/ui/loading-skeletons";
 
 export default function AppShell() {
   const { user, isLoadingAuth } = useAuth();
@@ -25,18 +26,7 @@ export default function AppShell() {
   const needsOnboarding = !isLoading && (!profile || !profile.isOnboarded);
 
   if (isLoading || isLoadingAuth) {
-    return (
-      <div className="auth-shell fixed inset-0 flex items-center justify-center bg-background">
-        <div className="page-enter text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/25 border-t-primary" />
-          </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Loading your dashboard...
-          </p>
-        </div>
-      </div>
-    );
+    return <AppLoadingSkeleton label="Preparing your Apply AI workspace" />;
   }
 
   if (needsOnboarding) {

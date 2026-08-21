@@ -11,6 +11,7 @@ import { KeywordsTargetsCard } from "../components/preferences/KeywordsTargetsCa
 import { PlatformIntegrationsCard } from "../components/preferences/PlatformIntegrationsCard";
 import GoogleCalendarCard from "../components/preferences/GoogleCalendarCard";
 import { supabase } from "@/supabaseClient";
+import { PreferencesSkeleton } from "@/components/ui/loading-skeletons";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -152,6 +153,10 @@ export default function Preferences() {
     };
     load();
   }, []);
+
+  if (loading) {
+    return <PreferencesSkeleton label="Loading preferences" />;
+  }
 
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
@@ -326,7 +331,7 @@ export default function Preferences() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <Settings2 className="w-6 h-6 text-white" />
+            <Settings2 className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Preferences</h1>
@@ -336,16 +341,16 @@ export default function Preferences() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleViewResume}>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <Button className="flex-1 sm:flex-none" variant="outline" onClick={handleViewResume}>
             <FileText className="w-4 h-4" />
             <span className="hidden sm:inline">View Resume</span>
           </Button>
-          <Button variant="outline" onClick={handleUpdateResume}>
+          <Button className="flex-1 sm:flex-none" variant="outline" onClick={handleUpdateResume}>
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">Update Resume</span>
           </Button>
-          <Button onClick={handleSave}>
+          <Button className="flex-1 sm:flex-none" onClick={handleSave}>
             <Save className="w-4 h-4" />
             <span className="hidden sm:inline">Save</span>
           </Button>
@@ -367,7 +372,7 @@ export default function Preferences() {
         onPlatformLimitChange={handlePlatformLimitChange}
       />
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         <RoleSpecificationsCard
           workMode={prefs.work_mode}
           opportunityTypes={prefs.opportunity_types}

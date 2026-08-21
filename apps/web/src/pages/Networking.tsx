@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton } from "@/components/ui/loading-skeletons";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -226,7 +228,8 @@ export default function Networking() {
   return (
     <div className="page-enter space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
             <Users className="w-6 h-6 text-primary-foreground" />
@@ -243,7 +246,7 @@ export default function Networking() {
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-primary text-primary-foreground border-0 glow-primary hover:opacity-90 transition-all h-10 px-5 shadow-lg active:scale-95">
+            <Button className="h-10 w-full border-0 gradient-primary px-5 text-primary-foreground shadow-lg glow-primary transition-all hover:opacity-90 active:scale-95 sm:w-auto">
               <Plus className="w-4 h-4 mr-2" /> Add Contact
             </Button>
           </DialogTrigger>
@@ -535,7 +538,7 @@ export default function Networking() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
             label: "Total Contacts",
@@ -588,7 +591,7 @@ export default function Networking() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 p-4 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm">
+      <div className="flex flex-col gap-3 rounded-[24px] border border-border/70 bg-card/60 p-4 backdrop-blur-xl sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -627,7 +630,7 @@ export default function Networking() {
           onClick={() => setPinnedOnly((v) => !v)}
           className={`h-10 px-4 flex-shrink-0 ${
             pinnedOnly
-              ? "gradient-primary text-white border-0"
+              ? "gradient-primary text-primary-foreground border-0"
               : "bg-background border-border/50 text-muted-foreground hover:text-foreground"
           }`}
           title={pinnedOnly ? "Showing pinned only" : "Show pinned only"}
@@ -649,9 +652,7 @@ export default function Networking() {
 
       {/* Contacts Grid */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-        </div>
+        <CardGridSkeleton label="Loading contacts" cards={6} />
       ) : visibleContacts.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -677,7 +678,7 @@ export default function Networking() {
           </p>
         </motion.div>
       ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <AnimatePresence>
             {visibleContacts.map((contact, i) => {
               const PlatformIcon = PLATFORM_ICONS[contact.platform] || Globe;
@@ -688,7 +689,7 @@ export default function Networking() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: i * 0.04 }}
-                  className={`group relative backdrop-blur-sm rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col justify-between ${
+                  className={`group relative flex flex-col justify-between rounded-[24px] p-5 backdrop-blur-xl transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 sm:p-6 ${
                     contact.pinned
                       ? "bg-primary/5 border border-primary/30 shadow-md shadow-primary/10"
                       : "bg-card/50 border border-border/50 hover:border-border"
@@ -697,7 +698,7 @@ export default function Networking() {
                   <div>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-white font-bold text-lg shadow-inner">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary text-lg font-bold text-primary-foreground shadow-inner">
                           {contact.name?.charAt(0).toUpperCase() || "?"}
                         </div>
                         <div>
@@ -712,7 +713,7 @@ export default function Networking() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                         <button
                           onClick={() => handleTogglePin(contact.id)}
                           className={`p-2 rounded-lg transition-colors ${
