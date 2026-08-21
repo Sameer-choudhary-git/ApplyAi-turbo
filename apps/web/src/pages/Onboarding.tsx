@@ -80,7 +80,7 @@ const OnboardingInput = ({
     </label>
     <input
       {...props}
-      className="w-full bg-input text-foreground border border-border rounded-lg p-2.5 md:p-3 text-sm focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all placeholder:text-muted-foreground/50"
+      className="auth-input w-full rounded-xl border p-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 md:p-3"
     />
   </div>
 );
@@ -298,7 +298,7 @@ export default function Onboarding() {
 
         const { url } = await uploadRes.json();
         setResumeUrl(url);
-      } else{
+      } else {
         console.log("No resume file to upload");
       }
 
@@ -307,7 +307,10 @@ export default function Onboarding() {
           await redeemAccessCode(accessCode.trim());
           setAccessCodeError("");
         } catch (codeError) {
-          const message = codeError instanceof Error ? codeError.message : "Access code could not be redeemed";
+          const message =
+            codeError instanceof Error
+              ? codeError.message
+              : "Access code could not be redeemed";
           setAccessCodeError(message);
           throw codeError;
         }
@@ -378,7 +381,7 @@ export default function Onboarding() {
                   Bio
                 </label>
                 <textarea
-                  className="w-full bg-input text-foreground border border-border rounded-lg p-3 h-28 text-sm focus:ring-2 focus:ring-ring outline-none transition-all placeholder:text-muted-foreground/50"
+                  className="auth-input h-28 w-full rounded-xl border p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                   placeholder="A brief description about yourself, your skills, and your career goals."
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -390,7 +393,7 @@ export default function Onboarding() {
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Resume{" "}
                   <span className="text-muted-foreground font-normal">
-                    (PDF ?,� max 5 MB)
+                    (PDF • max 5 MB)
                   </span>
                 </label>
 
@@ -441,7 +444,6 @@ export default function Onboarding() {
                         <span className="text-foreground font-medium">
                           {resumeFile?.name}
                         </span>
-                        �?,?�
                       </p>
                     </div>
                   )}
@@ -453,7 +455,7 @@ export default function Onboarding() {
                         {resumeFile?.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Uploaded successfully ?,�{" "}
+                        Uploaded successfully.{" "}
                         <span
                           className="text-primary cursor-pointer hover:underline"
                           onClick={(e) => {
@@ -510,14 +512,14 @@ export default function Onboarding() {
                 <OnboardingInput
                   label="LinkedIn URL"
                   type="url"
-                  placeholder="linkedin.com/in/�?,?�"
+                  placeholder="linkedin.com/in/your-handle"
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                 />
                 <OnboardingInput
                   label="GitHub URL"
                   type="url"
-                  placeholder="github.com/�?,?�"
+                  placeholder="github.com/your-handle"
                   value={githubUrl}
                   onChange={(e) => setGithubUrl(e.target.value)}
                 />
@@ -690,8 +692,8 @@ export default function Onboarding() {
                       addSkill(newSkill);
                     }
                   }}
-                  placeholder="e.g. Next.js, Solidity�?,?�"
-                  className="flex-1 bg-input text-foreground border border-border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-ring outline-none"
+                  placeholder="e.g. Next.js, Solidity"
+                  className="auth-input min-w-0 flex-1 rounded-xl border p-2.5 text-sm text-foreground outline-none"
                 />
                 <button
                   onClick={() => addSkill(newSkill)}
@@ -779,7 +781,7 @@ export default function Onboarding() {
                     />
                     <OnboardingInput
                       label="Duration"
-                      placeholder="May 2024 �?,???o Aug 2024"
+                      placeholder="May 2024 – Aug 2024"
                       value={exp.duration}
                       onChange={(e) => {
                         const ex = [...experience];
@@ -792,8 +794,8 @@ export default function Onboarding() {
                         Description
                       </label>
                       <textarea
-                        className="w-full bg-input text-foreground border border-border rounded-lg p-3 h-20 text-sm focus:ring-2 focus:ring-ring outline-none transition-all placeholder:text-muted-foreground/50"
-                        placeholder="Briefly describe your responsibilities�?,?�"
+                        className="auth-input h-20 w-full rounded-xl border p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+                        placeholder="Briefly describe your responsibilities..."
                         value={exp.description}
                         onChange={(e) => {
                           const ex = [...experience];
@@ -852,7 +854,7 @@ export default function Onboarding() {
                       className={cn(
                         "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
                         preferences.workModes.includes(m)
-                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                           : "bg-input border-border text-muted-foreground hover:border-primary/50",
                       )}
                     >
@@ -874,7 +876,7 @@ export default function Onboarding() {
                       className={cn(
                         "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
                         preferences.opportunityTypes.includes(t)
-                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                           : "bg-input border-border text-muted-foreground hover:border-primary/50",
                       )}
                     >
@@ -896,7 +898,7 @@ export default function Onboarding() {
                       className={cn(
                         "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
                         preferences.platforms.includes(p)
-                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                          ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                           : "bg-input border-border text-muted-foreground hover:border-primary/50",
                       )}
                     >
@@ -927,8 +929,8 @@ export default function Onboarding() {
                 Ready to Deploy
               </h2>
               <p className="text-muted-foreground mt-2 max-w-md mx-auto text-sm">
-                Your profile is complete. EngiBuddy agents will use this data to
-                automatically apply to jobs on your behalf.
+                Your profile is ready. Apply AI will use it to discover relevant
+                opportunities and help you prepare the next step.
               </p>
             </div>
 
@@ -973,8 +975,13 @@ export default function Onboarding() {
             {/* Optional subscription access */}
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm mt-6">
               <div>
-                <p className="font-semibold text-foreground">Have an access code?</p>
-                <p className="text-xs text-muted-foreground mt-1">Redeem an admin-issued code to activate your assigned plan. You can leave this blank and continue on the Free plan.</p>
+                <p className="font-semibold text-foreground">
+                  Have an access code?
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Redeem an admin-issued code to activate your assigned plan.
+                  You can leave this blank and continue on the Free plan.
+                </p>
               </div>
               <input
                 value={accessCode}
@@ -984,9 +991,14 @@ export default function Onboarding() {
                 }}
                 placeholder="APPLY-XXXXXXXXXXXX"
                 autoCapitalize="characters"
-                className="w-full bg-input text-foreground border border-border rounded-lg p-3 text-sm tracking-wider focus:ring-2 focus:ring-ring focus:border-ring outline-none"
+                className="auth-input w-full rounded-xl border p-3 text-sm tracking-wider text-foreground outline-none"
               />
-              {accessCodeError && <p className="text-xs text-rose-400 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" />{accessCodeError}</p>}
+              {accessCodeError && (
+                <p className="text-xs text-rose-400 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {accessCodeError}
+                </p>
+              )}
             </div>
 
             {/* Profile summary */}
@@ -997,7 +1009,7 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">
-                    {fullName || "�?,????"}
+                    {fullName || "Your name"}
                   </p>
                 </div>
                 {resumeUrl && (
@@ -1053,20 +1065,20 @@ export default function Onboarding() {
   // �????,?�????,?�????,? Layout �????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?�????,?
   return (
     <div
-      className="min-h-screen flex flex-col bg-background relative font-body pb-32"
+      className="auth-shell min-h-screen flex flex-col bg-background relative font-body pb-32"
       style={{
         backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsla(258,92%,68%,0.08) 0%, transparent 60%)",
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.12) 0%, transparent 60%)",
       }}
     >
       {/* Header */}
-      <div className="text-center pt-8 md:pt-12 pb-6 md:pb-8">
+      <div className="relative z-10 text-center pt-8 md:pt-12 pb-6 md:pb-8">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 glow-primary shadow-lg">
+          <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center flex-shrink-0 glow-primary shadow-lg">
             <Bot className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl md:text-2xl font-bold font-heading text-white">
-            Welcome to EngiBuddy
+            Welcome to Apply AI
           </h1>
         </div>
       </div>
@@ -1074,7 +1086,7 @@ export default function Onboarding() {
       {/* Content */}
       <div className="max-w-3xl w-full mx-auto flex flex-col gap-4 md:gap-6 px-4 relative z-10">
         {/* Step tabs */}
-        <div className="glass rounded-xl p-1.5 flex gap-1 border border-white/5 overflow-x-auto no-scrollbar">
+        <div className="glass border-shimmer rounded-2xl p-1.5 flex gap-1 overflow-x-auto no-scrollbar">
           {steps.map((step, index) => {
             const isActive = index === currentStepIndex;
             const isCompleted = index < currentStepIndex;
@@ -1108,19 +1120,19 @@ export default function Onboarding() {
         </div>
 
         {/* Main card */}
-        <div className="glass border-shimmer rounded-2xl shadow-xl relative p-5 md:p-8">
+        <div className="glass border-shimmer rounded-[1.75rem] shadow-xl relative p-5 md:p-8">
           <AnimatePresence mode="wait">{renderStepContent()}</AnimatePresence>
         </div>
       </div>
 
       {/* Fixed footer nav */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-background/95 backdrop-blur-md border-t border-sidebar-border z-50">
+      <div className="onboarding-footer fixed bottom-0 left-0 right-0 z-50 border-t border-sidebar-border p-4 backdrop-blur-md md:p-6">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
           <button
             onClick={prevStep}
             disabled={currentStepIndex === 0}
             className={cn(
-              "px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-muted-foreground font-medium flex items-center gap-2 hover:bg-input transition-all text-sm md:text-base border border-transparent hover:border-border",
+              "onboarding-back px-4 md:px-6 py-2.5 md:py-3 font-semibold flex items-center gap-2 transition-all text-sm md:text-base",
               currentStepIndex === 0 && "opacity-40 pointer-events-none",
             )}
           >
@@ -1131,11 +1143,11 @@ export default function Onboarding() {
           <button
             onClick={nextStep}
             disabled={isSaving}
-            className="px-6 md:px-8 py-2.5 md:py-3 rounded-lg gradient-primary glow-sm text-primary-foreground font-semibold flex items-center gap-2.5 hover:opacity-90 transition-all shadow-lg text-sm md:text-base disabled:opacity-60 disabled:pointer-events-none"
+            className="onboarding-next px-6 md:px-8 py-2.5 md:py-3 flex items-center gap-2.5 text-sm md:text-base disabled:opacity-60 disabled:pointer-events-none"
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Saving�?,?�
+                <Loader2 className="w-4 h-4 animate-spin" /> Saving...
               </>
             ) : currentStepIndex < steps.length - 1 ? (
               <>

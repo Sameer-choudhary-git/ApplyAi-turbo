@@ -47,7 +47,7 @@
 //             </h4>
 //             {app.url && (
 //               <a
-              
+
 //                 href={app.url}
 //                 target="_blank"
 //                 rel="noopener noreferrer"
@@ -75,7 +75,7 @@
 //                 {format(new Date(app.applied_date), "MMM d, yyyy")}
 //               </span>
 //             )}
-//             {app.success_probability > 0 && (
+//             {matchProbability > 0 && (
 //               <span className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/10">
 //                 <TrendingUp className="w-3 h-3" />
 //                 {Math.round(app.success_probability)}% match
@@ -121,7 +121,6 @@
 //   );
 // }
 
-
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -138,22 +137,53 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import ScheduleActionMenu from "./ScheduleActionMenu";
+import type { Application } from "@/types/application";
 
 // ?o. Canonical status config, keyed by NORMALIZED status (lowercase, underscores).
 // This now covers both the user-facing lifecycle AND the raw statuses the
 // apply agent actually writes (APPLIED, ACTION_REQUIRED, ALREADY_APPLIED, ERROR),
 // so nothing falls through to a silently-wrong default anymore.
 const statusConfig: Record<string, { label: string; class: string }> = {
-  applied: { label: "Applied", class: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  already_applied: { label: "Already Applied", class: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  under_review: { label: "Under Review", class: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  action_required: { label: "Action Required", class: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  shortlisted: { label: "Shortlisted", class: "bg-primary/10 text-primary border-primary/20" },
-  interview_scheduled: { label: "Interview", class: "bg-accent/10 text-accent border-accent/20" },
-  accepted: { label: "Accepted", class: "bg-sky-400/10 text-sky-300 border-sky-400/20" },
-  rejected: { label: "Rejected", class: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
-  error: { label: "Error", class: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
-  withdrawn: { label: "Withdrawn", class: "bg-muted text-muted-foreground border-border" },
+  applied: {
+    label: "Applied",
+    class: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  },
+  already_applied: {
+    label: "Already Applied",
+    class: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  },
+  under_review: {
+    label: "Under Review",
+    class: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  },
+  action_required: {
+    label: "Action Required",
+    class: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  },
+  shortlisted: {
+    label: "Shortlisted",
+    class: "bg-primary/10 text-primary border-primary/20",
+  },
+  interview_scheduled: {
+    label: "Interview",
+    class: "bg-accent/10 text-accent border-accent/20",
+  },
+  accepted: {
+    label: "Accepted",
+    class: "bg-sky-400/10 text-sky-300 border-sky-400/20",
+  },
+  rejected: {
+    label: "Rejected",
+    class: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  },
+  error: {
+    label: "Error",
+    class: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  },
+  withdrawn: {
+    label: "Withdrawn",
+    class: "bg-muted text-muted-foreground border-border",
+  },
 };
 
 // Statuses selectable from the manual editor (value = what gets sent to the API)
@@ -193,16 +223,26 @@ const typeColors: Record<string, string> = {
   competition: "bg-orange-500/10 text-orange-400 border-orange-500/20",
 };
 
+interface ApplicationRowData extends Application {
+  title?: string | null;
+  applied_date?: string | null;
+  stipend?: string | null;
+}
+
 interface ApplicationRowProps {
-  app: any;
+  app: ApplicationRowData;
   onInterviewScheduled?: () => void;
 }
 
-export default function ApplicationRow({ app, onInterviewScheduled }: ApplicationRowProps) {
+export default function ApplicationRow({
+  app,
+  onInterviewScheduled,
+}: ApplicationRowProps) {
   const queryClient = useQueryClient();
   const [isEditingStatus, setIsEditingStatus] = useState(false);
 
   const status = getStatusDisplay(app.status);
+  const matchProbability = app.success_probability ?? 0;
 
   // ?o. Manual status correction ??" assumes PATCH /applications/:id/status.
   // Adjust the path/body shape if your actual API route differs.
@@ -246,17 +286,17 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
                 {format(new Date(app.applied_date), "MMM d, yyyy")}
               </span>
             )}
-            {app.success_probability > 0 && (
+            {matchProbability > 0 && (
               <span className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/10">
                 <TrendingUp className="w-3 h-3" />
-                {Math.round(app.success_probability)}% match
+                {Math.round(matchProbability)}% match
               </span>
             )}
           </div>
 
           {app.stipend && (
             <p className="text-xs text-sky-300/90 font-medium mt-2">
-              ?Y'? {app.stipend}
+              Stipend: {app.stipend}
             </p>
           )}
         </div>
@@ -288,7 +328,7 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
               >
                 {EDITABLE_STATUSES.map((s) => (
                   <option key={s} value={s}>
-                    {statusConfig[s].label}
+                    {statusConfig[s]?.label ?? s}
                   </option>
                 ))}
               </select>
@@ -315,8 +355,6 @@ export default function ApplicationRow({ app, onInterviewScheduled }: Applicatio
               <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover/status:opacity-100 transition-opacity" />
             </button>
           )}
-
-          
 
           {/* Dropdown lives outside the badges, as its own control */}
           <ScheduleActionMenu app={app} onScheduled={onInterviewScheduled} />

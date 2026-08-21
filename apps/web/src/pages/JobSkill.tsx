@@ -28,7 +28,7 @@ function Button({
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:opacity-60 ${variant === "outline" ? "border-border bg-transparent hover:bg-muted/30" : "border-primary bg-primary text-primary-foreground hover:opacity-90"} ${size === "sm" ? "px-2.5 py-1.5 text-xs" : ""} ${className}`}
+      className={`inline-flex items-center justify-center rounded-xl border px-3 py-2.5 text-sm font-bold transition-[transform,border-color,background-color,opacity] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:pointer-events-none disabled:opacity-60 ${variant === "outline" ? "border-border bg-background/55 text-foreground hover:border-primary/40 hover:bg-secondary" : "border-primary bg-primary text-primary-foreground shadow-[0_14px_28px_-18px_hsl(var(--primary))] hover:opacity-90"} ${size === "sm" ? "px-2.5 py-1.5 text-xs" : ""} ${className}`}
     />
   );
 }
@@ -39,7 +39,7 @@ function Input({
   return (
     <input
       {...props}
-      className={`h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary ${className}`}
+      className={`h-11 w-full rounded-xl border border-border/80 bg-background/55 px-3.5 py-2 text-sm outline-none transition-[border-color,box-shadow,background-color] placeholder:text-muted-foreground/70 focus:border-primary/70 focus:bg-background/80 focus:ring-4 focus:ring-primary/10 ${className}`}
     />
   );
 }
@@ -252,11 +252,11 @@ export default function JobSkill() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="page-enter space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg">
-            <Sparkles className="w-6 h-6 text-white" />
+            <Sparkles className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -302,7 +302,7 @@ export default function JobSkill() {
       {canSearch && (
         <>
           <div className="grid xl:grid-cols-[1.2fr_.8fr] gap-6">
-            <div className="rounded-2xl border border-border/50 bg-card/50 p-6 space-y-5">
+            <div className="rounded-[24px] border border-border/70 bg-card/60 p-6 space-y-5 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-heading font-semibold text-lg">
@@ -350,7 +350,7 @@ export default function JobSkill() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl border border-border/50 bg-card/50 p-6 space-y-4">
+            <div className="rounded-[24px] border border-border/70 bg-card/60 p-6 space-y-4 backdrop-blur-xl">
               <div className="flex items-center gap-2">
                 <Settings2 className="w-5 h-5 text-primary" />
                 <h2 className="font-heading font-semibold text-lg">

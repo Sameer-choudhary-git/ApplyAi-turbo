@@ -5,8 +5,8 @@ const UserNotRegisteredError = () => {
   const { logout } = useAuth();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      <div className="max-w-md w-full p-8 glass border-shimmer rounded-2xl shadow-2xl relative z-10">
+    <div className="auth-shell flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="glass border-shimmer auth-card relative z-10 w-full max-w-md p-8 shadow-2xl">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-destructive/10 border border-destructive/20">
             <svg
@@ -32,7 +32,7 @@ const UserNotRegisteredError = () => {
           </p>
           <button
             onClick={() => logout()}
-            className="w-full gradient-primary glow-sm text-primary-foreground font-semibold py-3 rounded-lg hover:opacity-90 transition-all"
+            className="primary-action flex w-full items-center justify-center px-4 py-3"
           >
             Return to Login
           </button>

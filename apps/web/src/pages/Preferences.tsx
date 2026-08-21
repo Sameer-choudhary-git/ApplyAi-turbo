@@ -51,7 +51,9 @@ function buildInitialPlatformPrefs(): PlatformPrefs {
   }, {} as PlatformPrefs);
 }
 
-function extractFlagsFromUser(user: any): FlagState {
+function extractFlagsFromUser(
+  user: Record<string, boolean | undefined>,
+): FlagState {
   return Object.values(enableJobsConfig).reduce((acc, platform) => {
     Object.values(platform.jobs).forEach((job) => {
       acc[job.flag] = user[job.flag] ?? false;
@@ -277,8 +279,8 @@ export default function Preferences() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".pdf";
-    input.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
+    input.onchange = async (event: Event) => {
+      const file = (event.currentTarget as HTMLInputElement).files?.[0];
       if (!file) return;
 
       if (file.type !== "application/pdf") {

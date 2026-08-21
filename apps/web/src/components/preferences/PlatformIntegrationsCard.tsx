@@ -68,6 +68,19 @@ const DEFAULT_ACCENT: AccentTheme = {
 // Component
 // ?"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"??"?
 
+type PlatformPrefs = Record<string, unknown>;
+
+type PlatformIntegrationsProps = {
+  preferredPlatforms: string[];
+  onPlatformToggle: (platformId: string) => void;
+  sessionState: Record<string, boolean>;
+  onSessionSuccess: (platformId: string) => void;
+  flagState: Record<string, boolean>;
+  onFlagToggle: (flag: string, enabled: boolean) => void;
+  platformPrefs: Record<string, PlatformPrefs>;
+  onPlatformPrefsChange: (platformId: string, prefs: PlatformPrefs) => void;
+};
+
 export function PlatformIntegrationsCard({
   preferredPlatforms,
   onPlatformToggle,
@@ -77,7 +90,7 @@ export function PlatformIntegrationsCard({
   onFlagToggle,
   platformPrefs,
   onPlatformPrefsChange,
-}: any) {
+}: PlatformIntegrationsProps) {
   const platforms = Object.values(enableJobsConfig);
   const activePlatforms = platforms.filter((p) =>
     preferredPlatforms.includes(p.id),
@@ -233,7 +246,7 @@ export function PlatformIntegrationsCard({
                         <ExtrasComp
                           accent={accent}
                           platformPrefs={platformPrefs[platform.id] ?? {}}
-                          onPlatformPrefsChange={(prefs: any) =>
+                          onPlatformPrefsChange={(prefs: PlatformPrefs) =>
                             onPlatformPrefsChange(platform.id, prefs)
                           }
                         />

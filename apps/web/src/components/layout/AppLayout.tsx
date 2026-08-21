@@ -10,10 +10,10 @@ export default function AppLayout() {
   const sidebarWidth = collapsed ? 84 : 264;
 
   return (
-    <div className="noise-overlay relative min-h-screen overflow-x-clip bg-background">
-      <div className="grid-surface pointer-events-none absolute inset-x-0 top-0 h-[34rem] opacity-60" />
+    <div className="noise-overlay relative min-h-screen overflow-x-clip bg-background text-foreground">
+      <div className="grid-surface pointer-events-none absolute inset-x-0 top-0 h-[34rem] opacity-50" />
       <div className="pointer-events-none absolute -left-40 top-12 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-10rem] top-64 h-96 w-96 rounded-full bg-sky-300/5 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-10rem] top-64 h-96 w-96 rounded-full bg-[hsl(174_67%_68%_/_0.07)] blur-3xl" />
 
       <div className="relative z-20 hidden md:block">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -26,7 +26,7 @@ export default function AppLayout() {
         transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
         className="relative z-10 hidden min-h-screen md:block"
       >
-        <div className="mx-auto max-w-[1480px] px-6 py-7 lg:px-9 lg:py-9">
+        <div className="mx-auto max-w-[1480px] px-5 py-6 lg:px-9 lg:py-9">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}

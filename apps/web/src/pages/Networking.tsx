@@ -224,12 +224,12 @@ export default function Networking() {
     : contacts;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="page-enter space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-            <Users className="w-6 h-6 text-white" />
+            <Users className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -243,7 +243,7 @@ export default function Networking() {
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-primary text-white border-0 glow-primary hover:opacity-90 transition-all h-10 px-5 shadow-lg active:scale-95">
+            <Button className="gradient-primary text-primary-foreground border-0 glow-primary hover:opacity-90 transition-all h-10 px-5 shadow-lg active:scale-95">
               <Plus className="w-4 h-4 mr-2" /> Add Contact
             </Button>
           </DialogTrigger>
@@ -518,7 +518,7 @@ export default function Networking() {
                 )}
 
                 <Button
-                  className="w-full gradient-primary text-white border-0 mt-6 glow-primary hover:opacity-90 transition-all h-11"
+                  className="w-full gradient-primary text-primary-foreground border-0 mt-6 glow-primary hover:opacity-90 transition-all h-11"
                   onClick={() => handleAddContact(form)}
                   disabled={!form.name?.trim() || submitting}
                 >
@@ -720,7 +720,9 @@ export default function Networking() {
                               ? "text-primary hover:bg-primary/10 opacity-100"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                           }`}
-                          title={contact.pinned ? "Unpin contact" : "Pin contact"}
+                          title={
+                            contact.pinned ? "Unpin contact" : "Pin contact"
+                          }
                         >
                           {contact.pinned ? (
                             <PinOff className="w-4 h-4" />

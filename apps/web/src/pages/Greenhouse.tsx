@@ -429,7 +429,7 @@ export default function Greenhouse() {
                   {["autofill_queued", "autofilling"].includes(
                     application?.status || "",
                   ) && (
-                    <span className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-600">
+                    <span className="rounded-xl border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-sm font-semibold text-sky-200">
                       Autofilling form…
                     </span>
                   )}
@@ -470,13 +470,13 @@ export default function Greenhouse() {
                           "noopener,noreferrer",
                         )
                       }
-                      className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white"
+                      className="rounded-xl bg-amber-300 px-4 py-2 text-sm font-bold text-amber-950 shadow-lg shadow-amber-300/15"
                     >
                       Open & complete required fields
                     </button>
                   )}
                   {application?.status === "applied" && (
-                    <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-600">
+                    <span className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200">
                       Submitted automatically
                     </span>
                   )}

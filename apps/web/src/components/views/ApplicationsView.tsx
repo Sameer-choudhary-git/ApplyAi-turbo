@@ -46,7 +46,7 @@ export default function Applications({
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center glow-primary shadow-lg flex-shrink-0">
-          <Briefcase className="w-6 h-6 text-white" />
+          <Briefcase className="w-6 h-6 text-primary-foreground" />
         </div>
         <div>
           <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
@@ -59,7 +59,7 @@ export default function Applications({
       </div>
 
       {/* Filters */}
-      <div className="p-4 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm">
+      <div className="rounded-[24px] border border-border/70 bg-card/55 p-4 backdrop-blur-xl">
         <ApplicationFilters
           search={search}
           setSearch={setSearch}
@@ -76,7 +76,7 @@ export default function Applications({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
+        <Card className="overflow-hidden rounded-[28px] border-border/70 bg-card/60 shadow-[0_22px_60px_-42px_hsl(222_45%_2%_/_0.9)] backdrop-blur-xl">
           {isLoading ? (
             <div className="p-16 text-center">
               <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
@@ -91,7 +91,7 @@ export default function Applications({
               </p>
               <p className="text-sm text-muted-foreground mt-2 max-w-[300px] leading-relaxed">
                 {applications.length === 0
-                  ? "You haven't applied to any positions yet. EngiBuddy will start hunting soon!"
+                  ? "You haven’t added any applications yet. Use Job Skill to discover opportunities, or add one manually to start tracking your pipeline."
                   : "Try adjusting your filters or search terms to find what you're looking for."}
               </p>
             </div>

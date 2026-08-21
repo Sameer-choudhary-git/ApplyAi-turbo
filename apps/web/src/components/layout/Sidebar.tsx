@@ -100,11 +100,11 @@ function SidebarItem({
       title={collapsed ? item.label : undefined}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold",
+        "group relative flex h-11 items-center gap-3 rounded-xl border border-transparent px-3 text-sm font-semibold",
         collapsed ? "justify-center px-0" : "",
         isActive
           ? "text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/58 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+          : "text-sidebar-foreground/58 hover:border-sidebar-border/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
       )}
     >
       {isActive && (
@@ -149,7 +149,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       initial={false}
       animate={{ width: collapsed ? 84 : 264 }}
       transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-sidebar-border bg-sidebar/92 px-3 py-4 shadow-[18px_0_70px_-52px_hsl(222_35%_3%/.95)] backdrop-blur-2xl"
+      className="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-sidebar-border/80 bg-sidebar/88 px-3 py-4 shadow-[18px_0_70px_-52px_hsl(222_35%_3%/.95)] backdrop-blur-2xl"
     >
       <div
         className={cn(
@@ -188,7 +188,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         {groups.map((group) => (
           <div key={group.label} className="mb-6 last:mb-0">
             {!collapsed && (
-              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/32">
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/38">
                 {group.label}
               </p>
             )}

@@ -3,7 +3,20 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Send, MessageSquare, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function DailySummaryCard({ summary }) {
+type DailySummary = {
+  applications_sent?: number;
+  responses_received?: number;
+  interviews_scheduled?: number;
+  ai_insights?: string | null;
+  highlights?: string[];
+};
+
+export default function DailySummaryCard({
+  summary,
+}: {
+  summary?: DailySummary | null;
+}) {
+  const safeSummary = summary ?? {};
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -33,7 +46,7 @@ export default function DailySummaryCard({ summary }) {
             </h3>
           </div>
           <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>
 
@@ -44,21 +57,21 @@ export default function DailySummaryCard({ summary }) {
             {[
               {
                 icon: Send,
-                value: summary?.applications_sent || 0,
+                value: safeSummary.applications_sent || 0,
                 label: "Sent",
                 color: "text-violet-400",
                 bg: "bg-violet-500/10 border-violet-500/20",
               },
               {
                 icon: MessageSquare,
-                value: summary?.responses_received || 0,
+                value: safeSummary.responses_received || 0,
                 label: "Replies",
                 color: "text-sky-300",
                 bg: "bg-sky-400/10 border-sky-400/20",
               },
               {
                 icon: Calendar,
-                value: summary?.interviews_scheduled || 0,
+                value: safeSummary.interviews_scheduled || 0,
                 label: "Interviews",
                 color: "text-amber-400",
                 bg: "bg-amber-500/10 border-amber-500/20",
@@ -82,27 +95,27 @@ export default function DailySummaryCard({ summary }) {
 
           <div className="space-y-4">
             {/* AI Insights */}
-            {summary?.ai_insights && (
+            {safeSummary.ai_insights && (
               <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <p className="text-sm text-foreground/90 leading-relaxed font-medium">
-                    {summary.ai_insights}
+                    {safeSummary.ai_insights}
                   </p>
                 </div>
               </div>
             )}
 
             {/* Highlights */}
-            {summary?.highlights?.length > 0 && (
+            {safeSummary.highlights && safeSummary.highlights.length > 0 && (
               <div className="space-y-2.5">
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                  Today's Highlights
+                  Today&apos;s Highlights
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {summary.highlights.map((h, i) => (
+                  {safeSummary.highlights.map((h, i) => (
                     <Badge
                       key={i}
                       variant="secondary"

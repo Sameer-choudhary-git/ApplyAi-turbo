@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 export default function Analytics() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
 
   useEffect(() => {

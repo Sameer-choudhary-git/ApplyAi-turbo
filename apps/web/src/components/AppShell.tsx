@@ -12,9 +12,7 @@ export default function AppShell() {
     queryKey: ["userProfile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const data = await api<{ user: { isOnboarded?: boolean } }>(
-        "/users/me",
-      );
+      const data = await api<{ user: { isOnboarded?: boolean } }>("/users/me");
       return data.user;
     },
     enabled: !!user?.id,
@@ -28,10 +26,12 @@ export default function AppShell() {
 
   if (isLoading || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-muted-foreground mt-3">
+      <div className="auth-shell fixed inset-0 flex items-center justify-center bg-background">
+        <div className="page-enter text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/25 border-t-primary" />
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">
             Loading your dashboard...
           </p>
         </div>

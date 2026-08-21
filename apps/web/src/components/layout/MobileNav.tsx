@@ -29,7 +29,7 @@ export default function MobileNav() {
 
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-50 rounded-[22px] border border-border/90 bg-sidebar/94 p-1.5 shadow-[0_18px_50px_-22px_hsl(222_45%_2%/.95)] backdrop-blur-2xl md:hidden"
+      className="fixed inset-x-3 bottom-3 z-50 rounded-[22px] border border-sidebar-border/90 bg-sidebar/92 p-1.5 shadow-[0_18px_50px_-22px_hsl(222_45%_2%/.95)] backdrop-blur-2xl md:hidden"
       aria-label="Mobile navigation"
     >
       <div className="grid grid-cols-6 gap-1">
@@ -41,10 +41,10 @@ export default function MobileNav() {
               to={path}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex min-h-[54px] flex-col items-center justify-center gap-1 rounded-[17px] px-1 text-[10px] font-bold",
+                "relative flex min-h-[54px] flex-col items-center justify-center gap-1 rounded-[17px] border border-transparent px-1 text-[10px] font-bold",
                 active
                   ? "text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/45 hover:bg-sidebar-accent/55 hover:text-sidebar-foreground",
+                  : "text-sidebar-foreground/45 hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-foreground",
               )}
             >
               {active && (

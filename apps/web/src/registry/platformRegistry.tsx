@@ -5,7 +5,7 @@ export const SESSION_COMPONENTS = {
 };
 
 export const EXTRA_COMPONENTS = {
-  competitionFilters: ({ accent }: any) => {
+  competitionFilters: (_props: { accent: Record<string, string> }) => {
     return <div className="text-sm text-muted-foreground">Extras UI</div>;
   },
 };
