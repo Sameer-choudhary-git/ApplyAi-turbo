@@ -17,17 +17,21 @@
 
 ## Required runtime configuration
 
-| Variable | Required for | Notes |
-| --- | --- | --- |
-| `DATABASE_URL` | API, scheduler, worker, Prisma | Must point to the production PostgreSQL database. Run migrations before enabling features. |
-| `REDIS_QUEUE_URL` or `REDIS_HOST`/`REDIS_PORT` | API enqueue path, scheduler, worker | Do not set `DISABLE_REDIS=true` in a production environment that enables Job Skill. |
-| `ADMIN_USER_IDS` | Admin code management | Only authenticated IDs in this list can create or revoke access codes. |
-| `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | Resume uploads and Job Skill artifacts | Generated DOCX, ZIP, and report files use the existing R2 helper. |
-| `JOB_SKILL_WORKER_CONCURRENCY` | Job Skill worker | Optional; defaults to `2`. Increase only after observing Redis, CPU, storage, and model usage. |
-| `JOB_SKILL_LLM_API_KEY` | Optional material tailoring | If absent, deterministic fact-preserving material generation remains available. |
-| `JOB_SKILL_LLM_BASE_URL` | Optional material tailoring | Optional OpenAI-compatible base URL. |
-| `JOB_SKILL_LLM_MODEL` | Optional material tailoring | Optional; defaults to `gpt-5-mini` for the configured OpenAI-compatible service. |
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | API and web auth | Existing authentication requirements remain unchanged. |
+| Variable                                                                                         | Required for                                       | Notes                                                                                                     |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                                                   | API, scheduler, worker, Prisma                     | Must point to the production PostgreSQL database. Run migrations before enabling features.                |
+| `REDIS_QUEUE_URL` or `REDIS_HOST`/`REDIS_PORT`                                                   | API enqueue path, scheduler, worker                | Do not set `DISABLE_REDIS=true` in a production environment that enables Job Skill.                       |
+| `ADMIN_USER_IDS`                                                                                 | Admin code management                              | Only authenticated IDs in this list can create or revoke access codes.                                    |
+| `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | Resume uploads and Job Skill artifacts             | Generated DOCX, ZIP, and report files use the existing R2 helper.                                         |
+| `JOB_SKILL_WORKER_CONCURRENCY`                                                                   | Job Skill worker                                   | Optional; defaults to `2`. Increase only after observing Redis, CPU, storage, and model usage.            |
+| `JOB_SKILL_SEARCH_API_KEY`                                                                       | Multi-site Job Skill discovery                     | Required to activate the `web_search` adapter. The implementation expects a Tavily-compatible search API. |
+| `JOB_SKILL_SEARCH_API_URL`                                                                       | Multi-site Job Skill discovery                     | Optional; defaults to `https://api.tavily.com/search`.                                                    |
+| `JOB_SKILL_SEARCH_DEPTH`                                                                         | Multi-site Job Skill discovery                     | Optional; defaults to `basic` to control search latency and API usage.                                    |
+| `JOB_SKILL_SEARCH_DOMAINS` / `JOB_SKILL_CAREER_DOMAINS`                                          | Multi-site Job Skill discovery                     | Optional comma-separated domains added to the built-in job-board and career-page domain list.             |
+| `JOB_SKILL_LLM_API_KEY`                                                                          | Optional AI query expansion and material tailoring | If absent, deterministic role queries and fact-preserving material generation remain available.           |
+| `JOB_SKILL_LLM_BASE_URL`                                                                         | Optional AI query expansion and material tailoring | Optional OpenAI-compatible base URL.                                                                      |
+| `JOB_SKILL_LLM_MODEL`                                                                            | Optional AI query expansion and material tailoring | Optional; defaults to `gpt-5-mini` for the configured OpenAI-compatible service.                          |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`                                                              | API and web auth                                   | Existing authentication requirements remain unchanged.                                                    |
 
 ## Access-code administration
 
@@ -39,7 +43,7 @@ Share the code with the intended user through a secure channel. The user may ent
 
 ## Job Skill operations
 
-Open `/plans` to review the active Free, Pro, or Max plan and current usage. Open `/job-skill` after the user has an active Pro or Max entitlement. Select target roles and locations, verify the active provider badges, and run a manual search. The initial production provider is the existing Unstop dataset already maintained by ApplyAi. The adapter registry reports unsupported upstream providers explicitly rather than silently pretending they are active.
+Open `/plans` to review the active Free, Pro, or Max plan and current usage. Open `/job-skill` after the user has an active Pro or Max entitlement. Select target roles and locations, verify the active provider badges, and run a manual search. The initial built-in provider is the existing Unstop dataset already maintained by ApplyAi. When `JOB_SKILL_SEARCH_API_KEY` is configured, the `web_search` adapter also searches multiple job-board and company-career domains through the Tavily-compatible API. The optional LLM expands role terms but does not fetch jobs by itself. The adapter registry reports unsupported upstream providers explicitly rather than silently pretending they are active.
 
 Enable nightly automation only after the manual run is stable. The scheduler polls due schedules every five minutes, snapshots the user profile and entitlement, creates an idempotent nightly run, and enqueues the search stage. The worker then executes search, normalization, deduplication, scoring, optional material generation, and report stages. A failed provider is recorded in the run rather than stopping other providers or users.
 
@@ -51,22 +55,24 @@ If a deployment issue is detected, first disable Job Skill schedules in the UI o
 
 ## Acceptance checklist
 
-| Check | Expected result |
-| --- | --- |
-| Existing saved jobs list/create/update/delete | Continues to work with user isolation |
-| Existing networking create/list/update/delete | Uses the authenticated Supabase user ID; no `undefined` Prisma user context |
-| Free onboarding with no code | Completes successfully and receives a frontend-only Free entitlement |
-| Free service access | Service mutations are denied with a plan-upgrade response |
-| Pro service access | Saved jobs, networking, applications, and Job Skill are available within configured limits |
-| Max service access | Available plan features and usage limits resolve as unlimited (`-1`) |
-| Admin customer assignment | Customer receives the selected plan, expiry, overrides, and an audit event |
-| Valid one-time code redemption | Creates one redemption and one active entitlement |
-| Repeated redemption by same user | Returns the existing entitlement idempotently |
-| Concurrent redemptions beyond max usage | Only the configured number succeed |
-| Invalid or revoked code | Returns a controlled client error and creates no redemption |
-| Manual Job Skill run | Creates a queued run and returns `202` |
-| Provider failure | Run completes or reports partial failure without affecting other users |
-| Retry of same worker job | Does not duplicate an opportunity or artifact set |
-| Nightly schedule pause | Stops creating new runs while preserving history |
-| Generated materials | Contain only profile facts and are downloadable through user-scoped artifacts |
-| Migration and builds | Prisma validates; API, worker, scheduler, jobs, queue, Sentry, and web builds complete |
+| Check                                         | Expected result                                                                                                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Existing saved jobs list/create/update/delete | Continues to work with user isolation                                                                                                                  |
+| Existing networking create/list/update/delete | Uses the authenticated Supabase user ID; no `undefined` Prisma user context                                                                            |
+| Free onboarding with no code                  | Completes successfully and receives a frontend-only Free entitlement                                                                                   |
+| Free service access                           | Service mutations are denied with a plan-upgrade response                                                                                              |
+| Pro service access                            | Saved jobs, networking, applications, and Job Skill are available within configured limits                                                             |
+| Max service access                            | Available plan features and usage limits resolve as unlimited (`-1`)                                                                                   |
+| Admin customer assignment                     | Customer receives the selected plan, expiry, overrides, and an audit event                                                                             |
+| Valid one-time code redemption                | Creates one redemption and one active entitlement                                                                                                      |
+| Repeated redemption by same user              | Returns the existing entitlement idempotently                                                                                                          |
+| Concurrent redemptions beyond max usage       | Only the configured number succeed                                                                                                                     |
+| Invalid or revoked code                       | Returns a controlled client error and creates no redemption                                                                                            |
+| Manual Job Skill run                          | Creates a queued run and returns `202`                                                                                                                 |
+| Provider failure                              | Run completes or reports partial failure without affecting other users                                                                                 |
+| Web-search discovery                          | With `JOB_SKILL_SEARCH_API_KEY`, the run returns normalized results from configured job-board/career domains and records search failures transparently |
+| Job Skill boundary                            | Job Skill finds, ranks, saves, and prepares opportunities but never auto-submits an application                                                        |
+| Retry of same worker job                      | Does not duplicate an opportunity or artifact set                                                                                                      |
+| Nightly schedule pause                        | Stops creating new runs while preserving history                                                                                                       |
+| Generated materials                           | Contain only profile facts and are downloadable through user-scoped artifacts                                                                          |
+| Migration and builds                          | Prisma validates; API, worker, scheduler, jobs, queue, Sentry, and web builds complete                                                                 |

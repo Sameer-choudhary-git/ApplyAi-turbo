@@ -24,7 +24,10 @@ import { networking } from "./routes/networking.js";
 import { savedJobsRouter } from "./routes/saved-jobs.js";
 import googleCalendar from "./routes/google-calendar";
 import adminJobsRouter from "./routes/admin-jobs";
-import { subscriptionRouter, adminSubscriptionRouter } from "./routes/subscriptions";
+import {
+  subscriptionRouter,
+  adminSubscriptionRouter,
+} from "./routes/subscriptions";
 import { jobSkillRouter } from "./routes/job-skill";
 import { greenhouseRouter } from "./routes/greenhouse";
 
