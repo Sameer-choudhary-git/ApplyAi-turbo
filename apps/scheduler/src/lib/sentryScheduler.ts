@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import cron from "node-cron";
+import cron, { type ScheduledTask } from "node-cron";
 import { trackCronJob } from "@applyai/sentry";
 
 /**
@@ -14,7 +14,7 @@ export interface ScheduledTaskConfig {
 /**
  * Wrapper to track cron jobs with Sentry
  */
-export function scheduleWithSentry(config: ScheduledTaskConfig): ReturnType<typeof cron.schedule> {
+export function scheduleWithSentry(config: ScheduledTaskConfig): ScheduledTask {
   const { name, schedule, task } = config;
 
   console.log(`⏰ Scheduling cron job: ${name} (${schedule})`);
@@ -90,7 +90,9 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): ReturnType<type
             timestamp: Date.now() / 1000,
           });
 
-          console.log(`✅ [${name}] Cron job completed successfully (${duration}ms)`);
+          console.log(
+            `✅ [${name}] Cron job completed successfully (${duration}ms)`,
+          );
         } catch (executionError) {
           const duration = Date.now() - startTime;
           transaction.setStatus({ code: 2 });
@@ -120,7 +122,7 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): ReturnType<type
 
           console.error(
             `❌ [${name}] Cron job failed after ${duration}ms:`,
-            executionError
+            executionError,
           );
 
           throw executionError;
@@ -137,8 +139,8 @@ export function scheduleWithSentry(config: ScheduledTaskConfig): ReturnType<type
  * Create multiple scheduled tasks at once
  */
 export function scheduleMultipleWithSentry(
-  configs: ScheduledTaskConfig[]
-): Array<ReturnType<typeof cron.schedule>> {
+  configs: ScheduledTaskConfig[],
+): ScheduledTask[] {
   return configs.map((config) => scheduleWithSentry(config));
 }
 

@@ -16,9 +16,10 @@ const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
 
 // VITE_API_URL is the browser-facing API origin. PUBLIC_API_URL remains for
 // server-side consumers that need to generate a public API link.
-const apiBaseUrl = trimTrailingSlash(
-  env("VITE_API_URL") || env("PUBLIC_API_URL") || env("API_URL"),
-) ?? "http://localhost:3000";
+const apiBaseUrl =
+  trimTrailingSlash(
+    env("VITE_API_URL") || env("PUBLIC_API_URL") || env("API_URL"),
+  ) ?? "http://localhost:3000";
 
 export const apiConfig = {
   baseUrl: apiBaseUrl,
@@ -40,11 +41,18 @@ export const apiConfig = {
       submit: "/api/sessions/unstop/submit",
     },
     health: "/api/health",
+    greenhouse: {
+      jobs: "/api/greenhouse/jobs",
+      status: "/api/greenhouse/status",
+      limits: "/api/greenhouse/limits",
+    },
   },
 };
 
 export function getApiUrl(endpoint: string): string {
-  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
   return `${apiConfig.baseUrl}${normalizedEndpoint}`;
 }
 
@@ -102,6 +110,20 @@ export const enableJobsConfig = {
       },
     },
 
+    extras: {},
+  },
+
+  greenhouse: {
+    id: "greenhouse",
+    displayName: "Greenhouse",
+    session: { type: "public" },
+    jobs: {
+      apply: {
+        flag: "isGreenhouseApplyEnabled",
+        label: "Manual applications",
+        action: "Apply",
+      },
+    },
     extras: {},
   },
 

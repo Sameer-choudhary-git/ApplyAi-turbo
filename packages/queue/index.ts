@@ -1,6 +1,8 @@
 export * from "./src/queueFactory";
 export * from "./src/queueNames";
 export * from "./src/queueService";
+export * from "./queues/applyQueue";
+
 export * from "./types";
 
 // The Sentry worker contract is the public handler contract used by the

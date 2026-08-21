@@ -207,6 +207,7 @@ user.get("/me", authMiddleware, async (c) => {
       isUnstopInternshipEnabled: user.isUnstopInternshipEnabled,
       isUnstopJobEnabled: user.isUnstopJobEnabled,
       isCommudleEventEnabled: user.isCommudleEventEnabled,
+      isGreenhouseApplyEnabled: user.isGreenhouseApplyEnabled,
     };
 
     // ─────────────────────────────────────────────────────────────

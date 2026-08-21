@@ -123,7 +123,9 @@ export function PlatformIntegrationsCard({
           <div className="space-y-6">
             {activePlatforms.map((platform, index) => {
               const accent = PLATFORM_ACCENT[platform.id] ?? DEFAULT_ACCENT;
-              const sessionActive = sessionState[platform.id];
+              const sessionActive =
+                platform.session?.type === "public" ||
+                sessionState[platform.id];
 
               const CookieComp = platform.session?.type
                 ? SESSION_COMPONENTS[platform.session.type]
@@ -201,11 +203,12 @@ export function PlatformIntegrationsCard({
                                   Automatically handle{" "}
                                   {jobConfig.label.toLowerCase()} tasks on{" "}
                                   {platform.displayName}.
-                                  {!sessionActive && (
-                                    <span className="block mt-1 text-amber-400/80">
-                                      ?s? Requires an active session.
-                                    </span>
-                                  )}
+                                  {!sessionActive &&
+                                    platform.session?.type !== "public" && (
+                                      <span className="block mt-1 text-amber-400/80">
+                                        ?s? Requires an active session.
+                                      </span>
+                                    )}
                                 </p>
                               </div>
                             </div>
