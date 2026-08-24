@@ -35,6 +35,14 @@ export function getRedisClient(): RedisClientType {
   return redisClient;
 }
 
+export function getRedisStatus(): "connected" | "unreachable" | "disabled" {
+  if (process.env.DISABLE_REDIS === "true" || process.env.NODE_ENV === "development") {
+    return "disabled";
+  }
+
+  return redisClient?.isReady ? "connected" : "unreachable";
+}
+
 /**
  * Get value from cache
  */

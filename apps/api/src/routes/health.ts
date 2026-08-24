@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { prisma } from "@applyai/db";
+import { getRedisStatus } from "../lib/cache.js";
 
 export const healthRoutes = new Hono();
 
@@ -28,6 +29,7 @@ healthRoutes.get("/", async (c) => {
       uptime: `${uptimeSeconds}s`,
       memory: `${memMB}MB`,
       db: dbStatus,
+      redis: getRedisStatus(),
       timestamp: new Date().toISOString(),
     },
     healthy ? 200 : 503,
