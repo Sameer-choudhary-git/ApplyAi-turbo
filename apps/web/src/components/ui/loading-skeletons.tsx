@@ -28,17 +28,41 @@ export function AppLoadingSkeleton({
   label = "Preparing your Apply AI workspace",
 }: LoadingShellProps) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <LoadingShell label={label} className="w-full max-w-md text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-          <Skeleton className="h-8 w-8 rounded-xl" />
+    <div className="app-loading-screen flex min-h-screen items-center justify-center px-4 py-10">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="app-loading-card w-full max-w-md rounded-[32px] px-6 py-8 text-center sm:px-10 sm:py-10"
+      >
+        <span className="sr-only">{label}</span>
+        <div className="app-loader-orbit mx-auto" aria-hidden="true">
+          <div className="app-loader-ring" />
+          <div className="app-loader-core">
+            <span className="font-heading text-2xl font-black tracking-[-0.08em] text-primary-foreground">
+              AI
+            </span>
+          </div>
+          <span className="app-loader-spark app-loader-spark-one" />
+          <span className="app-loader-spark app-loader-spark-two" />
         </div>
-        <Skeleton className="mx-auto mt-5 h-4 w-44" />
-        <Skeleton className="mx-auto mt-3 h-3 w-64 max-w-full" />
-        <div className="mx-auto mt-6 h-1.5 w-36 overflow-hidden rounded-full bg-muted/70">
-          <div className="h-full w-1/2 rounded-full bg-primary/70 animate-loading-progress" />
+
+        <p className="mt-7 text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
+          Apply AI
+        </p>
+        <h1 className="mt-3 font-heading text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          Getting things ready
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{label}</p>
+
+        <div className="app-loader-track mx-auto mt-7 h-2 w-full max-w-xs overflow-hidden rounded-full" aria-hidden="true">
+          <div className="app-loader-progress h-full w-2/5 rounded-full" />
         </div>
-      </LoadingShell>
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+          <span className="app-loader-dot" aria-hidden="true" />
+          Securely connecting to your workspace
+        </div>
+      </div>
     </div>
   );
 }
