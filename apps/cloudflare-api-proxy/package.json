@@ -1,0 +1,16 @@
+{
+  "name": "@applyai/cloudflare-api-proxy",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260904.1",
+    "typescript": "5.9.2",
+    "wrangler": "^4.36.0"
+  }
+}

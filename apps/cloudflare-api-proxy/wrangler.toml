@@ -1,0 +1,8 @@
+name = "applyai-api-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-09-04"
+
+[vars]
+# Set this per environment before deployment.
+# The placeholder prevents accidentally deploying an open proxy.
+API_ORIGIN = "https://replace-with-your-render-api.onrender.com"
